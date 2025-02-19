@@ -1,5 +1,127 @@
-*{
-  padding:0;
-  margin:0;
+* {
+  padding: 0;
+  margin: 0;
   box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+}
+
+.app-container {
+  display: flex;
+  margin-top: 60px; /* Push content below navbar */
+  height: 100vh; /* Full viewport height */
+}
+
+.sidebar {
+  width: 250px; /* Set a fixed width for the sidebar */
+  height: 100vh; /* Full height */
+  background-color: #083f4f;
+  color: white;
+  padding: 20px;
+  display: flex;
+  border:"1px solid #000";
+  flex-direction: column;
+  font-family: Popins, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  font-style: normal;
+}
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar ul li {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Space between icon and text */
+  margin: 15px 0;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.sidebar ul li:hover {
+  background-color: #444;
+}
+.content {
+  flex-grow: 1;
+  padding: 20px;
+  overflow-y: auto; /* Enable scrolling if content is large */
+  background-color: #f4f4f4; /* Light background for better contrast */
+}
+.logout-btn {
+  background-color: #d9534f;
+  color: white;
+  border: none;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 5px;
+  margin-top: 20px;
+}
+
+.logout-btn:hover {
+  background-color: #c9302c;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  background: rgba(0, 0, 0, 0.5);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal {
+  background: white;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: small;
+  text-align: center;
+  width: 400px;
+  font-family: Popins, sans-serif;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+.confirm-btn {
+  background-color: #d9534f;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.confirm-btn:hover {
+  background-color: #c9302c;
+}
+
+.cancel-btn {
+  background-color: #5bc0de;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.cancel-btn:hover {
+  background-color: #31b0d5;
 }
