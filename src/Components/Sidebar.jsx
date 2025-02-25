@@ -5,6 +5,7 @@ import Modal from 'react-modal';
 // Set app element for accessibility
 Modal.setAppElement('#root');
 
+// eslint-disable-next-line react/prop-types
 const Sidebar = ({ setActiveScreen }) => {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 

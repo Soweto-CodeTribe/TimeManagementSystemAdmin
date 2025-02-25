@@ -12,12 +12,12 @@ html, body, #root {
 .app-container {
   display: flex;
   margin-top: 60px; /* Push content below navbar */
-  height: 100vh; /* Full viewport height */
+  height: 100%; 
 }
 
 .sidebar {
   width: 250px; /* Set a fixed width for the sidebar */
-  height: 100vh; /* Full height */
+  /* height: 100vh;  */
   background-color: #083f4f;
   color: white;
   padding: 20px;
