@@ -1,0 +1,80 @@
+.sidebar {
+    width: 230px; /* Slightly smaller sidebar */
+    height: 100%;
+    background-color: #ffffff;
+    color: rgba(0, 0, 0, 0.5);
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-right: 1px solid rgba(0, 0, 0, 0.2);
+    font-family: Poppins, sans-serif;
+    font-size: 14px; /* Smaller font size */
+    font-weight: 400;
+  }
+  
+  /* Logo Styling */
+  .logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 50px; /* Space between logo and sidebar */
+  }
+  
+  .logo {
+    width: 120px; /* Adjust the logo size */
+    height: auto;
+  }
+  
+  /* Sidebar List */
+  .sidebar ul {
+    list-style: none;
+    padding: 0;
+    width: 100%;
+  }
+  
+  .sidebar ul li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 10px 0;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .sidebar ul li:hover {
+    background-color: #e0e0e0;
+    color: #000;
+  }
+  
+  /* Icon Styling */
+  .icon {
+    width: 18px;
+    height: 18px;
+    color: rgba(0, 0, 0, 0.5);
+  }
+  
+  /* Logout Button */
+  .logout-btn {
+    width: 100%;
+    padding: 8px 12px;
+    margin-top: auto;
+    background-color: #f8f9fa;
+    border: none;
+    border-radius: 5px;
+    color: #000;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  
+  .logout-btn:hover {
+    background-color: #ddd;
+
+  }
+  
