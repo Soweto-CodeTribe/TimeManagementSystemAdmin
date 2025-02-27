@@ -1,85 +1,88 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // <-- Import useNavigate
 import { FaTachometerAlt, FaUsers, FaClock, FaChartBar, FaCogs, FaBell, FaClipboardList, FaSignOutAlt } from 'react-icons/fa';
 import Modal from 'react-modal';
+import "../Components/styling/Sidebar.css";
+import Logo from '../assets/CodeTribeImage.png';
 
 // Set app element for accessibility
 Modal.setAppElement('#root');
 
-const Sidebar = ({ setActiveScreen }) => {
+const Sidebar = () => {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const navigate = useNavigate(); // <-- Initialize navigate
 
-  const openLogoutModal = () => {
-    setIsLogoutModalOpen(true);
-  };
-
-  const closeLogoutModal = () => {
-    setIsLogoutModalOpen(false);
-  };
-
+  const openLogoutModal = () => setIsLogoutModalOpen(true);
+  const closeLogoutModal = () => setIsLogoutModalOpen(false);
   const handleLogout = () => {
     console.log("User logged out"); // Replace with actual logout logic
     closeLogoutModal();
   };
 
+  // Define a function to navigate to the respective route
+  const navigateTo = (screen) => {
+    switch (screen) {
+      case 'Dashboard':
+        navigate('/');
+        break;
+      case 'UserManagement':
+        navigate('/user-management');
+        break;
+      case 'Session':
+        navigate('/session');
+        break;
+      case 'Reports':
+        navigate('/reports');
+        break;
+      case 'SystemSettings':
+        navigate('/settings');
+        break;
+      case 'Alerts':
+        navigate('/alerts');
+        break;
+      case 'AuditLogs':
+        navigate('/audit-logs');
+        break;
+      default:
+        break;
+    }
+  };
+
   return (
     <div className="sidebar">
+      {/* Logo Section */}
+      <div className="logo-container">
+        <img src={Logo} alt="CodeTribe Logo" className="logo" />
+      </div>
+
+      {/* Sidebar Menu */}
       <ul>
-        <li onClick={() => setActiveScreen('Dashboard')}>
-          <FaTachometerAlt size={24} 
-           style={{
-            color:"#8cc151"
-        }}
-          /> Dashboard
+        <li onClick={() => navigateTo('Dashboard')}>
+          <FaTachometerAlt className="icon" /> Dashboard
         </li>
-        <li onClick={() => setActiveScreen('UserManagement')}>
-          <FaUsers size={24}
-           style={{
-            color:"#8cc151"
-        }}
-          /> User Management
+        <li onClick={() => navigateTo('UserManagement')}>
+          <FaUsers className="icon" /> User Management
         </li>
-        <li onClick={() => setActiveScreen('Session')}>
-          <FaClock size={24} 
-           style={{
-            color:"#8cc151"
-        }}
-          /> Session Monitoring
+        <li onClick={() => navigateTo('Session')}>
+          <FaClock className="icon" /> Session Monitoring
         </li>
-        <li onClick={() => setActiveScreen('Reports')}>
-          <FaChartBar size={24} 
-           style={{
-            color:"#8cc151"
-        }}
-          /> Reports
+        <li onClick={() => navigateTo('Reports')}>
+          <FaChartBar className="icon" /> Reports
         </li>
-        <li onClick={() => setActiveScreen('SystemSettings')}>
-          <FaCogs size={24}
-           style={{
-            color:"#8cc151"
-        }}
-          /> System Settings
+        <li onClick={() => navigateTo('SystemSettings')}>
+          <FaCogs className="icon" /> System Settings
         </li>
-        <li onClick={() => setActiveScreen('Alerts')}>
-          <FaBell size={24} 
-           style={{
-            color:"#8cc151"
-        }}
-          /> Alerts
+        <li onClick={() => navigateTo('Alerts')}>
+          <FaBell className="icon" /> Alerts
         </li>
-        <li onClick={() => setActiveScreen('AuditLogs')}>
-          <FaClipboardList size={24} 
-           style={{
-            color:"#8cc151"
-        }}
-          /> Audit Logs
+        <li onClick={() => navigateTo('AuditLogs')}>
+          <FaClipboardList className="icon" /> Audit Logs
         </li>
       </ul>
+
+      {/* Logout Button */}
       <button className="logout-btn" onClick={openLogoutModal}>
-        <FaSignOutAlt size={24} 
-         style={{
-            color:"#8cc151"
-        }}
-        /> Logout
+        <FaSignOutAlt className="icon" /> Logout
       </button>
 
       {/* Logout Confirmation Modal */}
