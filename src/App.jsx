@@ -12,6 +12,7 @@ import Alerts from "./Components/Alerts";
 import AuditLogs from "./Components/AuditLogs";
 import Logout from "./Components/Logout";
 import Login from "./Components/Login";
+import AddUserForm from "./Components/AddUserForm"; // Import the AddUserForm component
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -34,6 +35,8 @@ function App() {
         return "Alerts";
       case "/audit-logs":
         return "Audit Logs";
+      case "/add-user":
+        return "Add User"; // Add a new case for the AddUserForm route
       default:
         return "Unknown Screen";
     }
@@ -65,6 +68,7 @@ function App() {
                     <Route path="/alerts" element={<Alerts />} />
                     <Route path="/audit-logs" element={<AuditLogs />} />
                     <Route path="/logout" element={<Logout />} />
+                    <Route path="/add-user" element={<AddUserForm />} /> {/* Add the new route for AddUserForm */}
                   </Routes>
                 </div>
               </div>
