@@ -1,88 +1,259 @@
-/* General container styling */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+* {
+  font-family: 'Poppins', sans-serif;
+}
+
+
+
 .login-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background: #e8f0fe; /* Light blue background for a calm effect */
+  display: flex;
+  min-height: 100vh;
+  background-color: #fff;
+  font-family: Poppins;
+}
+
+/* Left Section */
+.login-left {
+  flex: 1;
+  padding: 2rem 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative; /* Add this */
+  font-family: Poppins;
+}
+
+.login-content {
+  width: 100%;
+  max-width: 400px;
+}
+
+.brand {
+  color: #8bc34a;
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+}
+
+.login-header {
+  margin-bottom: 2rem;
+}
+
+.login-header h2 {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #333;
+  font-family: Poppins;
+
+}
+
+.login-header p {
+  color: #666;
+  font-size: 10px;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #555;
+  font-size: 0.875rem;
+}
+
+.password-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.forgot-link {
+  color: #8bc34a;
+  font-size: 0.75rem;
+  text-decoration: none;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
+
+.input-wrapper {
+  position: relative;
+}
+
+.input-wrapper input {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  transition: border-color 0.2s;
+}
+
+.input-wrapper input:focus {
+  outline: none;
+  border-color: #8bc34a;
+}
+
+.input-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  font-size: 1rem;
+}
+
+.continue-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #8bc34a;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.continue-btn:hover {
+  background-color: #7cb342;
+}
+
+.continue-btn:disabled {
+  background-color: #c5e1a5;
+  cursor: not-allowed;
+}
+
+.social-login {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.social-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.social-btn {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  border-radius: 50%;
+  background-color: #f5f5f5;
+  color: #666;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.social-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.progress-dots {
+  position: absolute;
+  bottom: 2rem;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0 2rem;
+}
+
+.dot {
+  width: 3rem;
+  height: 0.25rem;
+  background-color: #e0e0e0;
+  border-radius: 1rem;
+}
+
+.dot.active {
+  background-color: #8bc34a;
+}
+
+/* Right Section */
+.login-right {
+  flex: 1;
+  background-color: rgba(140, 193, 81, 0.18);
+  padding: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin: 1rem;
+  border-radius: 25px;
+}
+
+.right-content {
+  max-width: 400px;
+}
+
+.right-content h2 {
+  color: #7cb342;
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-top: 1rem;
+}
+
+.right-content p {
+  color: #666;
+  margin-bottom: 3rem;
+  line-height: 1.5;
+  font-size: 0.875rem;
+}
+
+.illustration-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.illustration {
+  max-width: 100%;
+  height: auto;
+}
+
+.security-icon {
+  position: absolute;
+  right: -1rem;
+  top: 50%;
+  width: 3rem;
+  height: 3rem;
+  background-color: #8bc34a;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.25rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .login-left {
+    padding: 2rem;
   }
-  
-  /* Form styling */
-  .login-form {
-    background: #ffffff; /* White background for the form */
-    padding: 30px;
-    border-radius: 10px; /* Slightly rounded corners for a modern feel */
-    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
-    width: 100%;
-    max-width: 400px; /* Limit form width for better presentation */
-    text-align: center;
+
+  .login-right {
+    padding: 2rem;
+    margin: 0.5rem;
   }
-  
-  /* Heading styling */
-  .login-form h2 {
-    font-size: 28px;
-    font-weight: bold;
-    color: #333; /* Darker text for readability */
-    margin-bottom: 30px;
+}
+
+@media (max-width: 768px) {
+  .login-container {
+    flex-direction: column;
   }
-  
-  /* Input fields */
-  .login-form input {
-    width: 100%;
-    padding: 12px;
-    margin: 10px 0;
-    border: 2px solid #ddd; /* Subtle border color */
-    border-radius: 8px; /* Rounded corners */
-    font-size: 16px;
-    color: #333;
-    background: #f9f9f9; /* Light gray background */
-    transition: all 0.3s ease;
+
+  .login-right {
+    display: none;
   }
-  
-  /* Input focus styling */
-  .login-form input:focus {
-    border-color: #4c8bf5; /* Blue border on focus */
-    background: #ffffff; /* White background on focus */
-    outline: none; /* Remove default outline */
-  }
-  
-  /* Submit button styling */
-  .login-form button {
-    width: 100%;
-    padding: 12px;
-    background: #82cd47; /* Bright blue for action */
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 18px;
-    cursor: pointer;
-    margin-top: 20px;
-    transition: all 0.3s ease;
-  }
-  
-  /* Button hover effect */
-  .login-form button:hover {
-    background: #76e3f1; /* Darker blue on hover */
-    transform: translateY(-2px); /* Slight lift on hover */
-  }
-  
-  /* Loader style */
-  .loader {
-    position: fixed;
-    align-items: center;
-    justify-self: center;
-    transform: translate(-50%, -50%);
-    border: 10px solid #f3f3f3; /* Light gray background */
-    border-top: 6px solid #82cd47; /* Blue spinner color */
-    border-radius: 50%; /* Circular shape */
-    width: 60px;
-    height: 60px;
-    animation: spin 1s linear infinite; /* Rotating animation */
-  }
-  
-  /* Keyframes for the spinning animation */
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  
+}
+
