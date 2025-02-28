@@ -1,6 +1,16 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // <-- Import useNavigate
-import { FaTachometerAlt, FaUsers, FaClock, FaChartBar, FaCogs, FaBell, FaClipboardList, FaSignOutAlt } from 'react-icons/fa';
+import {
+  FaTachometerAlt,
+  FaUsers,
+  FaClock,
+  FaChartBar,
+  FaCogs,
+  FaBell,
+  FaClipboardList,
+  FaSignOutAlt,
+  FaUserPlus, // <-- Import FaUserPlus icon
+} from 'react-icons/fa';
 import Modal from 'react-modal';
 import "../Components/styling/Sidebar.css";
 import Logo from '../assets/CodeTribeImage.png';
@@ -43,6 +53,9 @@ const Sidebar = () => {
       case 'AuditLogs':
         navigate('/audit-logs');
         break;
+      case 'AddUserForm': // <-- Add case for AddUserForm
+        navigate('/add-user');
+        break;
       default:
         break;
     }
@@ -77,6 +90,10 @@ const Sidebar = () => {
         </li>
         <li onClick={() => navigateTo('AuditLogs')}>
           <FaClipboardList className="icon" /> Audit Logs
+        </li>
+        {/* Add User Form Option */}
+        <li onClick={() => navigateTo('AddUserForm')}>
+          <FaUserPlus className="icon" /> Add User
         </li>
       </ul>
 
