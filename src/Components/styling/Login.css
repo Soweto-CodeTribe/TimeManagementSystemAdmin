@@ -209,6 +209,12 @@
   line-height: 1.5;
   font-size: 0.875rem;
 }
+.brand-logo {
+  width: 150px; /* Adjust size as needed */
+  height: auto;
+  display: block;
+  margin-bottom: 2rem;
+}
 
 .illustration-wrapper {
   position: relative;

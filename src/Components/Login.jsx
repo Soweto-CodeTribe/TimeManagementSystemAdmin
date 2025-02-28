@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaEnvelope, FaLock } from "react-icons/fa";
 import "../Components/styling/Login.css";
+import logo from "../assets/CodeTribeImage.png"; // Adjust the path as needed
+
 
 const Login = ({ setIsAuthenticated }) => {
   const [email, setEmail] = useState("");
@@ -54,7 +56,7 @@ const Login = ({ setIsAuthenticated }) => {
       {/* Left Section - Login Form */}
       <div className="login-left">
         <div className="login-content">
-          <h1 className="brand">CodeTribe</h1>
+        <img src={logo} alt="Brand Logo" className="brand-logo" />
 
           <div className="login-header">
             <h2>Secure Access to Your Account</h2>
