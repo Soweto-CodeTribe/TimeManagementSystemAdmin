@@ -30,13 +30,14 @@ const Login = ({ setIsAuthenticated }) => {
       });
 
       const data = await response.json();
-
+      console.log("user: ", data)
       // Set loading state to false
       setIsLoading(false);
 
       if (response.ok) {
         // Assuming the response contains a JWT or user data for authentication
         setIsAuthenticated(true);
+        console.log("user: ", response)
         navigate("/"); // Redirect to Dashboard after successful login
       } else {
         alert(data.message || "Invalid credentials!"); // Show message from the server
