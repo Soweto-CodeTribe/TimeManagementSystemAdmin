@@ -8,12 +8,14 @@ html, body, #root {
   height: 100%;
   width: 100%;
   overflow: hidden; /* Prevents unwanted scrolling */
+  font-family: Poppins;
 }
 
 .app-container {
   display: flex;
   height: 100vh;
   width: 100%;
+  font-family: Poppins;
 }
 /* Main Content */
 .main-content {
