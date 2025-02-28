@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser, clearError } from "../Slices/authSlice";
@@ -7,6 +5,7 @@ import { FaEnvelope, FaLock } from "react-icons/fa";
 import "../Components/styling/Login.css";
 import logo from "../assets/CodeTribeImage.png";
 import loginImg from "../assets/loginImg.png";
+import { useNavigate } from 'react-router-dom'; // Make sure to import useNavigate if you're using React Router
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -14,7 +13,8 @@ const Login = () => {
   const [debugInfo, setDebugInfo] = useState("");
   const dispatch = useDispatch();
   const { isLoading, error } = useSelector((state) => state.auth);
-  
+  const navigate = useNavigate(); // Initialize useNavigate for redirection
+
   console.log("Login component rendering");
 
   const handleLogin = async (e) => {
@@ -28,7 +28,7 @@ const Login = () => {
 
     // Clear any previous errors
     dispatch(clearError());
-    
+
     try {
       const response = await fetch("https://timemanagementsystemserver.onrender.com/api/auth/login", {
         method: "POST",
@@ -39,21 +39,21 @@ const Login = () => {
       });
 
       const data = await response.json();
-      console.log("user: ", data)
-      // Set loading state to false
-      setIsLoading(false);
+      console.log("user: ", data);
 
       if (response.ok) {
         // Assuming the response contains a JWT or user data for authentication
-        setIsAuthenticated(true);
-        console.log("user: ", response)
+        // You might want to store it in localStorage or context/state depending on your app's needs
+        // localStorage.setItem("token", data.token); // Example if you receive a token
+        console.log("user: ", data);
         navigate("/"); // Redirect to Dashboard after successful login
       } else {
         alert(data.message || "Invalid credentials!"); // Show message from the server
+      }
 
       setDebugInfo("Attempting login...");
       console.log("Login attempt with:", { email, password: "********" });
-      
+
       const resultAction = await dispatch(loginUser({ email, password }));
       console.log("Login result:", resultAction);
       
@@ -65,7 +65,6 @@ const Login = () => {
         const errorMessage = resultAction.payload || resultAction.error.message || "Unknown error";
         setDebugInfo(`Login failed: ${errorMessage}`);
         console.error("Login rejected:", errorMessage);
-
       }
     } catch (err) {
       const errorMessage = err.message || "Unknown error";

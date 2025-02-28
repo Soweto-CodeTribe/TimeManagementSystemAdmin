@@ -34,27 +34,6 @@ const AddUserForm = () => {
     }
   };
 
-  const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      try {
-        const response = await axios.post(`${BASE_URL}/api/trainees/upload-csv`, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-        alert('CSV file uploaded successfully!');
-        console.log('Response:', response.data);
-      } catch (error) {
-        console.error('Error uploading CSV:', error);
-        alert('Failed to upload CSV file. Check the console for details.');
-      }
-    }
-  };
-
   return (
     <div
       style={{
@@ -73,41 +52,6 @@ const AddUserForm = () => {
         overflow: 'hidden',
       }}
     >
-      {/* Upload CSV Button - Now positioned with flexbox instead of absolute */}
-      <div
-        style={{
-          alignSelf: 'flex-end',
-          marginBottom: '15px',
-        }}
-      >
-        <label
-          htmlFor="csv-upload"
-          style={{
-            padding: '10px 20px',
-            fontSize: '14px',
-            fontWeight: 'bold',
-            color: '#fff',
-            backgroundColor: '#90EE90',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            transition: 'background-color 0.3s ease',
-            display: 'inline-block',
-          }}
-          onMouseEnter={(e) => (e.target.style.backgroundColor = '#76c776')}
-          onMouseLeave={(e) => (e.target.style.backgroundColor = '#90EE90')}
-        >
-          Upload CSV
-        </label>
-        <input
-          id="csv-upload"
-          type="file"
-          accept=".csv"
-          style={{ display: 'none' }}
-          onChange={handleFileUpload}
-        />
-      </div>
-
       {/* Title */}
       <h1
         style={{
@@ -215,15 +159,13 @@ const AddUserForm = () => {
               />
             </div>
 
-            {/* Role Field */}
+            {/* Role Field (Dropdown) */}
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
                 Role *
               </label>
-              <input
-                type="text"
+              <select
                 name="role"
-                placeholder="Enter role"
                 value={formData.role}
                 onChange={handleChange}
                 style={{
@@ -236,7 +178,12 @@ const AddUserForm = () => {
                   height: '45px',
                   boxSizing: 'border-box',
                 }}
-              />
+              >
+                <option value="">Select a role</option>
+                <option value="Trainee">Trainee</option>
+                <option value="Facilitator">Facilitator</option>
+                <option value="Stakeholder">Stakeholder</option>
+              </select>
             </div>
           </div>
 
