@@ -34,34 +34,7 @@ const trainees = [
     lastCheckIn: "25 Feb, 09:45",
     attendanceRate: "90%",
   },
-  {
-    name: "Sophie Anderson",
-    email: "sophie@example.com",
-    phone: "0123456789",
-    lastCheckIn: "25 Feb, 09:30",
-    attendanceRate: "95%",
-  },
-  {
-    name: "Marcus Johnson",
-    email: "marcus@example.com", 
-    phone: "0123456789",
-    lastCheckIn: "25 Feb, 09:45",
-    attendanceRate: "90%",
-  },
-  {
-    name: "Sophie Anderson",
-    email: "sophie@example.com",
-    phone: "0123456789",
-    lastCheckIn: "25 Feb, 09:30",
-    attendanceRate: "95%",
-  },
-  {
-    name: "Marcus Johnson",
-    email: "marcus@example.com", 
-    phone: "0123456789",
-    lastCheckIn: "25 Feb, 09:45",
-    attendanceRate: "90%",
-  },
+
 ]
 
 function Dashboard() {

@@ -76,7 +76,7 @@
   .metric-value.blue,
   .metric-label.blue {
     border-color: #ddd;
-    background-color: #f5f8ff;
+    /* background-color: #f5f8ff; */
   }
   
   .metric-icon.blue {
@@ -91,7 +91,7 @@
   .metric-value.green,
   .metric-label.green {
     border-color: #ddd;
-    background-color: #f5fff8;
+    /* background-color: #f5fff8; */
   }
   
   .metric-icon.green {
@@ -106,7 +106,7 @@
   .metric-value.red,
   .metric-label.red {
     border-color: #ddd;
-    background-color: #fff5f5;
+    /* background-color: #fff5f5; */
   }
   
   .metric-icon.red {
@@ -121,7 +121,7 @@
   .metric-value.yellow,
   .metric-label.yellow {
     border-color: #ddd;
-    background-color: #fffdf5;
+    /* background-color: #fffdf5; */
   }
   
   .metric-icon.yellow {

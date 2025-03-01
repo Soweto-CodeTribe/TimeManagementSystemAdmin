@@ -43,8 +43,8 @@ const SessionMonitoring = () => {
   // Sample data with the specified columns
   const employees = [
     {
-      name: "Mahesh",
-      id: "CT-01",
+      name: "Nqobile",
+      id: "564641568",
       status: "Present",
       checkInTime: "10:02am",
       lunchIn: "12:30pm",
@@ -53,8 +53,8 @@ const SessionMonitoring = () => {
       date: "20-02-2023",
     },
     {
-      name: "Vasanth",
-      id: "CT-02",
+      name: "Gloria",
+      id: "1568564964",
       status: "Present",
       checkInTime: "10:10am",
       lunchIn: "12:35pm",
@@ -64,7 +64,7 @@ const SessionMonitoring = () => {
     },
     {
       name: "Martin",
-      id: "CT-03",
+      id: "1416584651",
       status: "Present",
       checkInTime: "10:08am",
       lunchIn: "12:30pm",
@@ -73,8 +73,8 @@ const SessionMonitoring = () => {
       date: "20-02-2023",
     },
     {
-      name: "Ahmed",
-      id: "CT-04",
+      name: "Busisiwe",
+      id: "8641648",
       status: "Present",
       checkInTime: "10:12am",
       lunchIn: "12:40pm",
@@ -83,8 +83,8 @@ const SessionMonitoring = () => {
       date: "20-02-2023",
     },
     {
-      name: "Ryan",
-      id: "CT-05",
+      name: "Nhlakanipho",
+      id: "634855",
       status: "Present",
       checkInTime: "10:08am",
       lunchIn: "12:30pm",
@@ -117,7 +117,7 @@ const SessionMonitoring = () => {
             </div>
             <span className="metric-label">Total Check-Ins</span>
           </div>
-          <div className="metric-value blue">400</div>
+          <div className="metric-value blue">5</div>
         </div>
 
         <div className="metric-card green">
@@ -127,7 +127,7 @@ const SessionMonitoring = () => {
             </div>
             <span className="metric-label">Total Check-Outs</span>
           </div>
-          <div className="metric-value green">400</div>
+          <div className="metric-value green">0</div>
         </div>
 
         <div className="metric-card red">
@@ -137,7 +137,7 @@ const SessionMonitoring = () => {
             </div>
             <span className="metric-label">Missed Check-Ins</span>
           </div>
-          <div className="metric-value red">85%</div>
+          <div className="metric-value red">0%</div>
         </div>
 
         <div className="metric-card yellow">
@@ -147,7 +147,7 @@ const SessionMonitoring = () => {
             </div>
             <span className="metric-label">Late Check-Ins</span>
           </div>
-          <div className="metric-value yellow">15</div>
+          <div className="metric-value yellow">0</div>
         </div>
       </div>
 

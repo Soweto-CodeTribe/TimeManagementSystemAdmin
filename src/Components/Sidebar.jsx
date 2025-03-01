@@ -6,10 +6,10 @@ import {
   FaClock,
   FaChartBar,
   FaCogs,
-  FaBell,
-  FaClipboardList,
+  // FaBell,
+  // FaClipboardList,
   FaSignOutAlt,
-  FaUserPlus, // <-- Import FaUserPlus icon
+  // FaUserPlus, 
 } from 'react-icons/fa';
 import Modal from 'react-modal';
 import "../Components/styling/Sidebar.css";
@@ -84,16 +84,6 @@ const Sidebar = () => {
         </li>
         <li onClick={() => navigateTo('SystemSettings')}>
           <FaCogs className="icon" /> System Settings
-        </li>
-        <li onClick={() => navigateTo('Alerts')}>
-          <FaBell className="icon" /> Alerts
-        </li>
-        <li onClick={() => navigateTo('AuditLogs')}>
-          <FaClipboardList className="icon" /> Audit Logs
-        </li>
-        {/* Add User Form Option */}
-        <li onClick={() => navigateTo('AddUserForm')}>
-          <FaUserPlus className="icon" /> Add User
         </li>
       </ul>
 

@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import "./App.css";
 import Navbar from "./Components/Navbar";
 import Sidebar from "./Components/Sidebar";
@@ -35,8 +35,8 @@ function App() {
         return "Alerts";
       case "/audit-logs":
         return "Audit Logs";
-      case "/add-user":
-        return "Add User"; // Add a new case for the AddUserForm route
+      // case "/add-user":
+      //   return "Add User";
       default:
         return "Unknown Screen";
     }
