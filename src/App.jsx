@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import "./App.css";
 import Navbar from "./Components/Navbar";
 import Sidebar from "./Components/Sidebar";
@@ -15,8 +16,10 @@ import Login from "./Components/Login";
 import AddUserForm from "./Components/AddUserForm"; // Import the AddUserForm component
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const location = useLocation(); // Get the current route
+  const { isAuthenticated } = useSelector((state) => state.auth);
+  
+  console.log("App rendering, auth state:", isAuthenticated);
 
   // Function to get the screen name from the route path
   const getScreenName = (path) => {
@@ -47,7 +50,9 @@ function App() {
   return (
     <Routes>
       {/* Login Route */}
-      <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
+      <Route path="/login" element={
+        isAuthenticated ? <Navigate to="/" /> : <Login />
+      } />
 
       {/* Protected Routes */}
       <Route

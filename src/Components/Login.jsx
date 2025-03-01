@@ -1,62 +1,62 @@
 "use client";
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { loginUser, clearError } from "../Slices/authSlice";
 import { FaEnvelope, FaLock } from "react-icons/fa";
 import "../Components/styling/Login.css";
-import logo from "../assets/CodeTribeImage.png"; // Adjust the path as needed
+import logo from "../assets/CodeTribeImage.png";
+import loginImg from "../assets/loginImg.png";
 
-
-const Login = ({ setIsAuthenticated }) => {
+const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  const [debugInfo, setDebugInfo] = useState("");
+  const dispatch = useDispatch();
+  const { isLoading, error } = useSelector((state) => state.auth);
+  
+  console.log("Login component rendering");
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
+    setDebugInfo(""); // Clear previous debug info
+    
     if (!email || !password) {
       alert("Please enter both email and password.");
       return;
     }
 
-    setIsLoading(true);
-
+    // Clear any previous errors
+    dispatch(clearError());
+    
     try {
-      const response = await fetch(
-        "https://timemanagementsystemserver.onrender.com/api/auth/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email, password }),
-        }
-      );
-
-      const data = await response.json();
-      setIsLoading(false);
-
-      if (response.ok) {
-        setIsAuthenticated(true);
-        navigate("/");
-      } else {
-        alert(data.message || "Invalid credentials!");
+      setDebugInfo("Attempting login...");
+      console.log("Login attempt with:", { email, password: "********" });
+      
+      const resultAction = await dispatch(loginUser({ email, password }));
+      console.log("Login result:", resultAction);
+      
+      if (loginUser.fulfilled.match(resultAction)) {
+        setDebugInfo("Login successful!");
+        console.log("Login successful:", resultAction.payload);
+        // No need to navigate here - App.js will handle redirection
+      } else if (loginUser.rejected.match(resultAction)) {
+        const errorMessage = resultAction.payload || resultAction.error.message || "Unknown error";
+        setDebugInfo(`Login failed: ${errorMessage}`);
+        console.error("Login rejected:", errorMessage);
       }
-    } catch (error) {
-      console.error("Error during login:", error);
-      setIsLoading(false);
-      alert("An error occurred while logging in. Please try again later.");
+    } catch (err) {
+      const errorMessage = err.message || "Unknown error";
+      setDebugInfo(`Login error: ${errorMessage}`);
+      console.error("Login error:", err);
     }
   };
 
   return (
     <div className="login-container">
-      {/* Left Section - Login Form */}
       <div className="login-left">
         <div className="login-content">
-        <img src={logo} alt="Brand Logo" className="brand-logo" />
+          <img src={logo} alt="Brand Logo" className="brand-logo" />
 
           <div className="login-header">
             <h2>Secure Access to Your Account</h2>
@@ -99,6 +99,9 @@ const Login = ({ setIsAuthenticated }) => {
               </div>
             </div>
 
+            {error && <p className="error-message">{error}</p>}
+            {debugInfo && <p className="debug-info" style={{ fontSize: "12px", color: "#666" }}>{debugInfo}</p>}
+
             <button type="submit" className="continue-btn" disabled={isLoading}>
               {isLoading ? "Please wait..." : "Continue"}
             </button>
@@ -111,7 +114,6 @@ const Login = ({ setIsAuthenticated }) => {
         </div>
       </div>
 
-      {/* Right Section - Illustration */}
       <div className="login-right">
         <div className="right-content">
           <h2>Track Attendance with Ease</h2>
@@ -119,7 +121,7 @@ const Login = ({ setIsAuthenticated }) => {
 
           <div className="illustration-wrapper">
             <img
-              src="../src/assets/loginImg.png"
+              src={loginImg}
               alt="Attendance tracking illustration"
               className="illustration"
             />
