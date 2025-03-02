@@ -9,7 +9,7 @@ const AddUserForm = () => {
     name: '',
     email: '',
     phone: '',
-    role: '',
+    role: '', // This will help differentiate between Trainee and Stakeholder/Facilitator
     zipCode: '',
     surname: '',
     dateOfBirth: '',
@@ -24,13 +24,36 @@ const AddUserForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const endpoint = formData.role === 'Trainee' 
+      ? '/api/trainee' 
+      : '/api/facilitator';
+
+    const token = localStorage.getItem("token"); // Get the stored token
+
     try {
-      const response = await axios.post(`${BASE_URL}/api/trainee`, formData);
-      alert('Trainee saved successfully!');
+      const response = await axios.post(`${BASE_URL}${endpoint}`, formData, {
+          headers: {
+              Authorization: `Bearer ${token}` // Include the token in the request
+          }
+      });
+      alert('User saved successfully!');
       console.log('Response:', response.data);
+      // Reset form after successful submission
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        role: '',
+        zipCode: '',
+        surname: '',
+        dateOfBirth: '',
+        location: '',
+        address: '',
+      });
     } catch (error) {
-      console.error('Error saving trainee:', error);
-      alert('Failed to save trainee. Check the console for details.');
+      console.error('Error saving user:', error);
+      alert('Failed to save user. Check the console for details.');
     }
   };
 
@@ -52,7 +75,6 @@ const AddUserForm = () => {
         overflow: 'hidden',
       }}
     >
-      {/* Title */}
       <h1
         style={{
           fontSize: '24px',
@@ -63,10 +85,9 @@ const AddUserForm = () => {
           textAlign: 'center',
         }}
       >
-        Add a user
+        Add a User
       </h1>
 
-      {/* Form Fields Container */}
       <form
         onSubmit={handleSubmit}
         style={{
@@ -85,9 +106,7 @@ const AddUserForm = () => {
             width: '100%',
           }}
         >
-          {/* Left Column */}
           <div>
-            {/* Name Field */}
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
                 Name *
@@ -111,7 +130,6 @@ const AddUserForm = () => {
               />
             </div>
 
-            {/* Email Field */}
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
                 Email *
@@ -135,7 +153,6 @@ const AddUserForm = () => {
               />
             </div>
 
-            {/* Phone Field */}
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
                 Phone *
@@ -159,7 +176,6 @@ const AddUserForm = () => {
               />
             </div>
 
-            {/* Role Field (Dropdown) */}
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
                 Role *
@@ -187,9 +203,7 @@ const AddUserForm = () => {
             </div>
           </div>
 
-          {/* Right Column */}
           <div>
-            {/* Zip Code Field */}
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
                 Zip Code *
@@ -213,7 +227,6 @@ const AddUserForm = () => {
               />
             </div>
 
-            {/* Surname Field */}
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
                 Surname *
@@ -237,15 +250,13 @@ const AddUserForm = () => {
               />
             </div>
 
-            {/* Date of Birth Field */}
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
                 Date of Birth *
               </label>
               <input
-                type="text"
+                type="date"
                 name="dateOfBirth"
-                placeholder="DD/MM/YYYY"
                 value={formData.dateOfBirth}
                 onChange={handleChange}
                 style={{
@@ -261,7 +272,6 @@ const AddUserForm = () => {
               />
             </div>
 
-            {/* Location Field */}
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
                 Location *
@@ -285,7 +295,6 @@ const AddUserForm = () => {
               />
             </div>
 
-            {/* Address Field */}
             <div style={{ marginBottom: '20px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
                 Address *
@@ -311,12 +320,10 @@ const AddUserForm = () => {
           </div>
         </div>
 
-        {/* Save Button */}
         <button
           type="submit"
           style={{
-            width: '100%',
-            maxWidth: '400px',
+            width: '200px',
             padding: '14px',
             fontSize: '16px',
             fontWeight: 'bold',
