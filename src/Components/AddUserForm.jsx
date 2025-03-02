@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // Import for navigation
 
 // Base URL for all API requests
 const BASE_URL = 'https://timemanagementsystemserver.onrender.com';
 
 const AddUserForm = () => {
+  const navigate = useNavigate(); // Hook for navigation
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -32,25 +35,30 @@ const AddUserForm = () => {
     const token = localStorage.getItem("token"); // Get the stored token
 
     try {
+      // First save the user to the backend
       const response = await axios.post(`${BASE_URL}${endpoint}`, formData, {
           headers: {
               Authorization: `Bearer ${token}` // Include the token in the request
           }
       });
+      
+      // Alert success
       alert('User saved successfully!');
       console.log('Response:', response.data);
-      // Reset form after successful submission
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        role: '',
-        zipCode: '',
-        surname: '',
-        dateOfBirth: '',
-        location: '',
-        address: '',
+      
+      // Extract only the required data to send to User Management screen
+      const userManagementData = {
+        name: formData.name,
+        surname: formData.surname,
+        email: formData.email,
+        role: formData.role
+      };
+      
+      // Navigate to User Management screen with the data
+      navigate('/user-management', { 
+        state: { userData: userManagementData, newUser: true } 
       });
+      
     } catch (error) {
       console.error('Error saving user:', error);
       alert('Failed to save user. Check the console for details.');
@@ -127,6 +135,7 @@ const AddUserForm = () => {
                   height: '45px',
                   boxSizing: 'border-box',
                 }}
+                required
               />
             </div>
 
@@ -150,6 +159,7 @@ const AddUserForm = () => {
                   height: '45px',
                   boxSizing: 'border-box',
                 }}
+                required
               />
             </div>
 
@@ -173,6 +183,7 @@ const AddUserForm = () => {
                   height: '45px',
                   boxSizing: 'border-box',
                 }}
+                required
               />
             </div>
 
@@ -194,6 +205,7 @@ const AddUserForm = () => {
                   height: '45px',
                   boxSizing: 'border-box',
                 }}
+                required
               >
                 <option value="">Select a role</option>
                 <option value="Trainee">Trainee</option>
@@ -224,6 +236,7 @@ const AddUserForm = () => {
                   height: '45px',
                   boxSizing: 'border-box',
                 }}
+                required
               />
             </div>
 
@@ -247,6 +260,7 @@ const AddUserForm = () => {
                   height: '45px',
                   boxSizing: 'border-box',
                 }}
+                required
               />
             </div>
 
@@ -269,6 +283,7 @@ const AddUserForm = () => {
                   height: '45px',
                   boxSizing: 'border-box',
                 }}
+                required
               />
             </div>
 
@@ -292,6 +307,7 @@ const AddUserForm = () => {
                   height: '45px',
                   boxSizing: 'border-box',
                 }}
+                required
               />
             </div>
 
@@ -315,6 +331,7 @@ const AddUserForm = () => {
                   height: '45px',
                   boxSizing: 'border-box',
                 }}
+                required
               />
             </div>
           </div>
