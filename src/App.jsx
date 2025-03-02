@@ -1,5 +1,4 @@
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import "./App.css";
 import Navbar from "./Components/Navbar";
@@ -14,6 +13,7 @@ import AuditLogs from "./Components/AuditLogs";
 import Logout from "./Components/Logout";
 import Login from "./Components/Login";
 import AddUserForm from "./Components/AddUserForm"; // Import the AddUserForm component
+import ForgotPassword from "./Components/ForgotPassword";
 
 function App() {
   const location = useLocation(); // Get the current route
@@ -41,7 +41,7 @@ function App() {
       // case "/add-user":
       //   return "Add User";
       default:
-        return "Unknown Screen";
+        return "";
     }
   };
 
@@ -53,6 +53,8 @@ function App() {
       <Route path="/login" element={
         isAuthenticated ? <Navigate to="/" /> : <Login />
       } />
+
+      <Route path="/forgotPassword" element={<ForgotPassword/>}/>
 
       {/* Protected Routes */}
       <Route

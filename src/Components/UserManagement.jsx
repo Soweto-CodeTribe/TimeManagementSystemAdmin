@@ -5,14 +5,14 @@ import { useNavigate } from "react-router-dom"
 const UserManagement = () => {
   const navigate = useNavigate()
   // Sample data for the tables
-  const [users, setUsers] = useState([
+  const [users] = useState([
     { id: 1, name: "John Doe", email: "john@example.com", role: "Trainee", lastCheckIn: "3 days ago", status: "" },
     { id: 2, name: "Jane Doe", email: "jane@example.com", role: "Trainee", lastCheckIn: "5 days ago", status: "" },
     { id: 3, name: "John Smith", email: "smith@example.com", role: "Trainee", lastCheckIn: "2 days ago", status: "" },
     { id: 4, name: "Jane Smith", email: "jsmith@example.com", role: "Trainee", lastCheckIn: "3 days ago", status: "" },
     { id: 5, name: "John Brown", email: "jbrown@example.com", role: "Trainee", lastCheckIn: "5 days ago", status: "" },
   ])
-  const [guests, setGuests] = useState([
+  const [guests] = useState([
     { id: 1, name: "John Doe", email: "john@example.com", phone: "01234567890", status: "active", lastCheckIn: "" },
     { id: 2, name: "Jane Doe", email: "jane@example.com", phone: "Trainee", status: "", lastCheckIn: "5 days ago" },
     { id: 3, name: "John Smith", email: "smith@example.com", phone: "Trainee", status: "", lastCheckIn: "2 days ago" },

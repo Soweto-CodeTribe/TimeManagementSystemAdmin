@@ -1,19 +1,21 @@
 "use client"
 
-import { useState } from "react"
-import { FileText, Search, Filter } from "lucide-react"
+import { useState, useEffect } from "react"
+import { FileText, Search, Filter, Info } from "lucide-react"
 import "./styling/Session.css"
+import { useSelector } from 'react-redux'
+import axios from "axios"
 
 const SessionMonitoring = () => {
-
-  /*
-    const BASE_URL = "https://timemanagementsystemserver.onrender.com/"
+  const BASE_URL = "https://timemanagementsystemserver.onrender.com/"
   const token = useSelector((state) => state.auth.token);
   
-  // Create state to store API data
-  const [employees, setEmployees] = useState([]);
+  // State for API data
+  const [summaryData, setSummaryData] = useState(null);
+  const [reports, setReports] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("")
 
   useEffect(() => {
     const fetchData = async () => {
@@ -25,81 +27,44 @@ const SessionMonitoring = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        // Store API data in state
-        setEmployees(response.data);
+        
+        // Store API data in state - separate summary from reports
+        setSummaryData(response.data.summary || {});
+        setReports(response.data.reports || []);
         setIsLoading(false);
       } catch (error) {
         console.error("Error fetching daily report:", error);
-        setError("Failed to load employee data");
+        setError("Failed to load attendance data");
         setIsLoading(false);
       }
     };
 
     if (token) {
       fetchData();
+    } else {
+      setIsLoading(false);
+      setError("Authentication token not found");
     }
   }, [token]);
-  */
-  // Sample data with the specified columns
-  const employees = [
-    {
-      name: "Nqobile",
-      id: "564641568",
-      status: "Present",
-      checkInTime: "10:02am",
-      lunchIn: "12:30pm",
-      lunchOut: "01:30pm",
-      checkOutTime: "06:12pm",
-      date: "20-02-2023",
-    },
-    {
-      name: "Gloria",
-      id: "1568564964",
-      status: "Present",
-      checkInTime: "10:10am",
-      lunchIn: "12:35pm",
-      lunchOut: "01:35pm",
-      checkOutTime: "06:15pm",
-      date: "20-02-2023",
-    },
-    {
-      name: "Martin",
-      id: "1416584651",
-      status: "Present",
-      checkInTime: "10:08am",
-      lunchIn: "12:30pm",
-      lunchOut: "01:30pm",
-      checkOutTime: "06:30pm",
-      date: "20-02-2023",
-    },
-    {
-      name: "Busisiwe",
-      id: "8641648",
-      status: "Present",
-      checkInTime: "10:12am",
-      lunchIn: "12:40pm",
-      lunchOut: "01:40pm",
-      checkOutTime: "06:24pm",
-      date: "20-02-2023",
-    },
-    {
-      name: "Nhlakanipho",
-      id: "634855",
-      status: "Present",
-      checkInTime: "10:08am",
-      lunchIn: "12:30pm",
-      lunchOut: "01:30pm",
-      checkOutTime: "06:18pm",
-      date: "20-02-2023",
-    },
-  ]
 
-  const [searchTerm, setSearchTerm] = useState("")
+  // Filter employees based on search term - only if we have reports
+  const filteredReports = reports.length > 0 
+    ? reports.filter(report => 
+        report.name?.toLowerCase().includes(searchTerm.toLowerCase()))
+    : [];
 
-  // Filter employees based on search term
-  const filteredEmployees = employees.filter((employee) =>
-    employee.name.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+  const formatTime = (timeString) => {
+    if (!timeString) return "-";
+    
+    try {
+      // Assuming timeString is in ISO format or a standard format
+      const date = new Date(timeString);
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch (error) {
+      error
+      return timeString; // Return as is if parsing fails
+    }
+  };
 
   return (
     <div className="session-container">
@@ -115,9 +80,9 @@ const SessionMonitoring = () => {
             <div className="metric-icon blue">
               <div className="metric-dot blue"></div>
             </div>
-            <span className="metric-label">Total Check-Ins</span>
+            <span className="metric-label">Present</span>
           </div>
-          <div className="metric-value blue">5</div>
+          <div className="metric-value blue">{isLoading ? "-" : summaryData?.presentCount || 0}</div>
         </div>
 
         <div className="metric-card green">
@@ -125,9 +90,9 @@ const SessionMonitoring = () => {
             <div className="metric-icon green">
               <div className="metric-dot green"></div>
             </div>
-            <span className="metric-label">Total Check-Outs</span>
+            <span className="metric-label">Total Trainees</span>
           </div>
-          <div className="metric-value green">0</div>
+          <div className="metric-value green">{isLoading ? "-" : summaryData?.totalTrainees || 0}</div>
         </div>
 
         <div className="metric-card red">
@@ -135,9 +100,9 @@ const SessionMonitoring = () => {
             <div className="metric-icon red">
               <div className="metric-dot red"></div>
             </div>
-            <span className="metric-label">Missed Check-Ins</span>
+            <span className="metric-label">Absent</span>
           </div>
-          <div className="metric-value red">0%</div>
+          <div className="metric-value red">{isLoading ? "-" : summaryData?.absentCount || 0}</div>
         </div>
 
         <div className="metric-card yellow">
@@ -147,14 +112,17 @@ const SessionMonitoring = () => {
             </div>
             <span className="metric-label">Late Check-Ins</span>
           </div>
-          <div className="metric-value yellow">0</div>
+          <div className="metric-value yellow">{isLoading ? "-" : summaryData?.lateCount || 0}</div>
         </div>
       </div>
 
       {/* Daily Attendance Log */}
       <div className="table-container">
         <div className="table-header">
-          <h2 className="table-title">Daily Attendance Log</h2>
+          <h2 className="table-title">
+            Daily Attendance Log
+            {summaryData && <span className="table-date"> - {new Date(summaryData.date).toLocaleDateString()}</span>}
+          </h2>
           <div className="table-actions">
             <button className="btn filter-btn">
               <Filter className="btn-icon" />
@@ -164,67 +132,79 @@ const SessionMonitoring = () => {
               <Search className="search-icon" />
               <input
                 type="text"
-                placeholder="Search"
+                placeholder="Search by name"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="search-input"
+                disabled={reports.length === 0 || isLoading}
               />
             </div>
           </div>
         </div>
 
         <div className="export-actions">
-          <button className="btn export-btn">
+          <button className="btn export-btn" disabled={reports.length === 0 || isLoading}>
             <FileText className="btn-icon" />
             <span>Export PDF</span>
           </button>
-          {/* <button className="btn export-btn">
-            <Download className="btn-icon" />
-            <span>Import CSV</span>
-          </button> */}
         </div>
 
-        <div className="table-wrapper">
-          <table className="attendance-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>ID</th>
-                <th>Check-In</th>
-                <th>Lunch Start</th>
-                <th>Lunch End</th>
-                <th>Check-Out</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredEmployees.map((employee, index) => (
-                <tr key={index}>
-                  <td>{employee.name}</td>
-                  <td>{employee.id}</td>
-                  <td>{employee.checkInTime}</td>
-                  <td>{employee.lunchIn}</td>
-                  <td>{employee.lunchOut}</td>
-                  <td>{employee.checkOutTime}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        {/* <div className="pagination">
-          <div className="pagination-list">
-            {[1, 2, 3, 4, 5].map((page) => (
-              <button key={page} className={`pagination-item ${page === 5 ? "active" : ""}`}>
-                {page}
-              </button>
-            ))}
+        {isLoading ? (
+          <div className="loading-container">
+            <div className="loading-spinner"></div>
+            <p>Loading attendance data...</p>
           </div>
-        </div> */}
+        ) : error ? (
+          <div className="error-container">
+            <p className="error-message">{error}</p>
+          </div>
+        ) : reports.length === 0 ? (
+          <div className="no-data-container">
+            <Info size={48} />
+            <h3>No Attendance Records</h3>
+            <p>
+              {summaryData?.isWorkingDay === false 
+                ? "Today is not a working day. No attendance data is available."
+                : "No attendance records found for today. Check back later."}
+            </p>
+          </div>
+        ) : (
+          <div className="table-wrapper">
+            <table className="attendance-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>ID</th>
+                  <th>Check-In</th>
+                  <th>Lunch Start</th>
+                  <th>Lunch End</th>
+                  <th>Check-Out</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredReports.length > 0 ? (
+                  filteredReports.map((report, index) => (
+                    <tr key={index}>
+                      <td>{report.name || "-"}</td>
+                      <td>{report.id || "-"}</td>
+                      <td>{formatTime(report.checkInTime)}</td>
+                      <td>{formatTime(report.lunchIn)}</td>
+                      <td>{formatTime(report.lunchOut)}</td>
+                      <td>{formatTime(report.checkOutTime)}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr className="no-results">
+                    <td colSpan="6">No results match your search. Try a different name.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   )
 }
 
 export default SessionMonitoring
-
