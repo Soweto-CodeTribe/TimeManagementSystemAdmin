@@ -1,26 +1,65 @@
-import { useState } from "react"
-import { Search, Filter, Download, Upload, Plus } from "lucide-react"
-import './styling/UserManagement.css'
-import { useNavigate } from "react-router-dom"
+import React, { useState } from "react";
+import { Search, Filter, Download, Upload, Plus } from "lucide-react";
+import './styling/UserManagement.css';
+import { useNavigate } from "react-router-dom";
+import jsPDF from "jspdf"; 
+import Papa from 'papaparse'; // Importing the main papaparse library
+
 const UserManagement = () => {
-  const navigate = useNavigate()
-  // Sample data for the tables
+  const navigate = useNavigate();
   const [users, setUsers] = useState([
     { id: 1, name: "John Doe", email: "john@example.com", role: "Trainee", lastCheckIn: "3 days ago", status: "" },
     { id: 2, name: "Jane Doe", email: "jane@example.com", role: "Trainee", lastCheckIn: "5 days ago", status: "" },
     { id: 3, name: "John Smith", email: "smith@example.com", role: "Trainee", lastCheckIn: "2 days ago", status: "" },
     { id: 4, name: "Jane Smith", email: "jsmith@example.com", role: "Trainee", lastCheckIn: "3 days ago", status: "" },
     { id: 5, name: "John Brown", email: "jbrown@example.com", role: "Trainee", lastCheckIn: "5 days ago", status: "" },
-  ])
+  ]);
+
   const [guests, setGuests] = useState([
     { id: 1, name: "John Doe", email: "john@example.com", phone: "01234567890", status: "active", lastCheckIn: "" },
     { id: 2, name: "Jane Doe", email: "jane@example.com", phone: "Trainee", status: "", lastCheckIn: "5 days ago" },
     { id: 3, name: "John Smith", email: "smith@example.com", phone: "Trainee", status: "", lastCheckIn: "2 days ago" },
     { id: 4, name: "Jane Smith", email: "jsmith@example.com", phone: "Trainee", status: "", lastCheckIn: "3 days ago" },
     { id: 5, name: "John Brown", email: "jbrown@example.com", phone: "Trainee", status: "", lastCheckIn: "5 days ago" },
-  ])
-  const [searchTerm, setSearchTerm] = useState("")
-  // const [userForm, setUserForm] = useState(false)
+  ]);
+
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const handleAddUser = (newUser) => {
+    setUsers((prevUsers) => [...prevUsers, newUser]);
+  };
+
+  const exportPDF = () => {
+    const doc = new jsPDF();
+    doc.text("User Management", 10, 10);
+    doc.text("Name, Email, Role, Last Check-In", 10, 20);
+
+    users.forEach((user, index) => {
+      doc.text(`${user.name}, ${user.email}, ${user.role}, ${user.lastCheckIn}`, 10, 30 + index * 10);
+    });
+
+    // Save the generated PDF
+    doc.save("UserManagement.pdf");
+  };
+
+  // Using an input field to select the CSV file
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    
+    // Use Papa.parse to handle CSV parsing
+    Papa.parse(file, {
+      complete: (results) => {
+        results.data.forEach((row, index) => {
+          const { name, email, phone, status, lastCheckIn } = row;
+          const newGuest = { id: guests.length + index + 1, name, email, phone, status, lastCheckIn };
+          setGuests((prevGuests) => [...prevGuests, newGuest]);
+        });
+      },
+      header: true, // Assuming the CSV has headers
+      skipEmptyLines: true,
+    });
+  };
+
   return (
     <div className="user-management-container">
       <div className="header">
@@ -28,16 +67,17 @@ const UserManagement = () => {
           <h1>User management</h1>
           <p className="subtitle">Manage your trainees and guests and control permissions here</p>
         </div>
-        <button className="add-user-btn" onClick={()=> navigate('/add-user')}>
+        <button className="add-user-btn" onClick={() => navigate('/add-user')}>
           <Plus size={16} />
           <span>Add user</span>
         </button>
       </div>
-      {/* First Table Section */}
+
+      {/* First Table Section for Users */}
       <div className="table-section">
         <div className="table-header">
           <h2>
-            Trainees and Guests <span className="count">100</span>
+            Trainees <span className="count">{users.length}</span>
           </h2>
         </div>
         <div className="table-controls">
@@ -58,14 +98,21 @@ const UserManagement = () => {
             </div>
           </div>
           <div className="right-controls">
-            <button className="export-btn">
+            <button className="export-btn" onClick={exportPDF}>
               <Download size={14} />
               <span>Export PDF</span>
             </button>
-            <button className="import-btn">
+            <input 
+              type="file" 
+              accept=".csv" 
+              onChange={handleFileChange} 
+              style={{ display: "none" }} 
+              id="csvInput" 
+            />
+            <label htmlFor="csvInput" className="import-btn">
               <Upload size={14} />
               <span>Import CSV</span>
-            </button>
+            </label>
           </div>
         </div>
         <div className="table-container">
@@ -97,11 +144,12 @@ const UserManagement = () => {
           </table>
         </div>
       </div>
-      {/* Second Table Section */}
+
+      {/* Second Table Section for Guests */}
       <div className="table-section">
         <div className="table-header">
           <h2>
-            Trainees and Guests <span className="count">100</span>
+            Guests <span className="count">{guests.length}</span>
           </h2>
         </div>
         <div className="table-controls">
@@ -116,14 +164,21 @@ const UserManagement = () => {
             </div>
           </div>
           <div className="right-controls">
-            <button className="export-btn">
+            <button className="export-btn" onClick={exportPDF}>
               <Download size={14} />
               <span>Export PDF</span>
             </button>
-            <button className="import-btn">
+            <input 
+              type="file" 
+              accept=".csv" 
+              onChange={handleFileChange} 
+              style={{ display: "none" }} 
+              id="csvInput2" 
+            />
+            <label htmlFor="csvInput2" className="import-btn">
               <Upload size={14} />
               <span>Import CSV</span>
-            </button>
+            </label>
           </div>
         </div>
         <div className="table-container">
@@ -159,6 +214,7 @@ const UserManagement = () => {
         </div>
       </div>
     </div>
-  )
+  );
 }
-export default UserManagement
+
+export default UserManagement;

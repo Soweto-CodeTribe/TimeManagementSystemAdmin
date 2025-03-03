@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Import for navigation
+import { useNavigate } from 'react-router-dom';
 
 // Base URL for all API requests
 const BASE_URL = 'https://timemanagementsystemserver.onrender.com';
 
 const AddUserForm = () => {
-  const navigate = useNavigate(); // Hook for navigation
+  const navigate = useNavigate();
   
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    role: '', // This will help differentiate between Trainee and Stakeholder/Facilitator
+    role: '',
     zipCode: '',
     surname: '',
     dateOfBirth: '',
@@ -42,23 +42,42 @@ const AddUserForm = () => {
           }
       });
       
-      // Alert success
-      alert('User saved successfully!');
-      console.log('Response:', response.data);
-      
-      // Extract only the required data to send to User Management screen
-      const userManagementData = {
-        name: formData.name,
-        surname: formData.surname,
-        email: formData.email,
-        role: formData.role
-      };
-      
-      // Navigate to User Management screen with the data
-      navigate('/user-management', { 
-        state: { userData: userManagementData, newUser: true } 
-      });
-      
+      // If the save was successful
+      if (response.data) {
+        // Log the success
+        console.log('Response:', response.data);
+        
+        // Alert the user about successful save
+        alert('User saved successfully!');
+        
+        // Extract just the required data for UserManagement
+        const userManagementData = {
+          name: formData.name,
+          surname: formData.surname,
+          email: formData.email,
+          role: formData.role,
+          // Include any ID returned from the API response
+          id: response.data.id || response.data._id
+        };
+        
+        // Reset form after successful submission
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          role: '',
+          zipCode: '',
+          surname: '',
+          dateOfBirth: '',
+          location: '',
+          address: '',
+        });
+        
+        // Navigate to User Management with the new user data
+        navigate('/user-management', { 
+          state: { userData: userManagementData } 
+        });
+      }
     } catch (error) {
       console.error('Error saving user:', error);
       alert('Failed to save user. Check the console for details.');
