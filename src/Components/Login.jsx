@@ -3,43 +3,45 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser, clearError } from "../Slices/authSlice";
-import { FaEnvelope, FaLock } from "react-icons/fa";
+import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import "../Components/styling/Login.css";
 import logo from "../assets/CodeTribeImage.png";
 import loginImg from "../assets/loginImg.png";
+import ForgotPassword from "./ForgotPassword";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [debugInfo, setDebugInfo] = useState("");
   const dispatch = useDispatch();
   const { isLoading, error } = useSelector((state) => state.auth);
-  
+  const navigate = useNavigate();
+
   console.log("Login component rendering");
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setDebugInfo(""); // Clear previous debug info
-    
+    setDebugInfo("");
+
     if (!email || !password) {
       alert("Please enter both email and password.");
       return;
     }
 
-    // Clear any previous errors
     dispatch(clearError());
-    
+
     try {
       setDebugInfo("Attempting login...");
       console.log("Login attempt with:", { email, password: "********" });
-      
+
       const resultAction = await dispatch(loginUser({ email, password }));
       console.log("Login result:", resultAction);
-      
+
       if (loginUser.fulfilled.match(resultAction)) {
         setDebugInfo("Login successful!");
         console.log("Login successful:", resultAction.payload);
-        // No need to navigate here - App.js will handle redirection
       } else if (loginUser.rejected.match(resultAction)) {
         const errorMessage = resultAction.payload || resultAction.error.message || "Unknown error";
         setDebugInfo(`Login failed: ${errorMessage}`);
@@ -82,20 +84,33 @@ const Login = () => {
             <div className="form-group">
               <div className="password-header">
                 <label htmlFor="password">Password</label>
-                <a href="#" className="forgot-link">
-                  Forgot password?
-                </a>
+                <a
+            href="/forgot-password"
+            className="forgot-link"
+            onClick={(e) => {
+              e.preventDefault(); // Prevent default anchor behavior
+              navigate("/forgotPassword"); // Navigate to Forgot Password page
+            }}
+          >
+             Forgot password?
+          </a>
               </div>
               <div className="input-wrapper">
                 <FaLock className="input-icon" />
                 <input
                   id="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter password"
                   required
                 />
+                <span
+                  className="visibility-icon"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </span>
               </div>
             </div>
 
