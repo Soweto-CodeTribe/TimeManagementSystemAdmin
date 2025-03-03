@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 // Base URL for all API requests
 const BASE_URL = 'https://timemanagementsystemserver.onrender.com';
 
 const AddUserForm = () => {
+  const navigate = useNavigate();
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -24,105 +27,89 @@ const AddUserForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const endpoint = formData.role === 'Trainee' 
+      ? '/api/trainee' 
+      : '/api/facilitator';
+
+    const token = localStorage.getItem("token"); // Get the stored token
+
     try {
-      const response = await axios.post(`${BASE_URL}/api/trainee`, formData);
-      alert('Trainee saved successfully!');
-      console.log('Response:', response.data);
-    } catch (error) {
-      console.error('Error saving trainee:', error);
-      alert('Failed to save trainee. Check the console for details.');
-    }
-  };
-
-  const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      try {
-        const response = await axios.post(`${BASE_URL}/api/trainees/upload-csv`, formData, {
+      // First save the user to the backend
+      const response = await axios.post(`${BASE_URL}${endpoint}`, formData, {
           headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-        alert('CSV file uploaded successfully!');
+              Authorization: `Bearer ${token}` // Include the token in the request
+          }
+      });
+      
+      // If the save was successful
+      if (response.data) {
+        // Log the success
         console.log('Response:', response.data);
-      } catch (error) {
-        console.error('Error uploading CSV:', error);
-        alert('Failed to upload CSV file. Check the console for details.');
+        
+        // Alert the user about successful save
+        alert('User saved successfully!');
+        
+        // Extract just the required data for UserManagement
+        const userManagementData = {
+          name: formData.name,
+          surname: formData.surname,
+          email: formData.email,
+          role: formData.role,
+          id: response.data.id || response.data._id
+        };
+        
+        // Reset form after successful submission
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          role: '',
+          zipCode: '',
+          surname: '',
+          dateOfBirth: '',
+          location: '',
+          address: '',
+        });
+        
+        // Navigate to User Management with the new user data
+        navigate('/user-management', { 
+          state: { userData: userManagementData } 
+        });
       }
+    } catch (error) {
+      console.error('Error saving user:', error);
+      alert('Failed to save user. Check the console for details.');
     }
   };
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px',
-        backgroundColor: '#f5f5f5',
-        borderRadius: '8px',
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '20px',
+      backgroundColor: '#f5f5f5',
+      borderRadius: '8px',
+      width: '100%',
+      height: '100vh',
+      boxSizing: 'border-box',
+      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+      position: 'relative',
+      overflow: 'hidden',
+    }}>
+      <h1 style={{
+        fontSize: '24px',
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: '20px',
         width: '100%',
-        height: '100vh',
-        boxSizing: 'border-box',
-        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-    >
-      {/* Upload CSV Button - Now positioned with flexbox instead of absolute */}
-      <div
-        style={{
-          alignSelf: 'flex-end',
-          marginBottom: '15px',
-        }}
-      >
-        <label
-          htmlFor="csv-upload"
-          style={{
-            padding: '10px 20px',
-            fontSize: '14px',
-            fontWeight: 'bold',
-            color: '#fff',
-            backgroundColor: '#90EE90',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            transition: 'background-color 0.3s ease',
-            display: 'inline-block',
-          }}
-          onMouseEnter={(e) => (e.target.style.backgroundColor = '#76c776')}
-          onMouseLeave={(e) => (e.target.style.backgroundColor = '#90EE90')}
-        >
-          Upload CSV
-        </label>
-        <input
-          id="csv-upload"
-          type="file"
-          accept=".csv"
-          style={{ display: 'none' }}
-          onChange={handleFileUpload}
-        />
-      </div>
-
-      {/* Title */}
-      <h1
-        style={{
-          fontSize: '24px',
-          fontWeight: 'bold',
-          color: '#333',
-          marginBottom: '20px',
-          width: '100%',
-          textAlign: 'center',
-        }}
-      >
-        Add a user
+        textAlign: 'center',
+      }}>
+        Add a User
       </h1>
 
-      {/* Form Fields Container */}
       <form
         onSubmit={handleSubmit}
         style={{
@@ -141,9 +128,7 @@ const AddUserForm = () => {
             width: '100%',
           }}
         >
-          {/* Left Column */}
           <div>
-            {/* Name Field */}
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
                 Name *
@@ -164,10 +149,9 @@ const AddUserForm = () => {
                   height: '45px',
                   boxSizing: 'border-box',
                 }}
+                required
               />
             </div>
-
-            {/* Email Field */}
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
                 Email *
@@ -188,10 +172,9 @@ const AddUserForm = () => {
                   height: '45px',
                   boxSizing: 'border-box',
                 }}
+                required
               />
             </div>
-
-            {/* Phone Field */}
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
                 Phone *
@@ -212,18 +195,15 @@ const AddUserForm = () => {
                   height: '45px',
                   boxSizing: 'border-box',
                 }}
+                required
               />
             </div>
-
-            {/* Role Field */}
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
                 Role *
               </label>
-              <input
-                type="text"
+              <select
                 name="role"
-                placeholder="Enter role"
                 value={formData.role}
                 onChange={handleChange}
                 style={{
@@ -236,13 +216,16 @@ const AddUserForm = () => {
                   height: '45px',
                   boxSizing: 'border-box',
                 }}
-              />
+                required
+              >
+                <option value="">Select a role</option>
+                <option value="Trainee">Trainee</option>
+                <option value="Facilitator">Facilitator</option>
+                <option value="Stakeholder">Stakeholder</option>
+              </select>
             </div>
           </div>
-
-          {/* Right Column */}
           <div>
-            {/* Zip Code Field */}
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
                 Zip Code *
@@ -263,10 +246,9 @@ const AddUserForm = () => {
                   height: '45px',
                   boxSizing: 'border-box',
                 }}
+                required
               />
             </div>
-
-            {/* Surname Field */}
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
                 Surname *
@@ -287,18 +269,16 @@ const AddUserForm = () => {
                   height: '45px',
                   boxSizing: 'border-box',
                 }}
+                required
               />
             </div>
-
-            {/* Date of Birth Field */}
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
                 Date of Birth *
               </label>
               <input
-                type="text"
+                type="date"
                 name="dateOfBirth"
-                placeholder="DD/MM/YYYY"
                 value={formData.dateOfBirth}
                 onChange={handleChange}
                 style={{
@@ -311,10 +291,9 @@ const AddUserForm = () => {
                   height: '45px',
                   boxSizing: 'border-box',
                 }}
+                required
               />
             </div>
-
-            {/* Location Field */}
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
                 Location *
@@ -335,10 +314,9 @@ const AddUserForm = () => {
                   height: '45px',
                   boxSizing: 'border-box',
                 }}
+                required
               />
             </div>
-
-            {/* Address Field */}
             <div style={{ marginBottom: '20px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
                 Address *
@@ -359,17 +337,16 @@ const AddUserForm = () => {
                   height: '45px',
                   boxSizing: 'border-box',
                 }}
+                required
               />
             </div>
           </div>
         </div>
 
-        {/* Save Button */}
         <button
           type="submit"
           style={{
-            width: '100%',
-            maxWidth: '400px',
+            width: '200px',
             padding: '14px',
             fontSize: '16px',
             fontWeight: 'bold',
@@ -392,3 +369,4 @@ const AddUserForm = () => {
 };
 
 export default AddUserForm;
+
