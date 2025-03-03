@@ -56,7 +56,6 @@ const AddUserForm = () => {
           surname: formData.surname,
           email: formData.email,
           role: formData.role,
-          // Include any ID returned from the API response
           id: response.data.id || response.data._id
         };
         
@@ -85,33 +84,29 @@ const AddUserForm = () => {
   };
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px',
-        backgroundColor: '#f5f5f5',
-        borderRadius: '8px',
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '20px',
+      backgroundColor: '#f5f5f5',
+      borderRadius: '8px',
+      width: '100%',
+      height: '100vh',
+      boxSizing: 'border-box',
+      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+      position: 'relative',
+      overflow: 'hidden',
+    }}>
+      <h1 style={{
+        fontSize: '24px',
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: '20px',
         width: '100%',
-        height: '100vh',
-        boxSizing: 'border-box',
-        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-    >
-      <h1
-        style={{
-          fontSize: '24px',
-          fontWeight: 'bold',
-          color: '#333',
-          marginBottom: '20px',
-          width: '100%',
-          textAlign: 'center',
-        }}
-      >
+        textAlign: 'center',
+      }}>
         Add a User
       </h1>
 
@@ -157,7 +152,6 @@ const AddUserForm = () => {
                 required
               />
             </div>
-
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
                 Email *
@@ -181,7 +175,6 @@ const AddUserForm = () => {
                 required
               />
             </div>
-
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
                 Phone *
@@ -205,7 +198,6 @@ const AddUserForm = () => {
                 required
               />
             </div>
-
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
                 Role *
@@ -233,7 +225,6 @@ const AddUserForm = () => {
               </select>
             </div>
           </div>
-
           <div>
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
@@ -258,7 +249,6 @@ const AddUserForm = () => {
                 required
               />
             </div>
-
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
                 Surname *
@@ -282,7 +272,6 @@ const AddUserForm = () => {
                 required
               />
             </div>
-
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
                 Date of Birth *
@@ -305,7 +294,6 @@ const AddUserForm = () => {
                 required
               />
             </div>
-
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
                 Location *
@@ -329,7 +317,6 @@ const AddUserForm = () => {
                 required
               />
             </div>
-
             <div style={{ marginBottom: '20px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
                 Address *
@@ -382,3 +369,4 @@ const AddUserForm = () => {
 };
 
 export default AddUserForm;
+

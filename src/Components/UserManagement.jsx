@@ -1,67 +1,113 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Search, Filter, Download, Upload, Plus } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
 import './styling/UserManagement.css';
-import { useNavigate } from "react-router-dom";
 import jsPDF from "jspdf"; 
-import Papa from 'papaparse'; // Importing the main papaparse library
+import Papa from 'papaparse';
+import Modal from './Modal'; // Import Modal
 
 const UserManagement = () => {
+  const location = useLocation();
   const navigate = useNavigate();
-  const [users, setUsers] = useState([
-    { id: 1, name: "John Doe", email: "john@example.com", role: "Trainee", lastCheckIn: "3 days ago", status: "" },
-    { id: 2, name: "Jane Doe", email: "jane@example.com", role: "Trainee", lastCheckIn: "5 days ago", status: "" },
-    { id: 3, name: "John Smith", email: "smith@example.com", role: "Trainee", lastCheckIn: "2 days ago", status: "" },
-    { id: 4, name: "Jane Smith", email: "jsmith@example.com", role: "Trainee", lastCheckIn: "3 days ago", status: "" },
-    { id: 5, name: "John Brown", email: "jbrown@example.com", role: "Trainee", lastCheckIn: "5 days ago", status: "" },
-  ]);
-
-  const [guests, setGuests] = useState([
-    { id: 1, name: "John Doe", email: "john@example.com", phone: "01234567890", status: "active", lastCheckIn: "" },
-    { id: 2, name: "Jane Doe", email: "jane@example.com", phone: "Trainee", status: "", lastCheckIn: "5 days ago" },
-    { id: 3, name: "John Smith", email: "smith@example.com", phone: "Trainee", status: "", lastCheckIn: "2 days ago" },
-    { id: 4, name: "Jane Smith", email: "jsmith@example.com", phone: "Trainee", status: "", lastCheckIn: "3 days ago" },
-    { id: 5, name: "John Brown", email: "jbrown@example.com", phone: "Trainee", status: "", lastCheckIn: "5 days ago" },
-  ]);
-
-  const [searchTerm, setSearchTerm] = useState("");
-
-  const handleAddUser = (newUser) => {
-    setUsers((prevUsers) => [...prevUsers, newUser]);
+  
+  // Initial Users from localStorage or fallback to an empty array
+  const getInitialUsers = () => {
+    const storedUsers = localStorage.getItem('users');
+    return storedUsers ? JSON.parse(storedUsers) : [];
   };
+
+  const [users, setUsers] = useState(getInitialUsers());
+  const [guests, setGuests] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+
+  // Load new user data from location state if available
+  useEffect(() => {
+    if (location.state && location.state.userData) {
+      const newUser = location.state.userData;
+
+      // Check for duplicate user based on email
+      const userExists = users.some(user => user.email === newUser.email);
+
+      if (!userExists) {
+        const updatedUsers = [...users, newUser];
+        setUsers(updatedUsers);
+        localStorage.setItem('users', JSON.stringify(updatedUsers)); // Save to localStorage
+      } else {
+        console.warn("User already exists");
+      }
+    }
+  }, [location.state, users]);
 
   const exportPDF = () => {
     const doc = new jsPDF();
     doc.text("User Management", 10, 10);
     doc.text("Name, Email, Role, Last Check-In", 10, 20);
-
     users.forEach((user, index) => {
       doc.text(`${user.name}, ${user.email}, ${user.role}, ${user.lastCheckIn}`, 10, 30 + index * 10);
     });
-
-    // Save the generated PDF
     doc.save("UserManagement.pdf");
   };
 
-  // Using an input field to select the CSV file
+  const exportCSV = () => {
+    const csvContent = users.map(user => `${user.name},${user.email},${user.role},${user.lastCheckIn}`).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute('download', 'users.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const handleFileChange = (event) => {
     const file = event.target.files[0];
-    
-    // Use Papa.parse to handle CSV parsing
     Papa.parse(file, {
       complete: (results) => {
         results.data.forEach((row, index) => {
           const { name, email, phone, status, lastCheckIn } = row;
-          const newGuest = { id: guests.length + index + 1, name, email, phone, status, lastCheckIn };
-          setGuests((prevGuests) => [...prevGuests, newGuest]);
+
+          // Check for duplicates before adding guests
+          const guestExists = guests.some(guest => guest.email === email);
+
+          if (!guestExists) { // Only add if not exists
+            const newGuest = { id: guests.length + index + 1, name, email, phone, status, lastCheckIn };
+            setGuests((prevGuests) => [...prevGuests, newGuest]);
+          } else {
+            console.warn("Guest already exists");
+          }
         });
       },
-      header: true, // Assuming the CSV has headers
+      header: true, 
       skipEmptyLines: true,
     });
   };
 
+  const handleTakeAction = (user) => {
+    setSelectedUser(user);
+    setModalOpen(true);
+  };
+
+  const handleDeleteUser = () => {
+    const updatedUsers = users.filter(user => user.id !== selectedUser.id);
+    setUsers(updatedUsers);
+    setModalOpen(false);
+    setSelectedUser(null);
+    localStorage.setItem('users', JSON.stringify(updatedUsers)); // Update localStorage
+  };
+
   return (
     <div className="user-management-container">
+      <Modal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onView={() => console.log("View user", selectedUser)}
+        onExportCSV={exportCSV}
+        onExportPDF={() => exportPDF(selectedUser)}
+        onDelete={handleDeleteUser}
+      />
+
       <div className="header">
         <div className="title-section">
           <h1>User management</h1>
@@ -73,7 +119,6 @@ const UserManagement = () => {
         </button>
       </div>
 
-      {/* First Table Section for Users */}
       <div className="table-section">
         <div className="table-header">
           <h2>
@@ -102,13 +147,7 @@ const UserManagement = () => {
               <Download size={14} />
               <span>Export PDF</span>
             </button>
-            <input 
-              type="file" 
-              accept=".csv" 
-              onChange={handleFileChange} 
-              style={{ display: "none" }} 
-              id="csvInput" 
-            />
+            <input type="file" accept=".csv" onChange={handleFileChange} style={{ display: "none" }} id="csvInput" />
             <label htmlFor="csvInput" className="import-btn">
               <Upload size={14} />
               <span>Import CSV</span>
@@ -134,8 +173,8 @@ const UserManagement = () => {
                   <td>{user.role}</td>
                   <td>{user.lastCheckIn}</td>
                   <td>
-                    <button className="action-btn">
-                      <span>Manage</span>
+                    <button className="action-btn" onClick={() => handleTakeAction(user)}>
+                      <span>Take action</span>
                     </button>
                   </td>
                 </tr>
@@ -168,13 +207,7 @@ const UserManagement = () => {
               <Download size={14} />
               <span>Export PDF</span>
             </button>
-            <input 
-              type="file" 
-              accept=".csv" 
-              onChange={handleFileChange} 
-              style={{ display: "none" }} 
-              id="csvInput2" 
-            />
+            <input type="file" accept=".csv" onChange={handleFileChange} style={{ display: "none" }} id="csvInput2" />
             <label htmlFor="csvInput2" className="import-btn">
               <Upload size={14} />
               <span>Import CSV</span>
@@ -215,6 +248,6 @@ const UserManagement = () => {
       </div>
     </div>
   );
-}
+};
 
 export default UserManagement;
