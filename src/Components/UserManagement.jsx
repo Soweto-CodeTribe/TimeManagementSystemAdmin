@@ -97,25 +97,6 @@ const UserManagement = () => {
     localStorage.setItem('users', JSON.stringify(updatedUsers)); // Update localStorage
   };
 
-  const navigate = useNavigate()
-  // Sample data for the tables
-  const [users] = useState([
-    { id: 1, name: "John Doe", email: "john@example.com", role: "Trainee", lastCheckIn: "3 days ago", status: "" },
-    { id: 2, name: "Jane Doe", email: "jane@example.com", role: "Trainee", lastCheckIn: "5 days ago", status: "" },
-    { id: 3, name: "John Smith", email: "smith@example.com", role: "Trainee", lastCheckIn: "2 days ago", status: "" },
-    { id: 4, name: "Jane Smith", email: "jsmith@example.com", role: "Trainee", lastCheckIn: "3 days ago", status: "" },
-    { id: 5, name: "John Brown", email: "jbrown@example.com", role: "Trainee", lastCheckIn: "5 days ago", status: "" },
-  ])
-  const [guests] = useState([
-    { id: 1, name: "John Doe", email: "john@example.com", phone: "01234567890", status: "active", lastCheckIn: "" },
-    { id: 2, name: "Jane Doe", email: "jane@example.com", phone: "Trainee", status: "", lastCheckIn: "5 days ago" },
-    { id: 3, name: "John Smith", email: "smith@example.com", phone: "Trainee", status: "", lastCheckIn: "2 days ago" },
-    { id: 4, name: "Jane Smith", email: "jsmith@example.com", phone: "Trainee", status: "", lastCheckIn: "3 days ago" },
-    { id: 5, name: "John Brown", email: "jbrown@example.com", phone: "Trainee", status: "", lastCheckIn: "5 days ago" },
-  ])
-  const [searchTerm, setSearchTerm] = useState("")
-  // const [userForm, setUserForm] = useState(false)
-
   return (
     <div className="user-management-container">
       <Modal
