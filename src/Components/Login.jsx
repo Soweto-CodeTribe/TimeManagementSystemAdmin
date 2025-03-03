@@ -7,7 +7,6 @@ import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import "../Components/styling/Login.css";
 import logo from "../assets/CodeTribeImage.png";
 import loginImg from "../assets/loginImg.png";
-import ForgotPassword from "./ForgotPassword";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {

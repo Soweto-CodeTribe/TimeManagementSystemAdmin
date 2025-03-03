@@ -75,7 +75,7 @@ function Dashboard() {
   return (
     <div className="dashboard">
       <div className="dashboard-header">
-        <h3>Howsit, {name}</h3>
+        <h3>Howzit, {name}</h3>
         <p>{currentDate}</p>
       </div>
 

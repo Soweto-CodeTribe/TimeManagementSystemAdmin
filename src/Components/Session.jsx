@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { FileText, Search, Filter, Info } from "lucide-react"
+import { FileText, Search, Filter, Info, ChevronLeft, ChevronRight } from "lucide-react"
 import "./styling/Session.css"
 import { useSelector } from 'react-redux'
 import axios from "axios"
@@ -13,39 +13,68 @@ const SessionMonitoring = () => {
   // State for API data
   const [summaryData, setSummaryData] = useState(null);
   const [reports, setReports] = useState([]);
+  const [data, setData] = useState([])
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("")
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [itemsPerPage, setItemsPerPage] = useState(10); // Default items per page
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const response = await axios.get(`${BASE_URL}/api/session/daily-report`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        
-        // Store API data in state - separate summary from reports
-        setSummaryData(response.data.summary || {});
-        setReports(response.data.reports || []);
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Error fetching daily report:", error);
-        setError("Failed to load attendance data");
-        setIsLoading(false);
-      }
-    };
+    fetchData(currentPage);
+  }, [token, currentPage]);
 
-    if (token) {
-      fetchData();
-    } else {
+  const fetchData = async (page = 1) => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get(`${BASE_URL}api/session/daily-report`, {
+        params: {
+          page: page,
+          limit: itemsPerPage
+        },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      // Store API data in state - separate summary from reports
+      setSummaryData(response.data.summary || {});
+      setReports(response.data.paginatedReports || []);
+      setData(response.data || []);
+      
+      // Set pagination data
+      if (response.data.pagination) {
+        setCurrentPage(response.data.pagination.currentPage);
+        setTotalPages(response.data.pagination.totalPages);
+        setTotalItems(response.data.pagination.totalItems);
+      }
+      
       setIsLoading(false);
-      setError("Authentication token not found");
+    } catch (error) {
+      console.error("Error fetching daily report:", error);
+      setError("Failed to load attendance data");
+      setIsLoading(false);
     }
-  }, [token]);
+  };
+
+  // Handle page change
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  // Reset to first page when searching
+  useEffect(() => {
+    if (searchTerm) {
+      setCurrentPage(1);
+    }
+  }, [searchTerm]);
 
   // Filter employees based on search term - only if we have reports
   const filteredReports = reports.length > 0 
@@ -61,14 +90,40 @@ const SessionMonitoring = () => {
       const date = new Date(timeString);
       return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     } catch (error) {
-      error
       return timeString; // Return as is if parsing fails
     }
   };
 
+  // Generate page numbers for pagination
+  const renderPaginationNumbers = () => {
+    const pageNumbers = [];
+    const maxVisiblePages = 5; // Maximum number of page buttons to show
+    
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    // Adjust start page if end range is too small
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(
+        <button
+          key={i}
+          onClick={() => handlePageChange(i)}
+          className={`pagination-number ${currentPage === i ? 'active' : ''}`}
+        >
+          {i}
+        </button>
+      );
+    }
+    
+    return pageNumbers;
+  };
+
   return (
     <div className="session-container">
-      <h1 className="session-title">Session Monitoring</h1>
       <p className="session-description">
         Monitor check-ins, check-outs, and lunch breaks. Add time logs, update session attendance and activity.
       </p>
@@ -82,7 +137,7 @@ const SessionMonitoring = () => {
             </div>
             <span className="metric-label">Present</span>
           </div>
-          <div className="metric-value blue">{isLoading ? "-" : summaryData?.presentCount || 0}</div>
+          <div className="metric-value blue">{isLoading ? "-" :  summaryData?.presentCount || 0}</div>
         </div>
 
         <div className="metric-card green">
@@ -179,6 +234,7 @@ const SessionMonitoring = () => {
                   <th>Lunch Start</th>
                   <th>Lunch End</th>
                   <th>Check-Out</th>
+                  <th>Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -186,20 +242,49 @@ const SessionMonitoring = () => {
                   filteredReports.map((report, index) => (
                     <tr key={index}>
                       <td>{report.name || "-"}</td>
-                      <td>{report.id || "-"}</td>
-                      <td>{formatTime(report.checkInTime)}</td>
-                      <td>{formatTime(report.lunchIn)}</td>
-                      <td>{formatTime(report.lunchOut)}</td>
-                      <td>{formatTime(report.checkOutTime)}</td>
+                      <td>{report.traineeId}</td>
+                      <td>{report.checkInTime || "-"}</td>
+                      <td>{report.lunchStartTime || "-"}</td>
+                      <td>{report.lunchEndTime || "-"}</td>
+                      <td>{report.checkOutTime || "-"}</td>
+                      <td>{report.status || "-"}</td>
                     </tr>
                   ))
                 ) : (
                   <tr className="no-results">
-                    <td colSpan="6">No results match your search. Try a different name.</td>
+                    <td colSpan="7">No results match your search. Try a different name.</td>
                   </tr>
                 )}
               </tbody>
             </table>
+            
+            {/* Pagination controls */}
+            {!searchTerm && filteredReports.length > 0 && totalPages > 1 && (
+              <div className="pagination-container">
+                <div className="pagination-info">
+                  Showing {reports.length} of {totalItems} entries
+                </div>
+                <div className="pagination-controls">
+                  <button 
+                    className="pagination-arrow" 
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                  >
+                    <ChevronLeft size={18} />
+                  </button>
+                  
+                  {renderPaginationNumbers()}
+                  
+                  <button 
+                    className="pagination-arrow" 
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                  >
+                    <ChevronRight size={18} />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
