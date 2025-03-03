@@ -14,6 +14,7 @@ import {
 import Modal from 'react-modal';
 import "../Components/styling/Sidebar.css";
 import Logo from '../assets/CodeTribeImage.png';
+import navbar from './Navbar';
 
 // Set app element for accessibility
 Modal.setAppElement('#root');
