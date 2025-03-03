@@ -77,4 +77,136 @@
     background-color: #ddd;
 
   }
-  
+  /* Navbar Base Styles */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 16.8%;
+  width: 81.9%; /* Adjusted width to fit properly */
+  height: 60px;
+  z-index: 2000;
+  background-color: #ffffff;
+  color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  font-size: 24px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+  border-left: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+/* Navbar Content */
+.navbar-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+/* Screen Name on the Left */
+.screen-container {
+  flex: 1; /* Allows it to push icons to the right */
+}
+
+.screen-name {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+  white-space: nowrap; /* Prevents text from wrapping */
+  overflow: hidden;
+  text-overflow: ellipsis; /* Adds an ellipsis if text overflows */
+}
+
+/* Icons on the Right */
+.icon-container {
+  display: flex;
+  align-items: center;
+  gap: 20px; /* Adds space between icons */
+}
+
+/* Profile Icon */
+.profile-icon {
+  cursor: pointer;
+}
+/* Hamburger Menu Icon Styling */
+.hamburger-icon {
+  display: none; /* Initially hidden */
+  cursor: pointer;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .hamburger-icon {
+    display: block; /* Display hamburger icon on small screens */
+  }
+}
+
+
+
+/* Mobile Responsiveness */
+@media (max-width: 1024px) {
+  .navbar {
+    width: 100%; /* Full width for tablet screens */
+    left: 0; /* Remove left offset */
+  }
+
+  .navbar-content {
+    justify-content: space-between;
+  }
+
+  .screen-name {
+    font-size: 18px; /* Adjust screen name font size for tablets */
+  }
+
+  .icon-container {
+    gap: 10px; /* Reduce space between icons on smaller screens */
+  }
+
+  .profile-icon {
+    font-size: 20px; /* Adjust profile icon size */
+  }
+}
+
+/* Mobile Portrait Responsiveness */
+@media (max-width: 768px) {
+  .navbar {
+    width: 100%;
+    left: 0;
+    padding: 0 10px; /* Adjust padding for mobile screens */
+  }
+
+  .screen-name {
+    font-size: 16px; /* Adjust font size for mobile */
+    max-width: 60%; /* Allow screen name to be more flexible */
+  }
+
+  .icon-container {
+    gap: 8px; /* Further reduce space between icons on mobile */
+  }
+
+  .profile-icon {
+    font-size: 18px; /* Reduce profile icon size */
+  }
+}
+
+/* Very Small Mobile Screens */
+@media (max-width: 480px) {
+  .navbar {
+    padding: 0 5px; /* Even smaller padding for very small screens */
+  }
+
+  .screen-name {
+    font-size: 14px; /* Smaller font size on very small screens */
+  }
+
+  .icon-container {
+    gap: 5px; /* Minimal gap between icons on small screens */
+  }
+
+  .profile-icon {
+    font-size: 16px; /* Smaller profile icon */
+  }
+}

@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import "./App.css";
@@ -12,16 +13,14 @@ import Alerts from "./Components/Alerts";
 import AuditLogs from "./Components/AuditLogs";
 import Logout from "./Components/Logout";
 import Login from "./Components/Login";
-import AddUserForm from "./Components/AddUserForm"; // Import the AddUserForm component
+import AddUserForm from "./Components/AddUserForm";
 import ForgotPassword from "./Components/ForgotPassword";
 
 function App() {
-  const location = useLocation(); // Get the current route
+  const location = useLocation();
   const { isAuthenticated } = useSelector((state) => state.auth);
-  
-  console.log("App rendering, auth state:", isAuthenticated);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Function to get the screen name from the route path
   const getScreenName = (path) => {
     switch (path) {
       case "/":
@@ -38,33 +37,26 @@ function App() {
         return "Alerts";
       case "/audit-logs":
         return "Audit Logs";
-      // case "/add-user":
-      //   return "Add User";
       default:
         return "";
     }
   };
 
-  const currentScreen = getScreenName(location.pathname); // Get the current screen name based on the path
+  const currentScreen = getScreenName(location.pathname);
 
   return (
     <Routes>
-      {/* Login Route */}
-      <Route path="/login" element={
-        isAuthenticated ? <Navigate to="/" /> : <Login />
-      } />
+      <Route path="/login" element={isAuthenticated ? <Navigate to="/" /> : <Login />} />
+      <Route path="/forgotPassword" element={<ForgotPassword />} />
 
-      <Route path="/forgotPassword" element={<ForgotPassword/>}/>
-
-      {/* Protected Routes */}
       <Route
         path="/*"
         element={
           isAuthenticated ? (
             <div className="app-container">
-              <Navbar activeScreen={currentScreen} /> {/* Pass currentScreen as a prop */}
+              <Navbar activeScreen={currentScreen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
               <div className="main-content">
-                <Sidebar />
+                <Sidebar isOpen={isSidebarOpen} />
                 <div className="content">
                   <Routes>
                     <Route path="/" element={<Dashboard />} />
@@ -75,7 +67,7 @@ function App() {
                     <Route path="/alerts" element={<Alerts />} />
                     <Route path="/audit-logs" element={<AuditLogs />} />
                     <Route path="/logout" element={<Logout />} />
-                    <Route path="/add-user" element={<AddUserForm />} /> {/* Add the new route for AddUserForm */}
+                    <Route path="/add-user" element={<AddUserForm />} />
                   </Routes>
                 </div>
               </div>
