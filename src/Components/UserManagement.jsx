@@ -9,7 +9,7 @@ import Modal from './Modal'; // Import Modal
 const UserManagement = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   // Initial Users from localStorage or fallback to an empty array
   const getInitialUsers = () => {
     const storedUsers = localStorage.getItem('users');
@@ -97,6 +97,20 @@ const UserManagement = () => {
     localStorage.setItem('users', JSON.stringify(updatedUsers)); // Update localStorage
   };
 
+  // Filter users based on search term
+  const filteredUsers = users.filter(user =>
+    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.role.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Filter guests based on search term
+  const filteredGuests = guests.filter(guest =>
+    guest.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    guest.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    guest.phone.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="user-management-container">
       <Modal
@@ -122,7 +136,7 @@ const UserManagement = () => {
       <div className="table-section">
         <div className="table-header">
           <h2>
-            Trainees <span className="count">{users.length}</span>
+            Trainees <span className="count">{filteredUsers.length}</span>
           </h2>
         </div>
         <div className="table-controls">
@@ -166,7 +180,7 @@ const UserManagement = () => {
               </tr>
             </thead>
             <tbody>
-              {users.map((user) => (
+              {filteredUsers.map((user) => (
                 <tr key={user.id}>
                   <td>{user.name}</td>
                   <td>{user.email}</td>
@@ -188,7 +202,7 @@ const UserManagement = () => {
       <div className="table-section">
         <div className="table-header">
           <h2>
-            Guests <span className="count">{guests.length}</span>
+            Guests <span className="count">{filteredGuests.length}</span>
           </h2>
         </div>
         <div className="table-controls">
@@ -199,7 +213,13 @@ const UserManagement = () => {
             </button>
             <div className="search-container">
               <Search size={14} className="search-icon" />
-              <input type="text" placeholder="Search" className="search-input" />
+              <input
+                type="text"
+                placeholder="Search"
+                value={searchTerm} // Use the same searchTerm state for guest filtering
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input"
+              />
             </div>
           </div>
           <div className="right-controls">
@@ -226,7 +246,7 @@ const UserManagement = () => {
               </tr>
             </thead>
             <tbody>
-              {guests.map((guest) => (
+              {filteredGuests.map((guest) => (
                 <tr key={guest.id}>
                   <td>{guest.name}</td>
                   <td>{guest.email}</td>
