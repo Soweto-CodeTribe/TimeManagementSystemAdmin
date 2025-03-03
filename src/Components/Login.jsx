@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser, clearError } from "../Slices/authSlice";
@@ -31,9 +29,32 @@ const Login = () => {
 
     dispatch(clearError());
 
+
     try {
+      const response = await fetch("https://timemanagementsystemserver.onrender.com/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }), // Send credentials in the request body
+      });
+
+      const data = await response.json();
+      console.log("user: ", data);
+
+      if (response.ok) {
+        // Assuming the response contains a JWT or user data for authentication
+        // You might want to store it in localStorage or context/state depending on your app's needs
+        // localStorage.setItem("token", data.token); // Example if you receive a token
+        console.log("user: ", data);
+        navigate("/"); // Redirect to Dashboard after successful login
+      } else {
+        alert(data.message || "Invalid credentials!"); // Show message from the server
+      }
+
       setDebugInfo("Attempting login...");
       console.log("Login attempt with:", { email, password: "********" });
+
 
       const resultAction = await dispatch(loginUser({ email, password }));
       console.log("Login result:", resultAction);
