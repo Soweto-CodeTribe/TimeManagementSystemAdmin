@@ -51,7 +51,7 @@ export const loginFacilitator = createAsyncThunk(
         // Store token and role in localStorage
         if (data.token) {
           localStorage.setItem('authToken', data.token);
-          localStorage.setItem('userType', 'facilitator'); // Store role information
+          localStorage.setItem('userType', data.facilitator.userType); // Store role information
         }
         return data;
       } else {
@@ -69,7 +69,7 @@ export const checkAuthStatus = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('authToken');
-      const userType = localStorage.getItem('userType') || 'user'; // Default to user if not set
+      const userType = localStorage.getItem('userType') ; // Default to user if not set
 
       if (!token) {
         return rejectWithValue('No token found');
