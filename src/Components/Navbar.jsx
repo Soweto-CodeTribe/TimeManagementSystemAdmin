@@ -1,9 +1,10 @@
 import React from "react";
-import { CgProfile } from "react-icons/cg";
 import { IoMdNotificationsOutline } from "react-icons/io"; // Notification icon
 import { FiSettings } from "react-icons/fi"; // Settings icon
 import { useNavigate } from "react-router-dom"; // To handle navigation
+import { Avatar } from '@mui/material'; // Importing MUI Avatar component
 import "./styling/Navbar.css";
+import imgAvater from '../assets/hacker.png'; // Avatar image
 
 const Navbar = ({ activeScreen }) => {
   const navigate = useNavigate();
@@ -34,18 +35,19 @@ const Navbar = ({ activeScreen }) => {
         {/* Right: Icons */}
         <div className="icon-container">
           <IoMdNotificationsOutline
-            size={28}
+            size={30}  // Set size to 30px to match the Avatar size
             className="icon"
             onClick={handleNotificationsClick} // Notification icon click
-          />
-          <FiSettings
-            size={38}
-            className="icon"
-            onClick={handleSettingsClick} // Settings icon click
-          />
-          <CgProfile
-            size={18}
-            className="profile-icon"
+          />          
+          {/* Avatar for Profile */}
+          <Avatar
+            alt="Profile Avatar"
+            src={imgAvater} // Using the image for the avatar
+            sx={{
+              width: 24,  // Set size to 30px to match the icons
+              height: 24, // Set size to 30px to match the icons
+              cursor: 'pointer',
+            }}
             onClick={handleProfileClick} // Profile icon click
           />
         </div>

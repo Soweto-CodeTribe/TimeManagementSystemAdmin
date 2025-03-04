@@ -8,27 +8,32 @@ import {
   FaCogs,
   FaSignOutAlt,
 } from 'react-icons/fa';
-import { CgProfile } from "react-icons/cg";
-import { IoMdNotificationsOutline } from "react-icons/io";
-import { FiSettings } from "react-icons/fi";
 import Modal from 'react-modal';
 import "../Components/styling/Sidebar.css";
 import Logo from '../assets/CodeTribeImage.png';
+import Navbar from './Navbar';
+import { useDispatch } from 'react-redux';
+import { logout } from '../Slices/authSlice'; // Adjust the import path as needed
+
 
 // Set app element for accessibility
 Modal.setAppElement('#root');
 
+// Sidebar component
 const Sidebar = ({ activeScreen }) => {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-
+  const dispatch = useDispatch();
   const openLogoutModal = () => setIsLogoutModalOpen(true);
   const closeLogoutModal = () => setIsLogoutModalOpen(false);
+
+  // Handle logout
   const handleLogout = () => {
-    console.log("User logged out"); // Replace with actual logout logic
-    closeLogoutModal();
+    dispatch(logout()); // Dispatch logout to clear state
+    navigate("/login"); // Redirect to login page
   };
+  
 
   const navigateTo = (route) => {
     navigate(route);
@@ -38,76 +43,49 @@ const Sidebar = ({ activeScreen }) => {
     return location.pathname === route ? 'active' : '';
   };
 
-  const handleProfileClick = () => {
-    navigate("/profile");
-  };
-
-  const handleSettingsClick = () => {
-    navigate("/settings");
-  };
-
-  const handleNotificationsClick = () => {
-    alert("You have new notifications!");
-  };
-
   const sidebarItems = [
-    { name: 'Dashboard', icon: <FaTachometerAlt />, route: '/' },
-    { name: 'User Management', icon: <FaUsers />, route: '/user-management' },
-    { name: 'Session Monitoring', icon: <FaClock />, route: '/session' },
-    { name: 'Reports', icon: <FaChartBar />, route: '/reports' },
-    { name: 'System Settings', icon: <FaCogs />, route: '/settings' },
+    { name: 'Dashboard', icon: <FaTachometerAlt style={{ fontSize: '20px', color: "gray"}} />, route: '/' },
+    { name: 'User Management', icon: <FaUsers style={{ fontSize: '20px' }} />, route: '/user-management' },
+    { name: 'Session Monitoring', icon: <FaClock style={{ fontSize: '20px' }} />, route: '/session' },
+    { name: 'Reports', icon: <FaChartBar style={{ fontSize: '20px' }} />, route: '/reports' },
+    {name : 'Other', icon:null, route:null},
+    { name: 'Settings', icon: <FaCogs style={{ fontSize: '20px' }} />, route: '/settings' },
   ];
+  
 
   return (
     <div className="sidebar-container">
       {/* Navbar Section */}
       <nav className="navbar">
-        <div className="navbar-content">
-          <div className="screen-container">
-            <span className="screen-name">{activeScreen}</span>
-          </div>
-          <div className="icon-container">
-            <IoMdNotificationsOutline
-              size={28}
-              className="icon"
-              onClick={handleNotificationsClick}
-            />
-            <FiSettings
-              size={38}
-              className="icon"
-              onClick={handleSettingsClick}
-            />
-            <CgProfile
-              size={18}
-              className="profile-icon"
-              onClick={handleProfileClick}
-            />
-          </div>
-        </div>
+        <Navbar />
       </nav>
 
       {/* Sidebar Section */}
       <div className="sidebar">
+        {/* Logo at the top */}
         <div className="logo-container">
           <img src={Logo} alt="CodeTribe Logo" className="logo" />
         </div>
 
         <ul>
-          {sidebarItems.map((item) => (
-            <li
-              key={item.name}
-              onClick={() => navigateTo(item.route)}
-              className={getClassNames(item.route)}
-            >
-              {item.icon} {item.name}
-            </li>
-          ))}
-        </ul>
-
-        <button className="logout-btn" onClick={openLogoutModal}>
+        <li className="general-header">General</li>
+        <ul>
+  {sidebarItems.map((item) => (
+    <li
+      key={item.name}
+      onClick={item.route ? () => navigateTo(item.route) : null} // Only clickable if route exists
+      className={item.route ? getClassNames(item.route) : 'other-item'} // Apply other-item class if no route
+    >
+      {item.icon ? item.icon : null} {item.name}
+    </li>
+  ))}
+</ul>
+<button className="logout-btn" onClick={openLogoutModal}>
           <FaSignOutAlt className="icon" /> Logout
         </button>
+        </ul>
 
+        {/* Logout Modal */}
         <Modal
           isOpen={isLogoutModalOpen}
           onRequestClose={closeLogoutModal}

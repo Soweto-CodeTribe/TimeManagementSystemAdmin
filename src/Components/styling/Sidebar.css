@@ -1,29 +1,116 @@
+/* Sidebar Base Styles */
 .sidebar {
-    width: 230px; /* Slightly smaller sidebar */
-    height: 100%;
-    background-color: #ffffff;
-    color: rgba(0, 0, 0, 0.5);
-    padding: 15px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border-right: 1px solid rgba(0, 0, 0, 0.2);
-    font-family: Poppins, sans-serif;
-    font-size: 14px; /* Smaller font size */
-    font-weight: 400;
-  }
-  
-  /* Logo Styling */
-  .logo-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 50px; /* Space between logo and sidebar */
-  }
-  
+  width: 230px; /* Slightly smaller sidebar */
+  height: 100%;
+  background-color: #ffffff;
+  color: rgba(0, 0, 0, 0.5);
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-right: 1px solid rgba(0, 0, 0, 0.2);
+  font-family: Poppins, sans-serif;
+  font-size: 14px; /* Smaller font size */
+  font-weight: 400;
+}
+
+/* Logo Container at the Top */
+.logo-container {
+  display: flex;
+  position: absolute;
+  top: 1%;
+  padding: 20px 0;
+  justify-content: center;
+  z-index: 2000;
+  align-items: center;
+  margin-bottom: 20px; /* Adds spacing between logo and sidebar items */
+  width: 100%; /* Ensures logo takes up full width */
+}
+
+/* Logo Styling */
+.logo {
+  width: 120px; /* Adjust the logo size */
+  height: auto;
+}
+
+/* Sidebar List */
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  width: 100%;
+}
+
+/* General Section Header */
+.general-header {
+  font-size: 17.94px;
+  color: rgba(0, 0, 0, 0.3); /* 30% opacity */
+}
+
+
+/* Sidebar List Item Styling */
+.sidebar ul li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  /* margin: 10px 0; */
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.sidebar ul li:hover {
+  background-color: #e0e0e0;
+  color: #000;
+}
+
+/* Icon Styling */
+.icon {
+  width: 24px;
+  height: 24px;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+/* Logout Button */
+.logout-btn {
+  width: 100%;
+  color: #000;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+
+}
+/* For Non-clickable "Other" Item */
+.other-item {
+  color: rgba(0, 0, 0, 0.3); /* 30% opacity */
+  cursor: default; /* Prevent pointer cursor */
+  pointer-events: none; /* Disables hover and clicking */
+  font-size: 17.94px; /* Similar styling as other items */
+}
+
+.general-header {
+  font-size: 17.94px;
+  color: rgba(0, 0, 0, 0.3); /* 30% opacity */
+  cursor: default; /* Prevent pointer cursor */
+  pointer-events: none; /* Disables hover and clicking */
+  font-weight: 500; /* Make it stand out */
+}
+/* For Non-clickable "Other" Item */
+.other-item {
+  color: rgba(0, 0, 0, 0.3); /* 30% opacity */
+  cursor: default; /* Prevent pointer cursor */
+  pointer-events: none; /* Disables hover and clicking */
+  font-size: 17.94px; /* Similar styling as other items */
+  font-weight: 500; /* Make it stand out */
+}
+
+.logout-btn:hover {
+  background-color: #ddd;
+}
+
   .logo {
-    width: 120px; /* Adjust the logo size */
-    height: auto;
+    width: 285px; /* Adjust the logo size */
+    height: 70px;
   }
   
   /* Sidebar List */
@@ -51,8 +138,8 @@
   
   /* Icon Styling */
   .icon {
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 24px;
     color: rgba(0, 0, 0, 0.5);
   }
   
@@ -60,17 +147,12 @@
   .logout-btn {
     width: 100%;
     padding: 8px 12px;
-    margin-top: auto;
-    background-color: #f8f9fa;
+    margin-top: 8px;
+    background-color: transparent;
     border: none;
-    border-radius: 5px;
-    color: #000;
     cursor: pointer;
     font-size: 14px;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
   }
   
   .logout-btn:hover {
@@ -84,7 +166,7 @@
   left: 16.8%;
   width: 81.9%; /* Adjusted width to fit properly */
   height: 60px;
-  z-index: 2000;
+  z-index: 1000;
   background-color: #ffffff;
   color: rgba(0, 0, 0, 0.5);
   display: flex;
