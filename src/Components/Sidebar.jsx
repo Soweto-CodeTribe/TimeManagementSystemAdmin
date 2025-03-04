@@ -12,21 +12,28 @@ import Modal from 'react-modal';
 import "../Components/styling/Sidebar.css";
 import Logo from '../assets/CodeTribeImage.png';
 import Navbar from './Navbar';
+import { useDispatch } from 'react-redux';
+import { logout } from '../Slices/authSlice'; // Adjust the import path as needed
+
 
 // Set app element for accessibility
 Modal.setAppElement('#root');
 
+// Sidebar component
 const Sidebar = ({ activeScreen }) => {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-
+  const dispatch = useDispatch();
   const openLogoutModal = () => setIsLogoutModalOpen(true);
   const closeLogoutModal = () => setIsLogoutModalOpen(false);
+
+  // Handle logout
   const handleLogout = () => {
-    console.log("User logged out"); // Replace with actual logout logic
-    closeLogoutModal();
+    dispatch(logout()); // Dispatch logout to clear state
+    navigate("/login"); // Redirect to login page
   };
+  
 
   const navigateTo = (route) => {
     navigate(route);
