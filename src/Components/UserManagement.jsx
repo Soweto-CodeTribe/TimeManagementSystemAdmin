@@ -31,7 +31,7 @@ const UserManagement = () => {
       const userExists = users.some(user => user.email === newUser.email);
 
       if (!userExists) {
-        const updatedUsers = [...users, newUser];
+        const updatedUsers = [...users, { ...newUser, id: Date.now() }]; // Ensure to add unique ID
         setUsers(updatedUsers);
         localStorage.setItem('users', JSON.stringify(updatedUsers)); // Save to localStorage
       } else {
@@ -90,11 +90,13 @@ const UserManagement = () => {
   };
 
   const handleDeleteUser = () => {
-    const updatedUsers = users.filter(user => user.id !== selectedUser.id);
-    setUsers(updatedUsers);
-    setModalOpen(false);
-    setSelectedUser(null);
-    localStorage.setItem('users', JSON.stringify(updatedUsers)); // Update localStorage
+    if (selectedUser) {
+      const updatedUsers = users.filter(user => user.id !== selectedUser.id); // Correct filtering
+      setUsers(updatedUsers);
+      setModalOpen(false);
+      localStorage.setItem('users', JSON.stringify(updatedUsers)); // Update localStorage
+      setSelectedUser(null); // Clear the selected user
+    }
   };
 
   // Filter users based on search term
@@ -119,12 +121,13 @@ const UserManagement = () => {
         onView={() => console.log("View user", selectedUser)}
         onExportCSV={exportCSV}
         onExportPDF={() => exportPDF(selectedUser)}
-        onDelete={handleDeleteUser}
+        onDelete={handleDeleteUser} // Making sure the delete function is passed correctly
+        user={selectedUser} // Pass the selected user if you need to show in the modal
       />
 
       <div className="header">
         <div className="title-section">
-          <h1>User management</h1>
+          <h1>User Management</h1>
           <p className="subtitle">Manage your trainees and guests and control permissions here</p>
         </div>
         <button className="add-user-btn" onClick={() => navigate('/add-user')}>
@@ -199,6 +202,7 @@ const UserManagement = () => {
       </div>
 
       {/* Second Table Section for Guests */}
+      {/* The guest section and logic can remain similar to the user section */}
       <div className="table-section">
         <div className="table-header">
           <h2>

@@ -4,8 +4,21 @@ import { BiExport } from 'react-icons/bi'; // Export icon
 import { MdDelete, MdVisibility } from 'react-icons/md'; // View and delete icons
 import './styling/Modal.css'; // Import the CSS file
 
-const Modal = ({ isOpen, onClose, onView, onExportCSV, onExportPDF, onDelete }) => {
+const Modal = ({ 
+    isOpen, 
+    onClose, 
+    onView, 
+    onExportCSV, 
+    onExportPDF, 
+    onDelete, 
+    user // Pass the specific user here
+}) => {
     if (!isOpen) return null;
+
+    const handleDelete = () => {
+        // Call the onDelete function with the specific user's ID or details
+        onDelete(user.id); // Assuming each user has an 'id' property
+    };
 
     return (
         <div className="modal-overlay" onClick={onClose}>
@@ -27,7 +40,7 @@ const Modal = ({ isOpen, onClose, onView, onExportCSV, onExportPDF, onDelete }) 
                         <BiExport className="export-pdf-icon" />
                         <span>Export PDF</span>
                     </li>
-                    <li onClick={onDelete}>
+                    <li onClick={handleDelete}>
                         <MdDelete className="delete-icon" />
                         <span>Delete User</span>
                     </li>
