@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import './styling/UserManagement.css';
 import jsPDF from "jspdf"; 
 import Papa from 'papaparse';
-import Modal from './Modal'; // Import Modal
+import Modal from './Modal';
 
 const UserManagement = () => {
   const location = useLocation();
@@ -33,7 +33,7 @@ const UserManagement = () => {
       if (!userExists) {
         const updatedUsers = [...users, newUser];
         setUsers(updatedUsers);
-        localStorage.setItem('users', JSON.stringify(updatedUsers)); // Save to localStorage
+        localStorage.setItem('users', JSON.stringify(updatedUsers)); 
       } else {
         console.warn("User already exists");
       }

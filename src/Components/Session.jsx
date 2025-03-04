@@ -90,6 +90,7 @@ const SessionMonitoring = () => {
       const date = new Date(timeString);
       return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     } catch (error) {
+      console.error(error)
       return timeString; // Return as is if parsing fails
     }
   };
@@ -124,6 +125,7 @@ const SessionMonitoring = () => {
 
   return (
     <div className="session-container">
+      <h1>Session Monitoring</h1>
       <p className="session-description">
         Monitor check-ins, check-outs, and lunch breaks. Add time logs, update session attendance and activity.
       </p>
@@ -261,9 +263,9 @@ const SessionMonitoring = () => {
             {/* Pagination controls */}
             {!searchTerm && filteredReports.length > 0 && totalPages > 1 && (
               <div className="pagination-container">
-                <div className="pagination-info">
+                {/* <div className="pagination-info">
                   Showing {reports.length} of {totalItems} entries
-                </div>
+                </div> */}
                 <div className="pagination-controls">
                   <button 
                     className="pagination-arrow" 
