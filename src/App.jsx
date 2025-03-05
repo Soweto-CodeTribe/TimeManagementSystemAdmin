@@ -17,6 +17,7 @@ import Login from "./Components/Login";
 import AddUserForm from "./Components/AddUserForm";
 import ForgotPassword from "./Components/ForgotPassword";
 import Profile from "./Components/Profile";
+import Notifications from "./Components/Notifications";
 
 function App() {
   const location = useLocation();
@@ -112,6 +113,7 @@ function App() {
                       <Route path="/reports" element={<Reports />} />
                       <Route path="/settings" element={<SystemSettings />} />
                       <Route path="/profile" element={<Profile />} />
+                      <Route path="/notifications" element={<Notifications />} />
                       <Route path="/alerts" element={<Alerts />} />
                       <Route path="/audit-logs" element={<AuditLogs />} />
                       <Route path="/logout" element={<Logout />} />

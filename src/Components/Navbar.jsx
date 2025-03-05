@@ -21,7 +21,7 @@ const Navbar = ({ activeScreen }) => {
 
   // Handle notifications click
   const handleNotificationsClick = () => {
-    alert("You have new notifications!"); // Placeholder for notifications (can be expanded)
+    navigate("/notifications"); // Navigate to the settings page
   };
 
   return (
