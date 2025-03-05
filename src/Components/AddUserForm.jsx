@@ -12,6 +12,7 @@ const AddUserForm = () => {
         name: '',
         email: '',
         phone: '',
+        idNumber: '', // Corrected field name
         role: '',
         zipCode: '',
         surname: '',
@@ -28,17 +29,25 @@ const AddUserForm = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        // Check for missing fields
+        const missingFields = Object.keys(formData).filter(field => !formData[field]);
+        if (missingFields.length > 0) {
+            alert(`Please fill in all required fields: ${missingFields.join(', ')}`);
+            return; // Stop submission if fields are missing
+        }
+
         // Determine the endpoint based on the selected role
         const endpoint = formData.role === 'Trainee' 
-            ? '/api/trainee' 
+            ? '/api/trainees' 
             : formData.role === 'Facilitator' 
-            ? '/api/facilitator' 
-            : '/api/stakeholder';
+            ? '/api/facilitators' 
+            : '/api/stakeholder'; // Assume this is the endpoint for Stakeholder
 
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("authToken");
+        console.log("token: ", token);
 
         try {
-            // Send the POST request to the server
+            // Sending the correct data to the server
             const response = await axios.post(`${BASE_URL}${endpoint}`, formData, {
                 headers: {
                     Authorization: `Bearer ${token}` // Sending the JWT token for authentication
@@ -62,6 +71,7 @@ const AddUserForm = () => {
                     name: '',
                     email: '',
                     phone: '',
+                    idNumber: '', // Added reset for idNumber
                     role: '',
                     zipCode: '',
                     surname: '',
@@ -76,11 +86,24 @@ const AddUserForm = () => {
                 });
             }
         } catch (error) {
-            if (error.response && error.response.status === 400) {
-                alert('User already registered'); // Notify the user about existing user
+            console.error('Error saving user:', error);
+            if (error.response) {
+                console.error('Response data:', error.response.data);
+                if (error.response.status === 409) {
+                    alert('User already exists. Please use a different email or phone number.'); // Conflict
+                } else if (error.response.status === 400) {
+                    alert('Bad request. Please check the form data.'); // Missing fields
+                } else if (error.response.status === 401) {
+                    alert('Unauthorized! Please log in again.'); // Unauthorized
+                } else {
+                    alert('Failed to save user: ' + error.response.data.message); // Other errors
+                }
+            } else if (error.request) {
+                console.error('Request details:', error.request);
+                alert('No response from server. Please check your network.'); // No response
             } else {
-                console.error('Error saving user:', error);
-                alert('Failed to save user. Check the console for details.');
+                console.error('Error setting up the request:', error.message);
+                alert('Error: ' + error.message); // Other errors
             }
         }
     };
@@ -131,7 +154,6 @@ const AddUserForm = () => {
                     }}
                 >
                     <div>
-                        {/* Input fields are created for each attribute as needed */}
                         <div style={{ marginBottom: '15px' }}>
                             <label htmlFor="name">Name *</label>
                             <input
@@ -149,6 +171,17 @@ const AddUserForm = () => {
                                 type="email"
                                 name="email"
                                 value={formData.email}
+                                onChange={handleChange}
+                                required
+                                style={{ width: '100%', padding: '12px' }}
+                            />
+                        </div>
+                        <div style={{ marginBottom: '15px' }}>
+                            <label htmlFor="idNumber">ID Number *</label>
+                            <input
+                                type="text" // Corrected input type
+                                name="idNumber" // Updated name to match the state
+                                value={formData.idNumber} // Corrected to access the right property
                                 onChange={handleChange}
                                 required
                                 style={{ width: '100%', padding: '12px' }}
