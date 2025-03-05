@@ -1,11 +1,11 @@
 /* Navbar Base Styles */
 .navbar {
-  position: fixed;
+  position: relative;
   top: 0;
   left: 16.8%;
   width: 81.9%; /* Adjusted width to fit properly */
   height: 60px;
-  z-index: 2000;
+  /* z-index: 2000; */
   background-color: #ffffff;
   color: rgba(0, 0, 0, 0.5);
   display: flex;

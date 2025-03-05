@@ -64,23 +64,22 @@ export const loginFacilitator = createAsyncThunk(
   }
 );
 
-// Add a thunk to check if user is already logged in
 export const checkAuthStatus = createAsyncThunk(
   'auth/checkStatus',
   async (_, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('authToken');
       const userRole = localStorage.getItem('userRole') || 'user'; // Default to user if not set
-      
+
       if (!token) {
         return rejectWithValue('No token found');
       }
-      
+
       // Use different endpoints based on role
       const endpoint = userRole === 'facilitator' 
         ? 'https://timemanagementsystemserver.onrender.com/api/facilitators/verify'
         : 'https://timemanagementsystemserver.onrender.com/api/auth/verify';
-      
+
       const response = await fetch(endpoint, {
         method: 'GET',
         headers: {
@@ -88,9 +87,16 @@ export const checkAuthStatus = createAsyncThunk(
           'Content-Type': 'application/json',
         },
       });
-      
-      const data = await response.json();
-      
+
+      // Check if the response is a valid JSON
+      let data;
+      const contentType = response.headers.get('Content-Type');
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        data = await response.text(); // Get the raw response text in case of non-JSON response
+      }
+
       if (response.ok) {
         return { ...data, userRole }; // Include role in the response
       } else {
@@ -105,6 +111,7 @@ export const checkAuthStatus = createAsyncThunk(
     }
   }
 );
+
 
 const authSlice = createSlice({
   name: 'auth',
