@@ -41,7 +41,7 @@ const UserManagement = () => {
     const exportPDF = () => {
         const doc = new jsPDF();
         doc.text("User Management", 10, 10);
-        doc.text("Name, Email, Role, Last Check-In", 10, 20);
+        doc.text("fullName, Email, Role, Last Check-In", 10, 20);
         users.forEach((user, index) => {
             doc.text(`${user.name}, ${user.email}, ${user.role}, ${user.lastCheckIn || 'N/A'}`, 10, 30 + index * 10);
         });
@@ -64,7 +64,7 @@ const UserManagement = () => {
         Papa.parse(file, {
             complete: (results) => {
                 results.data.forEach((row, index) => {
-                    const { name, email, phone, status, lastCheckIn } = row;
+                    const { fullName, email, phone, status, lastCheckIn } = row;
 
                     const guestExists = guests.some(guest => guest.email === email);
                     if (!guestExists) {
@@ -169,7 +169,7 @@ const UserManagement = () => {
                     <table className="users-table">
                         <thead>
                             <tr>
-                                <th>Name</th>
+                                <th>fullName</th>
                                 <th>Email</th>
                                 <th>Role</th>
                                 <th>Last Check-in</th>
@@ -179,7 +179,7 @@ const UserManagement = () => {
                         <tbody>
                             {filteredUsers.map((user) => (
                                 <tr key={user.id}>
-                                    <td>{user.name}</td>
+                                    <td>{user.fullName}</td>
                                     <td>{user.email}</td>
                                     <td>{user.role}</td>
                                     <td>{user.lastCheckIn || 'N/A'}</td>
