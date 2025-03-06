@@ -7,12 +7,10 @@ import "./styling/Dashboard.css"
 
 const data = [
   { name: "M", value: 60 },
-  { name: "T", value: 40 },
-  { name: "W", value: 30 },
+  { name: "T", value: 35 },
+  { name: "W", value: 90 },
   { name: "T", value: 70 },
   { name: "F", value: 50 },
-  { name: "S", value: 40 },
-  { name: "S", value: 30 },
 ]
 
 const checkIns = [
@@ -75,7 +73,7 @@ function Dashboard() {
   return (
     <div className="dashboard">
       <div className="dashboard-header">
-        <h3>Howsit, {name}</h3>
+        <h3>Howzit, {name}</h3>
         <p>{currentDate}</p>
       </div>
 

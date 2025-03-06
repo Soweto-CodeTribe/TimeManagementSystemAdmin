@@ -240,6 +240,23 @@
   color: white;
   font-size: 1.25rem;
 }
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.visibility-icon {
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+  color: #777;
+  font-size: 18px;
+}
+
+.visibility-icon:hover {
+  color: #333;
+}
 
 /* Responsive Design */
 @media (max-width: 1024px) {
@@ -262,4 +279,3 @@
     display: none;
   }
 }
-
