@@ -11,7 +11,7 @@ const UserManagement = () => {
     const location = useLocation();
     const navigate = useNavigate();
     
-    const [users, setUsers] = useState([]); // State for all users (trainees and facilitators)
+    const [users, setUsers] = useState([]); // State for all users
     const [guests, setGuests] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [modalOpen, setModalOpen] = useState(false);
@@ -23,30 +23,24 @@ const UserManagement = () => {
             const token = localStorage.getItem("authToken");
             console.log("Authorization Token:", token); // Log the token for debugging
 
-            // Check if the token is present
             if (!token) {
                 setFeedbackMessage("No authorization token found. Please log in again.");
-                return; // Exit the function if no token is found
+                return;
             }
 
             try {
-                const headers = { Authorization: `Bearer ${token}` }; // Use the token in the headers
+                const headers = { Authorization: `Bearer ${token}` };
                 const traineesResponse = await axios.get("https://timemanagementsystemserver.onrender.com/api/trainees", { headers });
                 const facilitatorsResponse = await axios.get("https://timemanagementsystemserver.onrender.com/api/facilitators", { headers });
                 const stakeholdersResponse = await axios.get("https://timemanagementsystemserver.onrender.com/api/stakeholder/all", { headers });
-                // Log the responses to check available fields
-                console.log('stakeholders:', stakeholdersResponse.data);
-                console.log('Trainees:', traineesResponse.data);
-                console.log('Facilitators:', facilitatorsResponse.data);
 
-                // Combine fetched data into a single array
                 const allUsers = [
                     ...stakeholdersResponse.data.map(user => ({ fullName: user.fullName || user.name, email: user.email, role: "stakeholder" })),
                     ...traineesResponse.data.map(user => ({ fullName: user.fullName || user.name, email: user.email, role: "Trainee", lastCheckIn: user.lastCheckIn })),
                     ...facilitatorsResponse.data.map(user => ({ fullName: user.fullName || user.name, email: user.email, role: "Facilitator" }))
                 ];
-                setUsers(allUsers); // Set all users to state
-                setFeedbackMessage("Data fetched successfully."); // Feedback message
+                setUsers(allUsers);
+                setFeedbackMessage("Data fetched successfully.");
             } catch (error) {
                 console.error("Error fetching data from the server", error);
                 setFeedbackMessage("Error fetching data. Please try again later.");
@@ -57,7 +51,6 @@ const UserManagement = () => {
     }, []);
 
     useEffect(() => {
-        // Local storage manipulation only if there is new data from location state
         if (location.state && location.state.userData) {
             const newUser = location.state.userData;
             const userExists = users.some(user => user.email === newUser.email);
@@ -66,12 +59,11 @@ const UserManagement = () => {
                 setUsers(updatedUsers);
                 localStorage.setItem('users', JSON.stringify(updatedUsers));
             } else {
-                alert("User with this email already exists.");
+                alert("User Succesfully Added.");
             }
         }
     }, [location.state, users]);
 
-    // Functions to export PDF and CSV
     const exportPDF = () => {
         const doc = new jsPDF();
         doc.text("User Management", 10, 10);
@@ -93,21 +85,39 @@ const UserManagement = () => {
         document.body.removeChild(link);
     };
 
-    const handleFileChange = (event) => {
+    const handleFileChange = async (event) => {
         const file = event.target.files[0];
-        Papa.parse(file, {
-            complete: (results) => {
-                results.data.forEach((row, index) => {
-                    const { fullName, email, phone, status, lastCheckIn } = row;
+        if (!file) return;
 
-                    const guestExists = guests.some(guest => guest.email === email);
-                    if (!guestExists) {
-                        const newGuest = { id: guests.length + index + 1, name: fullName, email, phone, status, lastCheckIn };
-                        setGuests((prevGuests) => [...prevGuests, newGuest]);
+        // Parse CSV file locally
+        Papa.parse(file, {
+            complete: async (results) => {
+                // Prepare data for sending to the server
+                const csvDataToUpload = results.data.map(row => ({
+                    fullName: row.fullName,
+                    email: row.email,
+                    phone: row.phone,
+                    status: row.status,
+                    lastCheckIn: row.lastCheckIn
+                }));
+
+                // Upload CSV data to the server
+                try {
+                    const token = localStorage.getItem("authToken");
+                    const headers = { Authorization: `Bearer ${token}` };
+
+                    const response = await axios.post("https://timemanagementsystemserver.onrender.com/api/csv/csv-upload", csvDataToUpload, { headers });
+
+                    if (response.status === 200) {
+                        setGuests((prevGuests) => [...prevGuests, ...csvDataToUpload]);
+                        setFeedbackMessage("CSV uploaded successfully.");
                     } else {
-                        console.warn("Guest already exists");
+                        setFeedbackMessage("Failed to upload CSV. Please try again.");
                     }
-                });
+                } catch (error) {
+                    console.error("Error uploading CSV file:", error);
+                    setFeedbackMessage("Error uploading CSV. Please check the console for more details.");
+                }
             },
             header: true,
             skipEmptyLines: true,
@@ -141,6 +151,26 @@ const UserManagement = () => {
         (guest.phone && guest.phone.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
+    // Function to export trainees CSV from server
+    const exportTraineesCSV = async () => {
+        const token = localStorage.getItem("authToken");
+        const headers = { Authorization: `Bearer ${token}` };
+
+        try {
+            const response = await axios.get("http://localhost:8020/api/csv/export-trainees", { headers, responseType: 'blob' });
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'trainees.csv'); // Set file name for download
+            document.body.appendChild(link);
+            link.click();
+            setFeedbackMessage("Trainees CSV exported successfully.");
+        } catch (error) {
+            console.error("Error exporting trainees CSV:", error);
+            setFeedbackMessage("Failed to export trainees CSV. Please try again.");
+        }
+    };
+
     return (
         <div className="user-management-container">
             <Modal
@@ -157,7 +187,7 @@ const UserManagement = () => {
                 <div className="title-section">
                     <h1>User Management</h1>
                     <p className="subtitle">Manage your trainees, facilitators, and guests here</p>
-                    {feedbackMessage && <p className="feedback-message">{feedbackMessage}</p>} {/* Display feedback message */}
+                    {feedbackMessage && <p className="feedback-message">{feedbackMessage}</p>}
                 </div>
                 <button className="add-user-btn" onClick={() => navigate('/add-user')}>
                     <Plus size={16} />
@@ -165,7 +195,6 @@ const UserManagement = () => {
                 </button>
             </div>
 
-            {/* Training and Facilitators Table */}
             <div className="table-section">
                 <div className="table-header">
                     <h2>
@@ -231,7 +260,6 @@ const UserManagement = () => {
                 </div>
             </div>
 
-            {/* Guests Table */}
             <div className="table-section">
                 <div className="table-header">
                     <h2>
@@ -265,6 +293,10 @@ const UserManagement = () => {
                             <Upload size={14} />
                             <span>Import CSV</span>
                         </label>
+                        <button className="export-btn" onClick={exportTraineesCSV}>
+                            <Download size={14} />
+                            <span>Export Trainees CSV</span>
+                        </button>
                     </div>
                 </div>
                 <div className="table-container">
