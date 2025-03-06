@@ -8,10 +8,12 @@ const AddUserForm = () => {
     const [currentScreen, setCurrentScreen] = useState('basic-info');
 
     // State for basic info
-    const [name, setName] = useState('');
+    const [fullName, setFullName] = useState(''); // Updated state variable
     const [surname, setSurname] = useState('');
     const [email, setEmail] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
+    const [idNumber, setIdNumber] = useState(''); // State for ID Number
+    const [location, setLocation] = useState(''); // State for Location
     const [role, setRole] = useState(''); // State for user role
 
     // State for address
@@ -32,13 +34,15 @@ const AddUserForm = () => {
 
         // Prepare the user data to send
         const userData = { 
-            name, 
+            fullName, // Updated to match the new state variable name
             surname, 
             email, 
             phoneNumber, 
+            idNumber, // Include ID Number in the user data
             streetAddress, 
             city, 
-            postalCode 
+            postalCode,
+            location // Include Location in the user data
         };
 
         console.log(userData); // Log the user data being sent
@@ -188,16 +192,16 @@ const AddUserForm = () => {
 
             <form onSubmit={(e) => e.preventDefault()}>
                 <div className="form-group">
-                    <label htmlFor="fullName">Full name</label>
+                    <label htmlFor="fullName">Full Name</label> {/* Updated Label */}
                     <input 
                         type="text" 
                         id="fullName" 
                         placeholder="Enter full name" 
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)} {/* Updated State Function */}
                     />
                 </div>
-                
+
                 <div className="form-group">
                     <label htmlFor="surname">Surname</label>
                     <input 
@@ -208,7 +212,7 @@ const AddUserForm = () => {
                         onChange={(e) => setSurname(e.target.value)}
                     />
                 </div>
-                
+
                 <div className="form-group">
                     <label htmlFor="email">Email</label>
                     <input 
@@ -219,7 +223,7 @@ const AddUserForm = () => {
                         onChange={(e) => setEmail(e.target.value)}
                     />
                 </div>
-                
+
                 <div className="form-group">
                     <label htmlFor="phoneNumber">Phone number</label>
                     <input 
@@ -230,7 +234,33 @@ const AddUserForm = () => {
                         onChange={(e) => setPhoneNumber(e.target.value)}
                     />
                 </div>
-                
+
+                {/* New ID Number input field */}
+                <div className="form-group">
+                    <label htmlFor="idNumber">ID Number</label>
+                    <input 
+                        type="text" 
+                        id="idNumber" 
+                        placeholder="Enter ID Number" 
+                        value={idNumber}
+                        onChange={(e) => setIdNumber(e.target.value)}
+                    />
+                </div>
+
+                {/* Conditional Location input field */}
+                {(role === 'Trainee' || role === 'Facilitator') && (
+                    <div className="form-group">
+                        <label htmlFor="location">Location</label>
+                        <input 
+                            type="text" 
+                            id="location" 
+                            placeholder="Enter Location" 
+                            value={location}
+                            onChange={(e) => setLocation(e.target.value)}
+                        />
+                    </div>
+                )}
+
                 <div className="form-group">
                     <label htmlFor="role">Role</label>
                     <select 
@@ -244,7 +274,7 @@ const AddUserForm = () => {
                         <option value="Stakeholder">Stakeholder</option>
                     </select>
                 </div>
-                
+
                 <button type="button" onClick={handleContinue}>Continue</button>
             </form>
 
