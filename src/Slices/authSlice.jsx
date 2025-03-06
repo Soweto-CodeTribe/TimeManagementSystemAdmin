@@ -19,7 +19,7 @@ export const loginUser = createAsyncThunk(
         // Store token in localStorage for persistence across page refreshes
         if (data.token) {
           localStorage.setItem('authToken', data.token);
-          localStorage.setItem('userRole', 'user'); // Store role information
+          localStorage.setItem('role', data.facilitator?.role || 'user');
         }
         return data; // Return the data to be stored in the state
       } else {
@@ -37,7 +37,7 @@ export const loginFacilitator = createAsyncThunk(
   'auth/loginFacilitator',
   async ({ email, password }, { rejectWithValue }) => {
     try {
-      const response = await fetch('https://timemanagementsystemserver.onrender.com/api/facilitators/login', {
+      const response = await fetch('https://timemanagementsystemserver.onrender.com/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -51,7 +51,7 @@ export const loginFacilitator = createAsyncThunk(
         // Store token and role in localStorage
         if (data.token) {
           localStorage.setItem('authToken', data.token);
-          localStorage.setItem('userRole', 'facilitator'); // Store role information
+          localStorage.setItem('role', data.facilitator?.role || 'facilitator');
         }
         return data;
       } else {
@@ -69,15 +69,15 @@ export const checkAuthStatus = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('authToken');
-      const userRole = localStorage.getItem('userRole') || 'user'; // Default to user if not set
+      const role = localStorage.getItem('role'); // Default to user if not set
 
       if (!token) {
         return rejectWithValue('No token found');
       }
 
-      // Use different endpoints based on role
-      const endpoint = userRole === 'facilitator' 
-        ? 'https://timemanagementsystemserver.onrender.com/api/facilitators/verify'
+      // Use the correct verification endpoint based on role
+      const endpoint = role === 'facilitator' 
+        ? 'https://timemanagementsystemserver.onrender.com/api/auth/verify'
         : 'https://timemanagementsystemserver.onrender.com/api/auth/verify';
 
       const response = await fetch(endpoint, {
@@ -98,11 +98,11 @@ export const checkAuthStatus = createAsyncThunk(
       }
 
       if (response.ok) {
-        return { ...data, userRole }; // Include role in the response
+        return { ...data, role }; // Include role in the response
       } else {
         // Token is invalid, clear it
         localStorage.removeItem('authToken');
-        localStorage.removeItem('userRole');
+        localStorage.removeItem('role');
         return rejectWithValue(data.message || 'Session expired');
       }
     } catch (error) {
@@ -119,7 +119,7 @@ const authSlice = createSlice({
     isAuthenticated: false,
     user: null,
     token: localStorage.getItem('authToken') || null,
-    userRole: localStorage.getItem('userRole') || null, // Add role to state
+    role: localStorage.getItem('role') || null, // Add role to state
     isLoading: false,
     error: null,
   },
@@ -128,9 +128,9 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.user = null;
       state.token = null;
-      state.userRole = null;
+      state.role = null;
       localStorage.removeItem('authToken');
-      localStorage.removeItem('userRole');
+      localStorage.removeItem('role');
     },
     clearError: (state) => {
       state.error = null;
@@ -146,7 +146,7 @@ const authSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isAuthenticated = true;
-        state.userRole = 'user';
+        state.role = action.payload.facilitator?.role || 'user';
         state.error = null;
         
         // Store user data and token properly
@@ -177,7 +177,7 @@ const authSlice = createSlice({
       .addCase(loginFacilitator.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isAuthenticated = true;
-        state.userRole = 'facilitator';
+        state.role = action.payload.facilitator?.role || 'facilitator';
         state.error = null;
         
         // Store facilitator data and token
@@ -208,7 +208,7 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.isAuthenticated = true;
         state.user = action.payload.user || action.payload;
-        state.userRole = action.payload.userRole || 'user';
+        state.role = action.payload.role || 'Facilitator';
         state.error = null;
       })
       .addCase(checkAuthStatus.rejected, (state) => {
@@ -216,7 +216,7 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.user = null;
         state.token = null;
-        state.userRole = null;
+        state.role = null;
         // Don't set error here to avoid showing error messages when just checking status
       });
   },

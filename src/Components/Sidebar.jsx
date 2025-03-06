@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   FaTachometerAlt,
@@ -7,14 +7,15 @@ import {
   FaChartBar,
   FaCogs,
   FaSignOutAlt,
+  FaBars,
+  FaTimes
 } from 'react-icons/fa';
 import Modal from 'react-modal';
-import "../Components/styling/Sidebar.css";
-import Logo from '../assets/CodeTribeImage.png';
-import Navbar from './Navbar';
 import { useDispatch } from 'react-redux';
 import { logout } from '../Slices/authSlice'; // Adjust the import path as needed
-
+import Logo from '../assets/CodeTribeImage.png';
+import Navbar from './Navbar';
+import "./styling/Sidebar.css";
 
 // Set app element for accessibility
 Modal.setAppElement('#root');
@@ -22,11 +23,19 @@ Modal.setAppElement('#root');
 // Sidebar component
 const Sidebar = ({ activeScreen }) => {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
+  
   const openLogoutModal = () => setIsLogoutModalOpen(true);
   const closeLogoutModal = () => setIsLogoutModalOpen(false);
+  const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]); // Updated to only depend on pathname
 
   // Handle logout
   const handleLogout = () => {
@@ -34,7 +43,6 @@ const Sidebar = ({ activeScreen }) => {
     navigate("/login"); // Redirect to login page
   };
   
-
   const navigateTo = (route) => {
     navigate(route);
   };
@@ -52,37 +60,42 @@ const Sidebar = ({ activeScreen }) => {
     { name: 'Settings', icon: <FaCogs style={{ fontSize: '20px' }} />, route: '/settings' },
   ];
   
-
   return (
     <div className="sidebar-container">
+      {/* Mobile Menu Toggle Button */}
+      <div className="mobile-toggle" onClick={toggleMobileMenu}>
+        {isMobileMenuOpen ? <FaTimes /> : <FaBars />}
+      </div>
+
       {/* Navbar Section */}
       <nav className="navbar">
         <Navbar />
       </nav>
 
       {/* Sidebar Section */}
-      <div className="sidebar">
+      <div className={`sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
         {/* Logo at the top */}
         <div className="logo-container">
-          <img src={Logo} alt="CodeTribe Logo" className="logo" />
+          <img src={Logo || "/placeholder.svg"} alt="CodeTribe Logo" className="logo" />
         </div>
 
         <ul>
-        <li className="general-header">General</li>
-        <ul>
-  {sidebarItems.map((item) => (
-    <li
-      key={item.name}
-      onClick={item.route ? () => navigateTo(item.route) : null} // Only clickable if route exists
-      className={item.route ? getClassNames(item.route) : 'other-item'} // Apply other-item class if no route
-    >
-      {item.icon ? item.icon : null} {item.name}
-    </li>
-  ))}
-</ul>
-<button className="logout-btn" onClick={openLogoutModal}>
-          <FaSignOutAlt className="icon" /> Logout
-        </button>
+        
+          <ul>
+          <li className="general-header">General</li>
+            {sidebarItems.map((item) => (
+              <li
+                key={item.name}
+                onClick={item.route ? () => navigateTo(item.route) : null} // Only clickable if route exists
+                className={item.route ? getClassNames(item.route) : 'other-item'} // Apply other-item class if no route
+              >
+                {item.icon ? item.icon : null} {item.name}
+              </li>
+            ))}
+          </ul>
+          <button className="logout-btn" onClick={openLogoutModal}>
+            <FaSignOutAlt className="icon" /> Logout
+          </button>
         </ul>
 
         {/* Logout Modal */}

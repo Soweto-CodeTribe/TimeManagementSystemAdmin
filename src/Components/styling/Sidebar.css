@@ -12,6 +12,29 @@
   font-family: Poppins, sans-serif;
   font-size: 14px; /* Smaller font size */
   font-weight: 400;
+  position: fixed;
+  left: 50;
+  top: 0;
+  z-index: 1000;
+  transition: transform 0.3s ease;
+}
+
+/* Mobile Toggle Button */
+.mobile-toggle {
+  display: none;
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  z-index: 1100;
+  font-size: 24px;
+  cursor: pointer;
+  color: #333;
+  width: 40px;
+  height: 40px;
+  /* border-radius: 50%; */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Logo Container at the Top */
@@ -38,6 +61,7 @@
   list-style: none;
   padding: 0;
   width: 100%;
+  margin-top: 30px; /* Add space for the logo */
 }
 
 /* General Section Header */
@@ -46,13 +70,12 @@
   color: rgba(0, 0, 0, 0.3); /* 30% opacity */
 }
 
-
 /* Sidebar List Item Styling */
 .sidebar ul li {
   display: flex;
   align-items: center;
   gap: 8px;
-  /* margin: 10px 0; */
+  margin: 10px 0;
   padding: 8px 12px;
   border-radius: 5px;
   cursor: pointer;
@@ -78,8 +101,14 @@
   cursor: pointer;
   font-size: 14px;
   display: flex;
-
+  padding: 8px 12px;
+  margin-top: 8px;
+  background-color: transparent;
+  border: none;
+  align-items: center;
+  gap: 8px;
 }
+
 /* For Non-clickable "Other" Item */
 .other-item {
   color: rgba(0, 0, 0, 0.3); /* 30% opacity */
@@ -95,6 +124,7 @@
   pointer-events: none; /* Disables hover and clicking */
   font-weight: 500; /* Make it stand out */
 }
+
 /* For Non-clickable "Other" Item */
 .other-item {
   color: rgba(0, 0, 0, 0.3); /* 30% opacity */
@@ -108,187 +138,205 @@
   background-color: #ddd;
 }
 
-  .logo {
-    width: 285px; /* Adjust the logo size */
-    height: 70px;
-  }
-  
-  /* Sidebar List */
-  .sidebar ul {
-    list-style: none;
-    padding: 0;
-    width: 100%;
-  }
-  
-  .sidebar ul li {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 10px 0;
-    padding: 8px 12px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
-  }
-  
-  .sidebar ul li:hover {
-    background-color: #e0e0e0;
-    color: #000;
-  }
-  
-  /* Icon Styling */
-  .icon {
-    width: 24px;
-    height: 24px;
-    color: rgba(0, 0, 0, 0.5);
-  }
-  
-  /* Logout Button */
-  .logout-btn {
-    width: 100%;
-    padding: 8px 12px;
-    margin-top: 8px;
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    display: flex;
-  }
-  
-  .logout-btn:hover {
-    background-color: #ddd;
-
-  }
-  /* Navbar Base Styles */
+/* Navbar Base Styles */
 .navbar {
   position: fixed;
   top: 0;
-  left: 16.8%;
-  width: 81.9%; /* Adjusted width to fit properly */
+  left: 230px; /* Match sidebar width */
+  width: calc(100% - 230px); /* Adjusted width to fit properly */
   height: 60px;
-  z-index: 1000;
   background-color: #ffffff;
   color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 20px;
+  padding: 20px 20px;
   font-size: 24px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  /* box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); */
   border-bottom: 1px solid rgba(0, 0, 0, 0.2);
   flex-shrink: 0;
-  border-left: 1px solid rgba(0, 0, 0, 0.2);
+  z-index: 900;
+  transition: left 0.3s ease, width 0.3s ease;
 }
 
-/* Navbar Content */
-.navbar-content {
+/* Sidebar Container */
+.sidebar-container {
   display: flex;
-  justify-content: space-between;
+  height: 100vh;
+  position: relative;
+}
+
+/* Content area adjustment */
+.content {
+  margin-left: 230px;
+  width: calc(100% - 230px);
+  transition: margin-left 0.3s ease, width 0.3s ease;
+}
+
+/* Modal Styles */
+.modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
   align-items: center;
-  width: 100%;
+  justify-content: center;
+  z-index: 1200;
 }
 
-/* Screen Name on the Left */
-.screen-container {
-  flex: 1; /* Allows it to push icons to the right */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
 }
 
-.screen-name {
-  font-size: 20px;
-  font-weight: bold;
+.confirm-btn, .cancel-btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
+
+.confirm-btn {
+  background-color: #f44336;
+  color: white;
+}
+
+.cancel-btn {
+  background-color: #e0e0e0;
   color: #333;
-  white-space: nowrap; /* Prevents text from wrapping */
-  overflow: hidden;
-  text-overflow: ellipsis; /* Adds an ellipsis if text overflows */
 }
 
-/* Icons on the Right */
-.icon-container {
-  display: flex;
-  align-items: center;
-  gap: 20px; /* Adds space between icons */
-}
-
-/* Profile Icon */
-.profile-icon {
-  cursor: pointer;
-}
-/* Hamburger Menu Icon Styling */
-.hamburger-icon {
-  display: none; /* Initially hidden */
-  cursor: pointer;
-}
-
-/* Mobile Responsiveness */
-@media (max-width: 768px) {
-  .hamburger-icon {
-    display: block; /* Display hamburger icon on small screens */
-  }
-}
-
-
-
-/* Mobile Responsiveness */
+/* Responsive Styles */
 @media (max-width: 1024px) {
+  .sidebar {
+    width: 200px;
+  }
+  
   .navbar {
-    width: 100%; /* Full width for tablet screens */
-    left: 0; /* Remove left offset */
+    left: 200px;
+    width: calc(100% - 200px);
   }
-
-  .navbar-content {
-    justify-content: space-between;
+  
+  .content {
+    margin-left: 200px;
+    width: calc(100% - 200px);
   }
-
-  .screen-name {
-    font-size: 18px; /* Adjust screen name font size for tablets */
-  }
-
-  .icon-container {
-    gap: 10px; /* Reduce space between icons on smaller screens */
-  }
-
-  .profile-icon {
-    font-size: 20px; /* Adjust profile icon size */
+  
+  .logo {
+    width: 100px;
   }
 }
-
-/* Mobile Portrait Responsiveness */
+@media (min-width: 769px) {
+  .mobile-toggle {
+    display: none !important;
+  }
+}
 @media (max-width: 768px) {
+  .mobile-toggle {
+    display: flex;
+  }
+  
+  .sidebar {
+    transform: translateX(-100%);
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+  
   .navbar {
-    width: 100%;
     left: 0;
-    padding: 0 10px; /* Adjust padding for mobile screens */
+    width: 100%;
   }
-
-  .screen-name {
-    font-size: 16px; /* Adjust font size for mobile */
-    max-width: 60%; /* Allow screen name to be more flexible */
-  }
-
-  .icon-container {
-    gap: 8px; /* Further reduce space between icons on mobile */
-  }
-
-  .profile-icon {
-    font-size: 18px; /* Reduce profile icon size */
+  
+  .content {
+    margin-left: 0;
+    width: 100%;
   }
 }
 
-/* Very Small Mobile Screens */
 @media (max-width: 480px) {
-  .navbar {
-    padding: 0 5px; /* Even smaller padding for very small screens */
+  .sidebar {
+    width: 80%;
+    max-width: 280px;
   }
-
-  .screen-name {
-    font-size: 14px; /* Smaller font size on very small screens */
+  
+  .logo {
+    width: 80px;
   }
-
-  .icon-container {
-    gap: 5px; /* Minimal gap between icons on small screens */
+  
+  .sidebar ul li, .logout-btn {
+    font-size: 13px;
   }
+  
+  .general-header, .other-item {
+    font-size: 15px;
+  }
+}
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .modal {
+    padding: 12px 8px; /* Slightly smaller padding on medium screens */
+  }
+}
 
-  .profile-icon {
-    font-size: 16px; /* Smaller profile icon */
+@media (max-width: 768px) {
+  .modal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    border-radius: 8px;
+    max-width: 200px;
+    width: 90%;
+    font-family: Poppings;
+    font-weight: 500;
+    font-style: normal;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  .confirm-btn, .cancel-btn {
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+  }
+  .confirm-btn, .cancel-btn {
+    padding: 4px 16px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal {
+    padding: 8px 10px; /* Minimal padding on very small screens */
+    width: 90%;
+  }
+  .confirm-btn, .cancel-btn {
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
   }
 }
