@@ -11,7 +11,7 @@ const UserManagement = () => {
     const location = useLocation();
     const navigate = useNavigate();
     
-    const [users, setUsers] = useState([]); // Initialize with an empty array
+    const [users, setUsers] = useState([]); // State for all users (trainees and facilitators)
     const [guests, setGuests] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [modalOpen, setModalOpen] = useState(false);
@@ -33,13 +33,23 @@ const UserManagement = () => {
                 const headers = { Authorization: `Bearer ${token}` }; // Use the token in the headers
                 const traineesResponse = await axios.get("https://timemanagementsystemserver.onrender.com/api/trainees", { headers });
                 const facilitatorsResponse = await axios.get("https://timemanagementsystemserver.onrender.com/api/facilitators", { headers });
-                const stakeholdersResponse = await axios.get("https://timemanagementsystemserver.onrender.com/api/stakeholder", { headers });
-                
-                // Combine fetched data with stakeholders, if needed
-                const allUsers = [...traineesResponse.data, ...facilitatorsResponse.data, ...stakeholdersResponse.data];
-                setUsers(allUsers);
+                const stakeholdersResponse = await axios.get("https://timemanagementsystemserver.onrender.com/api/stakeholder/all", { headers });
+                // Log the responses to check available fields
+                console.log('stakeholders:', stakeholdersResponse.data);
+                console.log('Trainees:', traineesResponse.data);
+                console.log('Facilitators:', facilitatorsResponse.data);
+
+                // Combine fetched data into a single array
+                const allUsers = [
+                    ...stakeholdersResponse.data.map(user => ({ fullName: user.fullName || user.name, email: user.email, role: "stakeholder" })),
+                    ...traineesResponse.data.map(user => ({ fullName: user.fullName || user.name, email: user.email, role: "Trainee", lastCheckIn: user.lastCheckIn })),
+                    ...facilitatorsResponse.data.map(user => ({ fullName: user.fullName || user.name, email: user.email, role: "Facilitator" }))
+                ];
+                setUsers(allUsers); // Set all users to state
+                setFeedbackMessage("Data fetched successfully."); // Feedback message
             } catch (error) {
                 console.error("Error fetching data from the server", error);
+                setFeedbackMessage("Error fetching data. Please try again later.");
             }
         };
 
@@ -61,18 +71,19 @@ const UserManagement = () => {
         }
     }, [location.state, users]);
 
+    // Functions to export PDF and CSV
     const exportPDF = () => {
         const doc = new jsPDF();
         doc.text("User Management", 10, 10);
-        doc.text("fullName, Email, Role, Last Check-In", 10, 20);
+        doc.text("Full Name, Email, Role, Last Check-In", 10, 20);
         users.forEach((user, index) => {
-            doc.text(`${user.name}, ${user.email}, ${user.role}, ${user.lastCheckIn || 'N/A'}`, 10, 30 + index * 10);
+            doc.text(`${user.fullName}, ${user.email}, ${user.role}, ${user.lastCheckIn || 'N/A'}`, 10, 30 + index * 10);
         });
         doc.save("UserManagement.pdf");
     };
 
     const exportCSV = () => {
-        const csvContent = users.map(user => `${user.name},${user.email},${user.role},${user.lastCheckIn || 'N/A'}`).join('\n');
+        const csvContent = users.map(user => `${user.fullName},${user.email},${user.role},${user.lastCheckIn || 'N/A'}`).join('\n');
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
@@ -119,7 +130,7 @@ const UserManagement = () => {
     };
 
     const filteredUsers = users.filter(user =>
-        (user.name && user.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (user.fullName && user.fullName.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (user.role && user.role.toLowerCase().includes(searchTerm.toLowerCase()))
     );
@@ -145,7 +156,7 @@ const UserManagement = () => {
             <div className="header">
                 <div className="title-section">
                     <h1>User Management</h1>
-                    <p className="subtitle">Manage your trainees and guests and control permissions here</p>
+                    <p className="subtitle">Manage your trainees, facilitators, and guests here</p>
                     {feedbackMessage && <p className="feedback-message">{feedbackMessage}</p>} {/* Display feedback message */}
                 </div>
                 <button className="add-user-btn" onClick={() => navigate('/add-user')}>
@@ -154,10 +165,11 @@ const UserManagement = () => {
                 </button>
             </div>
 
+            {/* Training and Facilitators Table */}
             <div className="table-section">
                 <div className="table-header">
                     <h2>
-                        Trainees <span className="count">{filteredUsers.length}</span>
+                        Trainees and Facilitators <span className="count">{filteredUsers.length}</span>
                     </h2>
                 </div>
                 <div className="table-controls">
@@ -193,7 +205,7 @@ const UserManagement = () => {
                     <table className="users-table">
                         <thead>
                             <tr>
-                                <th>fullName</th>
+                                <th>Full Name</th>
                                 <th>Email</th>
                                 <th>Role</th>
                                 <th>Last Check-in</th>
@@ -219,7 +231,7 @@ const UserManagement = () => {
                 </div>
             </div>
 
-            {/* Second Table Section for Guests */}
+            {/* Guests Table */}
             <div className="table-section">
                 <div className="table-header">
                     <h2>
