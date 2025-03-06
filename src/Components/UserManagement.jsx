@@ -4,36 +4,59 @@ import { useLocation, useNavigate } from "react-router-dom";
 import './styling/UserManagement.css';
 import jsPDF from "jspdf"; 
 import Papa from 'papaparse';
-import Modal from './Modal'; // Import Modal
+import Modal from './Modal';
+import axios from 'axios'; // Import Axios
 
 const UserManagement = () => {
     const location = useLocation();
     const navigate = useNavigate();
     
-    // Get initial users from local storage
-    const getInitialUsers = () => {
-        const storedUsers = localStorage.getItem('users');
-        return storedUsers ? JSON.parse(storedUsers) : [];
-    };
-
-    const [users, setUsers] = useState(getInitialUsers());
+    const [users, setUsers] = useState([]); // Initialize with an empty array
     const [guests, setGuests] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
+    const [feedbackMessage, setFeedbackMessage] = useState(""); // State for feedback messages
 
     useEffect(() => {
+        const fetchData = async () => {
+            const token = localStorage.getItem("authToken");
+            console.log("Authorization Token:", token); // Log the token for debugging
+
+            // Check if the token is present
+            if (!token) {
+                setFeedbackMessage("No authorization token found. Please log in again.");
+                return; // Exit the function if no token is found
+            }
+
+            try {
+                const headers = { Authorization: `Bearer ${token}` }; // Use the token in the headers
+                const traineesResponse = await axios.get("https://timemanagementsystemserver.onrender.com/api/trainees", { headers });
+                const facilitatorsResponse = await axios.get("https://timemanagementsystemserver.onrender.com/api/facilitators", { headers });
+                const stakeholdersResponse = await axios.get("https://timemanagementsystemserver.onrender.com/api/stakeholder", { headers });
+                
+                // Combine fetched data with stakeholders, if needed
+                const allUsers = [...traineesResponse.data, ...facilitatorsResponse.data, ...stakeholdersResponse.data];
+                setUsers(allUsers);
+            } catch (error) {
+                console.error("Error fetching data from the server", error);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    useEffect(() => {
+        // Local storage manipulation only if there is new data from location state
         if (location.state && location.state.userData) {
             const newUser = location.state.userData;
-            
-            // Ensure that the new user's role is added
             const userExists = users.some(user => user.email === newUser.email);
             if (!userExists) {
-                const updatedUsers = [...users, { ...newUser, id: Date.now(), lastCheckIn: null }]; // Last check-in set to null
+                const updatedUsers = [...users, { ...newUser, id: Date.now(), lastCheckIn: null }];
                 setUsers(updatedUsers);
                 localStorage.setItem('users', JSON.stringify(updatedUsers));
             } else {
-                alert("User with this email already exists."); // Provide user feedback
+                alert("User with this email already exists.");
             }
         }
     }, [location.state, users]);
@@ -68,7 +91,7 @@ const UserManagement = () => {
 
                     const guestExists = guests.some(guest => guest.email === email);
                     if (!guestExists) {
-                        const newGuest = { id: guests.length + index + 1, name, email, phone, status, lastCheckIn };
+                        const newGuest = { id: guests.length + index + 1, name: fullName, email, phone, status, lastCheckIn };
                         setGuests((prevGuests) => [...prevGuests, newGuest]);
                     } else {
                         console.warn("Guest already exists");
@@ -123,6 +146,7 @@ const UserManagement = () => {
                 <div className="title-section">
                     <h1>User Management</h1>
                     <p className="subtitle">Manage your trainees and guests and control permissions here</p>
+                    {feedbackMessage && <p className="feedback-message">{feedbackMessage}</p>} {/* Display feedback message */}
                 </div>
                 <button className="add-user-btn" onClick={() => navigate('/add-user')}>
                     <Plus size={16} />
