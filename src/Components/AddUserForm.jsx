@@ -8,7 +8,7 @@ const AddUserForm = () => {
     const [currentScreen, setCurrentScreen] = useState('basic-info');
 
     // State for basic info
-    const [fullName, setFullName] = useState(''); // Updated state variable
+    const [fullName, setFullName] = useState('');
     const [surname, setSurname] = useState('');
     const [email, setEmail] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
@@ -17,7 +17,7 @@ const AddUserForm = () => {
     const [role, setRole] = useState(''); // State for user role
 
     // State for address
-    const [streetAddress, setStreetAddress] = useState('');
+    const [street, setStreet] = useState('');
     const [city, setCity] = useState('');
     const [postalCode, setPostalCode] = useState('');
     const [isConfirmed, setIsConfirmed] = useState(false);
@@ -34,22 +34,31 @@ const AddUserForm = () => {
 
         // Prepare the user data to send
         const userData = { 
-            fullName, // Updated to match the new state variable name
+            fullName, 
             surname, 
             email, 
             phoneNumber, 
-            idNumber, // Include ID Number in the user data
-            streetAddress, 
+            idNumber, 
+            street, 
             city, 
             postalCode,
-            location // Include Location in the user data
+            location 
         };
 
-        console.log(userData); // Log the user data being sent
+        console.log("User Data:", userData); // Log the user data being sent
+
+        const token = localStorage.getItem("authToken");
+        console.log("Authorization Token:", token); // Log the token for debugging
+
+        // Check if the token is present
+        if (!token) {
+            setFeedbackMessage("No authorization token found. Please log in again.");
+            return;
+        }
 
         try {
-            let endpoint = '';
             // Determine the correct endpoint based on the role
+            let endpoint = '';
             switch (role) {
                 case 'Trainee':
                     endpoint = '/api/trainees';
@@ -65,12 +74,10 @@ const AddUserForm = () => {
                     return; // Stop execution if the role is not selected
             }
 
-            const token = localStorage.getItem("authToken"); // Retrieve the token
-
-            // Send the user data to the selected endpoint, including the Authorization header
+            // Send the user data to the selected endpoint
             const response = await axios.post(`https://timemanagementsystemserver.onrender.com${endpoint}`, userData, {
                 headers: {
-                    Authorization: `Bearer ${token}` // Include token in headers
+                    Authorization: `Bearer ${token}`
                 }
             });
 
@@ -81,11 +88,11 @@ const AddUserForm = () => {
             }
         } catch (error) {
             console.error('Error saving user:', error);
-            
+
             // Enhanced error logging
             if (error.response) {
                 console.error('Response data:', error.response.data);
-                const errorMessage = error.response.data.message || error.response.data || "An unknown error occurred.";
+                const errorMessage = error.response.data.error || error.response.data || "An unknown error occurred.";
                 setFeedbackMessage("Failed to save user: " + errorMessage); // Show specific error message
             } else {
                 setFeedbackMessage("Failed to save user: " + error.message); // Show network or other errors
@@ -117,8 +124,8 @@ const AddUserForm = () => {
                             type="text" 
                             id="street" 
                             placeholder="Enter Street"
-                            value={streetAddress}
-                            onChange={(e) => setStreetAddress(e.target.value)}
+                            value={street}
+                            onChange={(e) => setStreet(e.target.value)}
                         />
                     </div>
 
@@ -192,13 +199,13 @@ const AddUserForm = () => {
 
             <form onSubmit={(e) => e.preventDefault()}>
                 <div className="form-group">
-                    <label htmlFor="fullName">Full Name</label> {/* Updated Label */}
+                    <label htmlFor="fullName">Full Name</label>
                     <input 
                         type="text" 
                         id="fullName" 
                         placeholder="Enter full name" 
                         value={fullName}
-                        onChange={(e) => setFullName(e.target.value)} {/* Updated State Function */}
+                        onChange={(e) => setFullName(e.target.value)} 
                     />
                 </div>
 
