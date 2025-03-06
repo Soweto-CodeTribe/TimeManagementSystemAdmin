@@ -5,7 +5,10 @@ import { Users, UserCheck, BarChart2, AlertCircle } from "lucide-react"
 import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts"
 import "./styling/Dashboard.css"
 import axios from "axios"
-import { useSelector } from "react-redux"
+import { useSelector, useDispatch } from "react-redux"
+import fetchReports from "../utils/fetchReports";
+import DataLoader from "./dataLoader"
+
 
 const data = [
   { name: "M", value: 60 },
@@ -53,7 +56,7 @@ const trainees = [
   },
 ]
 
-const totalTrainees = trainees.length;
+// const totalTrainees = trainees.length;
 const totalFacilitators = 20;
 const dailyAttendanceRate = Math.round(
   trainees.reduce((sum, trainee) => sum + trainee.attendanceRate, 0) / trainees.length
@@ -64,13 +67,21 @@ const missedCheckIns = 100 - dailyAttendanceRate;
 function Dashboard() {
   const [name] = useState("Super Admin")
   const currentDate = new Date().toDateString()
+  const [summaryData, setSummaryData] = useState([])
+  const role = useSelector((state) => state.auth.role)
+  const [loading, setLoading] = useState(true)
+
+
+  console.log('myRole', role)
 
 
   const [checkIns, setCheckIns] = useState([]);
   const BASE_URL = 'https://timemanagementsystemserver.onrender.com/api/session/all-session-status';
   const token = useSelector((state) => state.auth.token);
-
+  
   useEffect(() => {
+    // isLoading
+    setLoading(true)
     const fetchData = async () => {
       try {
         const response = await axios.get(BASE_URL, {
@@ -85,10 +96,30 @@ function Dashboard() {
       } catch (error) {
         console.error('Error fetching check-ins:', error);
       }
+      finally{
+        setLoading(false)
+      }
     };
 
+
     fetchData();
+    loadOtherData()
   }, [token]);
+
+  
+  const loadOtherData = async () => {
+    try {
+      const { summaryData, reports } = await fetchReports(token, 1, 20);
+      console.log("my Fetched sumary:", summaryData);
+      console.log("my Fetched Reports:", reports);
+      setSummaryData(summaryData)
+    } catch (error) {
+      console.error(error.message);
+    }
+    
+  };
+  
+  if (loading) return <DataLoader message="Loading dashboard..." />;
 
   return (
     <div className="dashboard">
@@ -104,7 +135,7 @@ function Dashboard() {
             <Users className="stat-icon" />
           </div>
           <div className="stat-content">
-            <div className="stat-value">{totalTrainees}</div>
+            <div className="stat-value">{summaryData?.totalTrainees}</div>
           </div>
         </div>
 
@@ -179,7 +210,7 @@ function Dashboard() {
                 {checkIns.map((checkIn) => (
                   <tr key={checkIn.name}>
                     <td>{checkIn.name}</td>
-                    <td className="time">{checkIn.time}</td>
+                    <td className="time">{checkIn.checkInTime}</td>
                   </tr>
                 ))}
               </tbody>

@@ -2,6 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "../Slices/authSlice";
 import notificationsReducer from '../Slices/notificationsSlice'
 import reportsReducer from '../Slices/reportsSlice'
+import loaderReducer from '../Slices/loaderSlice'
 
 
 const store = configureStore({
@@ -10,6 +11,7 @@ const store = configureStore({
         auth: authReducer,   
         notifications: notificationsReducer,
         reports: reportsReducer,
+        loader: loaderReducer,
     }
 })
 
