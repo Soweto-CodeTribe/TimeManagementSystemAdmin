@@ -1,299 +1,258 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
-// Base URL for all API requests
-const BASE_URL = 'https://timemanagementsystemserver.onrender.com';
+import axios from 'axios';
+import './styling/AddUserForm.css'; // Import the CSS
 
 const AddUserForm = () => {
     const navigate = useNavigate();
+    const [currentScreen, setCurrentScreen] = useState('basic-info');
 
-    const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        phone: '',
-        idNumber: '', // Corrected field name
-        role: '',
-        zipCode: '',
-        surname: '',
-        dateOfBirth: '',
-        location: '',
-        address: '',
-    });
+    // State for basic info
+    const [name, setName] = useState('');
+    const [surname, setSurname] = useState('');
+    const [email, setEmail] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [role, setRole] = useState(''); // State for user role
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
+    // State for address
+    const [streetAddress, setStreetAddress] = useState('');
+    const [city, setCity] = useState('');
+    const [postalCode, setPostalCode] = useState('');
+    const [isConfirmed, setIsConfirmed] = useState(false);
+    const [feedbackMessage, setFeedbackMessage] = useState(''); // State for feedback message
+
+    const handleContinue = () => {
+        if (currentScreen === 'basic-info') {
+            setCurrentScreen('physical-address');
+        }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Check for missing fields
-        const missingFields = Object.keys(formData).filter(field => !formData[field]);
-        if (missingFields.length > 0) {
-            alert(`Please fill in all required fields: ${missingFields.join(', ')}`);
-            return; // Stop submission if fields are missing
-        }
+        // Prepare the user data to send
+        const userData = { 
+            name, 
+            surname, 
+            email, 
+            phoneNumber, 
+            streetAddress, 
+            city, 
+            postalCode 
+        };
 
-        // Determine the endpoint based on the selected role
-        const endpoint = formData.role === 'Trainee' 
-            ? '/api/trainees' 
-            : formData.role === 'Facilitator' 
-            ? '/api/facilitators' 
-            : '/api/stakeholder'; // Assume this is the endpoint for Stakeholder
-
-        const token = localStorage.getItem("authToken");
-        console.log("token: ", token);
+        console.log(userData); // Log the user data being sent
 
         try {
-            // Sending the correct data to the server
-            const response = await axios.post(`${BASE_URL}${endpoint}`, formData, {
+            let endpoint = '';
+            // Determine the correct endpoint based on the role
+            switch (role) {
+                case 'Trainee':
+                    endpoint = '/api/trainees';
+                    break;
+                case 'Facilitator':
+                    endpoint = '/api/facilitators';
+                    break;
+                case 'Stakeholder':
+                    endpoint = '/api/stakeholder';
+                    break;
+                default:
+                    setFeedbackMessage("Please select a role.");
+                    return; // Stop execution if the role is not selected
+            }
+
+            const token = localStorage.getItem("authToken"); // Retrieve the token
+
+            // Send the user data to the selected endpoint, including the Authorization header
+            const response = await axios.post(`https://timemanagementsystemserver.onrender.com${endpoint}`, userData, {
                 headers: {
-                    Authorization: `Bearer ${token}` // Sending the JWT token for authentication
+                    Authorization: `Bearer ${token}` // Include token in headers
                 }
             });
 
-            if (response.data) {
-                console.log('Response:', response.data);
-                alert('User saved successfully!');
-
-                const userManagementData = {
-                    name: formData.name,
-                    surname: formData.surname,
-                    email: formData.email,
-                    role: formData.role,
-                    id: response.data.id || response.data._id, // Ensure you're capturing the correct ID
-                };
-
-                // Clear the form
-                setFormData({
-                    name: '',
-                    email: '',
-                    phone: '',
-                    idNumber: '', // Added reset for idNumber
-                    role: '',
-                    zipCode: '',
-                    surname: '',
-                    dateOfBirth: '',
-                    location: '',
-                    address: '',
-                });
-
-                // Redirect to user management with user data
-                navigate('/user-management', { 
-                    state: { userData: userManagementData } 
-                });
+            // Handle the response from the server
+            if (response.status === 201 || response.status === 200) {
+                setFeedbackMessage("User saved successfully!"); // Show success message
+                navigate('/user-management', { state: { userData } }); // Navigate to UserManagement
             }
         } catch (error) {
             console.error('Error saving user:', error);
+            
+            // Enhanced error logging
             if (error.response) {
                 console.error('Response data:', error.response.data);
-                if (error.response.status === 409) {
-                    alert('User already exists. Please use a different email or phone number.'); // Conflict
-                } else if (error.response.status === 400) {
-                    alert('Bad request. Please check the form data.'); // Missing fields
-                } else if (error.response.status === 401) {
-                    alert('Unauthorized! Please log in again.'); // Unauthorized
-                } else {
-                    alert('Failed to save user: ' + error.response.data.message); // Other errors
-                }
-            } else if (error.request) {
-                console.error('Request details:', error.request);
-                alert('No response from server. Please check your network.'); // No response
+                const errorMessage = error.response.data.message || error.response.data || "An unknown error occurred.";
+                setFeedbackMessage("Failed to save user: " + errorMessage); // Show specific error message
             } else {
-                console.error('Error setting up the request:', error.message);
-                alert('Error: ' + error.message); // Other errors
+                setFeedbackMessage("Failed to save user: " + error.message); // Show network or other errors
             }
         }
     };
 
-    return (
-        <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '20px',
-            backgroundColor: '#f5f5f5',
-            borderRadius: '8px',
-            width: '100%',
-            height: '100vh',
-            boxSizing: 'border-box',
-            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-            position: 'relative',
-            overflow: 'hidden',
-        }}>
-            <h1 style={{
-                fontSize: '24px',
-                fontWeight: 'bold',
-                color: '#333',
-                marginBottom: '20px',
-                width: '100%',
-                textAlign: 'center',
-            }}>
-                Add a User
-            </h1>
+    // Render physical address screen
+    if (currentScreen === 'physical-address') {
+        return (
+            <div className="add-user-form-container">
+                <h1>Add New User</h1>
+                <p>Easily register trainees, guests, or facilitators with the required details.</p>
 
-            <form
-                onSubmit={handleSubmit}
-                style={{
-                    width: '100%',
-                    maxWidth: '1200px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                }}
-            >
-                <div
-                    style={{
-                        display: 'grid',
-                        gridTemplateColumns: '1fr 1fr',
-                        gap: '20px',
-                        width: '100%',
-                    }}
-                >
-                    <div>
-                        <div style={{ marginBottom: '15px' }}>
-                            <label htmlFor="name">Name *</label>
-                            <input
-                                type="text"
-                                name="name"
-                                value={formData.name}
-                                onChange={handleChange}
-                                required
-                                style={{ width: '100%', padding: '12px' }}
-                            />
-                        </div>
-                        <div style={{ marginBottom: '15px' }}>
-                            <label htmlFor="email">Email *</label>
-                            <input
-                                type="email"
-                                name="email"
-                                value={formData.email}
-                                onChange={handleChange}
-                                required
-                                style={{ width: '100%', padding: '12px' }}
-                            />
-                        </div>
-                        <div style={{ marginBottom: '15px' }}>
-                            <label htmlFor="idNumber">ID Number *</label>
-                            <input
-                                type="text" // Corrected input type
-                                name="idNumber" // Updated name to match the state
-                                value={formData.idNumber} // Corrected to access the right property
-                                onChange={handleChange}
-                                required
-                                style={{ width: '100%', padding: '12px' }}
-                            />
-                        </div>
-                        <div style={{ marginBottom: '15px' }}>
-                            <label htmlFor="phone">Phone *</label>
-                            <input
-                                type="tel"
-                                name="phone"
-                                value={formData.phone}
-                                onChange={handleChange}
-                                required
-                                style={{ width: '100%', padding: '12px' }}
-                            />
-                        </div>
-                        <div style={{ marginBottom: '15px' }}>
-                            <label htmlFor="role">Role *</label>
-                            <select
-                                name="role"
-                                value={formData.role}
-                                onChange={handleChange}
-                                required
-                                style={{ width: '100%', padding: '12px' }}
-                            >
-                                <option value="">Select a role</option>
-                                <option value="Trainee">Trainee</option>
-                                <option value="Facilitator">Facilitator</option>
-                                <option value="Stakeholder">Stakeholder</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div>
-                        <div style={{ marginBottom: '15px' }}>
-                            <label htmlFor="zipCode">Zip Code *</label>
-                            <input
-                                type="text"
-                                name="zipCode"
-                                value={formData.zipCode}
-                                onChange={handleChange}
-                                required
-                                style={{ width: '100%', padding: '12px' }}
-                            />
-                        </div>
-                        <div style={{ marginBottom: '15px' }}>
-                            <label htmlFor="surname">Surname *</label>
-                            <input
-                                type="text"
-                                name="surname"
-                                value={formData.surname}
-                                onChange={handleChange}
-                                required
-                                style={{ width: '100%', padding: '12px' }}
-                            />
-                        </div>
-                        <div style={{ marginBottom: '15px' }}>
-                            <label htmlFor="dateOfBirth">Date of Birth *</label>
-                            <input
-                                type="date"
-                                name="dateOfBirth"
-                                value={formData.dateOfBirth}
-                                onChange={handleChange}
-                                required
-                                style={{ width: '100%', padding: '12px' }}
-                            />
-                        </div>
-                        <div style={{ marginBottom: '15px' }}>
-                            <label htmlFor="location">Location *</label>
-                            <input
-                                type="text"
-                                name="location"
-                                value={formData.location}
-                                onChange={handleChange}
-                                required
-                                style={{ width: '100%', padding: '12px' }}
-                            />
-                        </div>
-                        <div style={{ marginBottom: '20px' }}>
-                            <label htmlFor="address">Address *</label>
-                            <input
-                                type="text"
-                                name="address"
-                                value={formData.address}
-                                onChange={handleChange}
-                                required
-                                style={{ width: '100%', padding: '12px' }}
-                            />
-                        </div>
-                    </div>
+                <div className="navigation">
+                    <span className="nav-item">Basic Information</span>
+                    {' > '}
+                    <span className="nav-item active">Physical Address</span>
+                    {' > '}
+                    <span className="nav-item">Additional Info</span>
                 </div>
 
-                <button
-                    type="submit"
-                    style={{
-                        width: '200px',
-                        padding: '14px',
-                        fontSize: '16px',
-                        fontWeight: 'bold',
-                        color: '#fff',
-                        backgroundColor: '#4caf50',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        transition: 'background-color 0.3s ease',
-                        marginTop: '20px',
-                    }}
-                    onMouseEnter={(e) => (e.target.style.backgroundColor = '#45a049')}
-                    onMouseLeave={(e) => (e.target.style.backgroundColor = '#4caf50')}
-                >
-                    Save
-                </button>
+                <h2>Physical Address <span className="info-icon">ⓘ</span></h2>
+
+                <form onSubmit={handleSubmit}>
+                    <div className="form-group">
+                        <label htmlFor="street">Street</label>
+                        <input 
+                            type="text" 
+                            id="street" 
+                            placeholder="Enter Street"
+                            value={streetAddress}
+                            onChange={(e) => setStreetAddress(e.target.value)}
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="city">City</label>
+                        <input 
+                            type="text" 
+                            id="city" 
+                            placeholder="Enter City"
+                            value={city}
+                            onChange={(e) => setCity(e.target.value)}
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="postalCode">Postal Code</label>
+                        <input 
+                            type="text" 
+                            id="postalCode" 
+                            placeholder="Enter postal code"
+                            value={postalCode}
+                            onChange={(e) => setPostalCode(e.target.value)}
+                        />
+                    </div>
+
+                    <div className="form-group checkbox-group">
+                        <input 
+                            type="checkbox" 
+                            id="confirm" 
+                            checked={isConfirmed}
+                            onChange={(e) => setIsConfirmed(e.target.checked)}
+                        />
+                        <label htmlFor="confirm">
+                            I confirm that all the information provided is accurate and agree to the system's terms and conditions.
+                        </label>
+                    </div>
+
+                    <button 
+                        type="submit" 
+                        className="submit-btn"
+                        disabled={!isConfirmed}
+                    >
+                        Submit
+                    </button>
+
+                    {feedbackMessage && (
+                        <p className={`feedback-message ${feedbackMessage.includes("Failed") ? 'error' : 'success'}`}>
+                            {feedbackMessage}
+                        </p>
+                    )}
+                </form>
+            </div>
+        );
+    }
+
+    // Render basic information screen
+    return (
+        <div className="add-user-form-container">
+            <h1>Add New User</h1>
+            <p>Easily register trainees, guests, or facilitators with the required details.</p>
+
+            <div className="navigation">
+                <span className="nav-item active">Basic Information</span>
+                {' > '}
+                <span className="nav-item">Physical Address</span>
+                {' > '}
+                <span className="nav-item">Additional Info</span>
+            </div>
+
+            <h2>Basic Information <span className="info-icon">ⓘ</span></h2>
+
+            <form onSubmit={(e) => e.preventDefault()}>
+                <div className="form-group">
+                    <label htmlFor="fullName">Full name</label>
+                    <input 
+                        type="text" 
+                        id="fullName" 
+                        placeholder="Enter full name" 
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                    />
+                </div>
+                
+                <div className="form-group">
+                    <label htmlFor="surname">Surname</label>
+                    <input 
+                        type="text" 
+                        id="surname" 
+                        placeholder="Enter surname" 
+                        value={surname}
+                        onChange={(e) => setSurname(e.target.value)}
+                    />
+                </div>
+                
+                <div className="form-group">
+                    <label htmlFor="email">Email</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        placeholder="Enter email" 
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
+                </div>
+                
+                <div className="form-group">
+                    <label htmlFor="phoneNumber">Phone number</label>
+                    <input 
+                        type="tel" 
+                        id="phoneNumber" 
+                        placeholder="Enter phone number" 
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
+                    />
+                </div>
+                
+                <div className="form-group">
+                    <label htmlFor="role">Role</label>
+                    <select 
+                        id="role" 
+                        value={role}
+                        onChange={(e) => setRole(e.target.value)}
+                    >
+                        <option value="" disabled>Select role</option>
+                        <option value="Trainee">Trainee</option>
+                        <option value="Facilitator">Facilitator</option>
+                        <option value="Stakeholder">Stakeholder</option>
+                    </select>
+                </div>
+                
+                <button type="button" onClick={handleContinue}>Continue</button>
             </form>
+
+            {feedbackMessage && (
+                <p className={`feedback-message ${feedbackMessage.includes("Failed") ? 'error' : 'success'}`}>
+                    {feedbackMessage}
+                </p>
+            )}
         </div>
     );
 };

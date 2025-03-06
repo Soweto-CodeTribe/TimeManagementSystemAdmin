@@ -9,7 +9,8 @@ import Modal from './Modal'; // Import Modal
 const UserManagement = () => {
     const location = useLocation();
     const navigate = useNavigate();
-
+    
+    // Get initial users from local storage
     const getInitialUsers = () => {
         const storedUsers = localStorage.getItem('users');
         return storedUsers ? JSON.parse(storedUsers) : [];
@@ -24,14 +25,15 @@ const UserManagement = () => {
     useEffect(() => {
         if (location.state && location.state.userData) {
             const newUser = location.state.userData;
+            
+            // Ensure that the new user's role is added
             const userExists = users.some(user => user.email === newUser.email);
-
             if (!userExists) {
-                const updatedUsers = [...users, { ...newUser, id: Date.now() }];
+                const updatedUsers = [...users, { ...newUser, id: Date.now(), lastCheckIn: null }]; // Last check-in set to null
                 setUsers(updatedUsers);
                 localStorage.setItem('users', JSON.stringify(updatedUsers));
             } else {
-                console.warn("User already exists");
+                alert("User with this email already exists."); // Provide user feedback
             }
         }
     }, [location.state, users]);
@@ -41,13 +43,13 @@ const UserManagement = () => {
         doc.text("User Management", 10, 10);
         doc.text("Name, Email, Role, Last Check-In", 10, 20);
         users.forEach((user, index) => {
-            doc.text(`${user.name}, ${user.email}, ${user.role}, ${user.lastCheckIn}`, 10, 30 + index * 10);
+            doc.text(`${user.name}, ${user.email}, ${user.role}, ${user.lastCheckIn || 'N/A'}`, 10, 30 + index * 10);
         });
         doc.save("UserManagement.pdf");
     };
 
     const exportCSV = () => {
-        const csvContent = users.map(user => `${user.name},${user.email},${user.role},${user.lastCheckIn}`).join('\n');
+        const csvContent = users.map(user => `${user.name},${user.email},${user.role},${user.lastCheckIn || 'N/A'}`).join('\n');
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
@@ -107,161 +109,161 @@ const UserManagement = () => {
 
     return (
         <div className="user-management-container">
-        <Modal
-            isOpen={modalOpen}
-            onClose={() => setModalOpen(false)}
-            onView={() => console.log("View user", selectedUser)}
-            onExportCSV={exportCSV}
-            onExportPDF={() => exportPDF(selectedUser)}
-            onDelete={handleDeleteUser}
-            user={selectedUser}
-        />
+            <Modal
+                isOpen={modalOpen}
+                onClose={() => setModalOpen(false)}
+                onView={() => console.log("View user", selectedUser)}
+                onExportCSV={exportCSV}
+                onExportPDF={() => exportPDF(selectedUser)}
+                onDelete={handleDeleteUser}
+                user={selectedUser}
+            />
 
-        <div className="header">
-            <div className="title-section">
-                <h1>User Management</h1>
-                <p className="subtitle">Manage your trainees and guests and control permissions here</p>
+            <div className="header">
+                <div className="title-section">
+                    <h1>User Management</h1>
+                    <p className="subtitle">Manage your trainees and guests and control permissions here</p>
+                </div>
+                <button className="add-user-btn" onClick={() => navigate('/add-user')}>
+                    <Plus size={16} />
+                    <span>Add user</span>
+                </button>
             </div>
-            <button className="add-user-btn" onClick={() => navigate('/add-user')}>
-                <Plus size={16} />
-                <span>Add user</span>
-            </button>
-        </div>
 
-        <div className="table-section">
-            <div className="table-header">
-                <h2>
-                    Trainees <span className="count">{filteredUsers.length}</span>
-                </h2>
-            </div>
-            <div className="table-controls">
-                <div className="left-controls">
-                    <button className="filter-btn">
-                        <Filter size={14} />
-                        <span>Filter</span>
-                    </button>
-                    <div className="search-container">
-                        <Search size={14} className="search-icon" />
-                        <input
-                            type="text"
-                            placeholder="Search"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="search-input"
-                        />
+            <div className="table-section">
+                <div className="table-header">
+                    <h2>
+                        Trainees <span className="count">{filteredUsers.length}</span>
+                    </h2>
+                </div>
+                <div className="table-controls">
+                    <div className="left-controls">
+                        <button className="filter-btn">
+                            <Filter size={14} />
+                            <span>Filter</span>
+                        </button>
+                        <div className="search-container">
+                            <Search size={14} className="search-icon" />
+                            <input
+                                type="text"
+                                placeholder="Search"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="search-input"
+                            />
+                        </div>
+                    </div>
+                    <div className="right-controls">
+                        <button className="export-btn" onClick={exportPDF}>
+                            <Download size={14} />
+                            <span>Export PDF</span>
+                        </button>
+                        <input type="file" accept=".csv" onChange={handleFileChange} style={{ display: "none" }} id="csvInput" />
+                        <label htmlFor="csvInput" className="import-btn">
+                            <Upload size={14} />
+                            <span>Import CSV</span>
+                        </label>
                     </div>
                 </div>
-                <div className="right-controls">
-                    <button className="export-btn" onClick={exportPDF}>
-                        <Download size={14} />
-                        <span>Export PDF</span>
-                    </button>
-                    <input type="file" accept=".csv" onChange={handleFileChange} style={{ display: "none" }} id="csvInput" />
-                    <label htmlFor="csvInput" className="import-btn">
-                        <Upload size={14} />
-                        <span>Import CSV</span>
-                    </label>
+                <div className="table-container">
+                    <table className="users-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Last Check-in</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredUsers.map((user) => (
+                                <tr key={user.id}>
+                                    <td>{user.name}</td>
+                                    <td>{user.email}</td>
+                                    <td>{user.role}</td>
+                                    <td>{user.lastCheckIn || 'N/A'}</td>
+                                    <td>
+                                        <button className="action-btn" onClick={() => handleTakeAction(user)}>
+                                            <span>Take action</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             </div>
-            <div className="table-container">
-                <table className="users-table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>Last Check-in</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredUsers.map((user) => (
-                            <tr key={user.id}>
-                                <td>{user.name}</td>
-                                <td>{user.email}</td>
-                                <td>{user.role}</td>
-                                <td>{user.lastCheckIn}</td>
-                                <td>
-                                    <button className="action-btn" onClick={() => handleTakeAction(user)}>
-                                        <span>Take action</span>
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-        </div>
 
-        {/* Second Table Section for Guests */}
-        <div className="table-section">
-            <div className="table-header">
-                <h2>
-                    Guests <span className="count">{filteredGuests.length}</span>
-                </h2>
-            </div>
-            <div className="table-controls">
-                <div className="left-controls">
-                    <button className="filter-btn">
-                        <Filter size={14} />
-                        <span>Filter</span>
-                    </button>
-                    <div className="search-container">
-                        <Search size={14} className="search-icon" />
-                        <input
-                            type="text"
-                            placeholder="Search"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="search-input"
-                        />
+            {/* Second Table Section for Guests */}
+            <div className="table-section">
+                <div className="table-header">
+                    <h2>
+                        Guests <span className="count">{filteredGuests.length}</span>
+                    </h2>
+                </div>
+                <div className="table-controls">
+                    <div className="left-controls">
+                        <button className="filter-btn">
+                            <Filter size={14} />
+                            <span>Filter</span>
+                        </button>
+                        <div className="search-container">
+                            <Search size={14} className="search-icon" />
+                            <input
+                                type="text"
+                                placeholder="Search"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="search-input"
+                            />
+                        </div>
+                    </div>
+                    <div className="right-controls">
+                        <button className="export-btn" onClick={exportPDF}>
+                            <Download size={14} />
+                            <span>Export PDF</span>
+                        </button>
+                        <input type="file" accept=".csv" onChange={handleFileChange} style={{ display: "none" }} id="csvInput2" />
+                        <label htmlFor="csvInput2" className="import-btn">
+                            <Upload size={14} />
+                            <span>Import CSV</span>
+                        </label>
                     </div>
                 </div>
-                <div className="right-controls">
-                    <button className="export-btn" onClick={exportPDF}>
-                        <Download size={14} />
-                        <span>Export PDF</span>
-                    </button>
-                    <input type="file" accept=".csv" onChange={handleFileChange} style={{ display: "none" }} id="csvInput2" />
-                    <label htmlFor="csvInput2" className="import-btn">
-                        <Upload size={14} />
-                        <span>Import CSV</span>
-                    </label>
+                <div className="table-container">
+                    <table className="users-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredGuests.map((guest) => (
+                                <tr key={guest.id}>
+                                    <td>{guest.name}</td>
+                                    <td>{guest.email}</td>
+                                    <td>{guest.phone}</td>
+                                    <td>
+                                        {guest.status === "active" && <span className="status-badge active">Active</span>}
+                                        {!guest.status && guest.lastCheckIn && <span>{guest.lastCheckIn}</span>}
+                                    </td>
+                                    <td>
+                                        <button className="action-btn">
+                                            <span>Manage</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             </div>
-            <div className="table-container">
-                <table className="users-table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredGuests.map((guest) => (
-                            <tr key={guest.id}>
-                                <td>{guest.name}</td>
-                                <td>{guest.email}</td>
-                                <td>{guest.phone}</td>
-                                <td>
-                                    {guest.status === "active" && <span className="status-badge active">Active</span>}
-                                    {!guest.status && guest.lastCheckIn && <span>{guest.lastCheckIn}</span>}
-                                </td>
-                                <td>
-                                    <button className="action-btn">
-                                        <span>Manage</span>
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
         </div>
-    </div>
     );
 };
 
