@@ -43,7 +43,7 @@ const Login = () => {
       console.log("user: ", data);
 
       if (response.ok) {
-        // Assuming the response contains a JWT or user data for authentication
+        // Assuming the response conatains a JWT or user data for authentication
         // You might want to store it in localStorage or context/state depending on your app's needs
         // localStorage.setItem("token", data.token); // Example if you receive a token
         console.log("user: ", data);
@@ -141,9 +141,9 @@ const Login = () => {
               {isLoading ? "Please wait..." : "Continue"}
             </button>
 
-            <div className="progress-dots">
-              <span className="dot active"></span>
-              <span className="dot"></span>
+            <div className="progress-bars">
+              <span className="bar active"></span>
+              <span className="bar"></span>
             </div>
           </form>
         </div>
