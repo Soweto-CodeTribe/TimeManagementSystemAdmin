@@ -157,7 +157,7 @@
   background-color: #e0e0e0;
 }
 
-.progress-dots {
+.progress-bars {
   position: absolute;
   bottom: 2rem;
   left: 0;
@@ -168,14 +168,14 @@
   padding: 0 2rem;
 }
 
-.dot {
-  width: 3rem;
-  height: 0.25rem;
+.bar {
+  width: 6rem;
+  height: 0.5rem;
   background-color: #e0e0e0;
   border-radius: 1rem;
 }
 
-.dot.active {
+.bar.active {
   background-color: #8bc34a;
 }
 
