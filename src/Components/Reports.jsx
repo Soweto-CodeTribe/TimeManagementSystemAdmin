@@ -1,9 +1,7 @@
-// src/screens/ReportsScreen.js
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import "./styling/ReportsScreen.css";
-import DataLoader from "./dataLoader";
 
 const ReportsScreen = () => {
   const token = useSelector((state) => state.auth.token);
@@ -12,7 +10,7 @@ const ReportsScreen = () => {
   const [error, setError] = useState(null);
   const [selectedTrainee, setSelectedTrainee] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const maxVisiblePages = 5; 
+  const maxVisiblePages = 5; // Maximum number of pagination buttons to show
 
   const fetchData = async (page) => {
     setLoading(true);
@@ -32,7 +30,7 @@ const ReportsScreen = () => {
 
   useEffect(() => {
     fetchData(currentPage);
-  }, [token, currentPage]);
+  }, [token]);
 
   const handlePageChange = (page) => {
     if (page !== currentPage) {
@@ -69,108 +67,80 @@ const ReportsScreen = () => {
     return pageNumbers;
   };
 
-  if (loading) return <DataLoader />; // Use the Loader component here
-
-  if (error) return (
-    <div className="error-container">
-      <p>Error: {error}</p>
-    </div>
-  );
-  
-  if (!data) return (
-    <div className="no-data-container">
-      <p>No data available</p>
-    </div>
-  );
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
+  if (!data) return <p>No data available</p>;
 
   return (
-    <div className="WrapperContent">
-      {/* Rest of your component remains unchanged */}
-      <div className="page-content">
-        <div className="page-header">
-          <h1 className="page-title">Reports and Issues</h1>
-          <p className="page-subtitle">View and manage reports and issues</p>
+    <div className="reports-container">
+      <h1 className="reports-title">Daily Reports</h1>
+
+      {/* Summary Metrics */}
+      <div className="metrics-grid">
+        <div className="metric-card" onClick={() => setSelectedTrainee(null)}>
+          <span>Total Trainees</span>
+          <strong>{data.summary.totalTrainees}</strong>
         </div>
-
-        <div className="card">
-          <div className="card-header">
-            <h2 className="card-title">Issue Management Table</h2>
-            <div className="card-actions">
-              <button className="filter-button">
-                <FilterIcon className="filter-icon" />
-                <span>Filter</span>
-              </button>
-              <div className="search-container">
-                <SearchIcon className="search-icon" />
-                <input 
-                  type="text" 
-                  placeholder="Search..." 
-                  className="search-input"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="export-actions">
-            <button className="export-button">
-              <PDFIcon className="export-icon" />
-              <span>Export PDF</span>
-            </button>
-            <button className="export-button">
-              <CSVIcon className="export-icon" />
-              <span>Export CSV</span>
-            </button>
-          </div>
-
-          <div className="table-container">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Report ID</th>
-                  <th>Trainee Name</th>
-                  <th>Status</th>
-                  <th>Date Submitted</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.reports.map((report, index) => (
-                  <tr key={report.traineeId} onClick={() => setSelectedTrainee(report)}>
-                    <td>{report.traineeId || `REP-${index + 1}`}</td>
-                    <td>{report.name}</td>
-                    <td className={report.status.toLowerCase()}>
-                      {report.status}
-                    </td>
-                    <td>{new Date().toLocaleDateString()}</td>
-                    <td>
-                      <button className="view-button">View</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="pagination">
-            <button 
-              className="pagination-arrow"
-              onClick={() => handlePageChange(currentPage - 1)} 
-              disabled={currentPage === 1}
-            >
-              <ChevronLeftIcon />
-            </button>
-            
-            {renderPaginationNumbers()}
-
-            <button 
-              className="pagination-arrow"
-              onClick={() => handlePageChange(currentPage + 1)} 
-              disabled={currentPage === data.totalPages}
-            >
-              <ChevronRightIcon />
-            </button>
-          </div>
+        <div className="metric-card">
+          <span>Present</span>
+          <strong>{data.summary.presentCount}</strong>
         </div>
+        <div className="metric-card">
+          <span>Absent</span>
+          <strong>{data.summary.absentCount}</strong>
+        </div>
+        <div className="metric-card">
+          <span>Late</span>
+          <strong>{data.summary.lateCount}</strong>
+        </div>
+        <div className="metric-card">
+          <span>Avg Hours Worked</span>
+          <strong>{data.summary.averageHoursWorked}</strong>
+        </div>
+      </div>
+
+      {/* Attendance Table */}
+      <div className="table-section">
+        <h2 className="table-title">Attendance Records</h2>
+        <table className="reports-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Status</th>
+              <th>Hours Worked</th>
+              <th>Lunch (Minutes)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.reports.map((report) => (
+              <tr key={report.traineeId} onClick={() => setSelectedTrainee(report)}>
+                <td>{report.name}</td>
+                <td className={report.status === "Absent" ? "absent" : "present"}>{report.status}</td>
+                <td>{report.totalHoursWorked}</td>
+                <td>{report.totalLunchMinutes}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination */}
+      <div className="pagination">
+        <button 
+          onClick={() => handlePageChange(currentPage - 1)} 
+          disabled={currentPage === 1}
+        >
+          Prev
+        </button>
+        
+        {renderPaginationNumbers()}
+
+        <button 
+          onClick={() => handlePageChange(currentPage + 1)} 
+          disabled={currentPage === data.totalPages}
+        >
+          Next
+        </button>
       </div>
 
       {/* Modal for Trainee Details */}
@@ -178,7 +148,7 @@ const ReportsScreen = () => {
         <div className="modal-overlay" onClick={() => setSelectedTrainee(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <button className="close-button" onClick={() => setSelectedTrainee(null)}>✖</button>
-            <h2>{`${selectedTrainee.name}'s Report`}</h2>
+            <h2>{selectedTrainee.name}'s Report</h2>
             <p><strong>Status:</strong> {selectedTrainee.status}</p>
             <p><strong>Total Hours Worked:</strong> {selectedTrainee.totalHoursWorked}</p>
             <p><strong>Lunch Break:</strong> {selectedTrainee.totalLunchMinutes} minutes</p>
@@ -188,113 +158,5 @@ const ReportsScreen = () => {
     </div>
   );
 };
-
-// Icon Components (keep them here for now)
-const SearchIcon = (props) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width="16" 
-    height="16" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round"
-    {...props}
-  >
-    <circle cx="11" cy="11" r="8"></circle>
-    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-  </svg>
-);
-
-const FilterIcon = (props) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width="16" 
-    height="16" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round"
-    {...props}
-  >
-    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-  </svg>
-);
-
-const PDFIcon = (props) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width="16" 
-    height="16" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round"
-    {...props}
-  >
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-    <polyline points="14 2 14 8 20 8"></polyline>
-    <line x1="16" y1="13" x2="8" y2="13"></line>
-    <line x1="16" y1="17" x2="8" y2="17"></line>
-    <polyline points="10 9 9 9 8 9"></polyline>
-  </svg>
-);
-
-const CSVIcon = (props) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width="16" 
-    height="16" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round"
-    {...props}
-  >
-    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-    <polyline points="7 10 12 15 17 10"></polyline>
-    <line x1="12" y1="15" x2="12" y2="3"></line>
-  </svg>
-);
-
-const ChevronLeftIcon = () => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width="16" 
-    height="16" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round"
-  >
-    <polyline points="15 18 9 12 15 6"></polyline>
-  </svg>
-);
-
-const ChevronRightIcon = () => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width="16" 
-    height="16" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round"
-  >
-    <polyline points="9 18 15 12 9 6"></polyline>
-  </svg>
-);
 
 export default ReportsScreen;

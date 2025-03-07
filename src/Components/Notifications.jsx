@@ -1,4 +1,19 @@
+// import React from 'react'
 
+const Notifications = () => {
+
+    
+  return (
+    <div>
+      Notiffications
+    </div>
+  )
+}
+
+export default Notifications
+
+
+/*
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchNotifications, markAsRead } from '../Slices/notificationsSlice';
@@ -50,3 +65,4 @@ const Notifications = () => {
 };
 
 export default Notifications;
+*/

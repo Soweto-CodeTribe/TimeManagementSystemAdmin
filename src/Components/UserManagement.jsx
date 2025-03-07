@@ -5,7 +5,6 @@ import './styling/UserManagement.css';
 import jsPDF from "jspdf"; 
 import Papa from 'papaparse';
 import Modal from './Modal';
-import axios from 'axios'; // Import Axios
 
 const UserManagement = () => {
     const location = useLocation();

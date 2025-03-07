@@ -5,7 +5,6 @@ import { FileText, Search, Filter, Info, ChevronLeft, ChevronRight } from "lucid
 import "./styling/Session.css"
 import { useSelector } from 'react-redux'
 import axios from "axios"
-import DataLoader from "./dataLoader"
 
 const SessionMonitoring = () => {
   const BASE_URL = "https://timemanagementsystemserver.onrender.com/"
@@ -26,39 +25,42 @@ const SessionMonitoring = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10); // Default items per page
 
   useEffect(() => {
-    if (token) fetchData(currentPage);
-  }, [currentPage]); // Removed token to prevent unnecessary re-fetching
-  
+    fetchData(currentPage);
+  }, [token, currentPage]);
+
   const fetchData = async (page = 1) => {
     setIsLoading(true);
     try {
       const response = await axios.get(`${BASE_URL}api/session/daily-report`, {
-        params: { page, limit: itemsPerPage },
+        params: {
+          page: page,
+          limit: itemsPerPage
+        },
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
-  
-      const data = response?.data || {}; // Ensure `data` exists
-      setSummaryData(data.summary || {});
-      setReports(data.paginatedReports || []);
-      setData(data || []);
-  
-      // Update pagination only if data is valid
-      if (data.pagination) {
-        setCurrentPage(data.pagination.currentPage);
-        setTotalPages(data.pagination.totalPages);
-        setTotalItems(data.pagination.totalItems);
+      
+      // Store API data in state - separate summary from reports
+      setSummaryData(response.data.summary || {});
+      setReports(response.data.paginatedReports || []);
+      setData(response.data || []);
+      
+      // Set pagination data
+      if (response.data.pagination) {
+        setCurrentPage(response.data.pagination.currentPage);
+        setTotalPages(response.data.pagination.totalPages);
+        setTotalItems(response.data.pagination.totalItems);
       }
+      
+      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching daily report:", error);
-      setError(error?.response?.data?.message || "Failed to load attendance data");
-    } finally {
+      setError("Failed to load attendance data");
       setIsLoading(false);
     }
   };
-  
 
   // Handle page change
   const handlePageChange = (page) => {
@@ -120,8 +122,6 @@ const SessionMonitoring = () => {
     
     return pageNumbers;
   };
-
-  if(isLoading) return <DataLoader/>
 
   return (
     <div className="session-container">
@@ -206,7 +206,12 @@ const SessionMonitoring = () => {
           </button>
         </div>
 
-        {error ? (
+        {isLoading ? (
+          <div className="loading-container">
+            <div className="loading-spinner"></div>
+            <p>Loading attendance data...</p>
+          </div>
+        ) : error ? (
           <div className="error-container">
             <p className="error-message">{error}</p>
           </div>

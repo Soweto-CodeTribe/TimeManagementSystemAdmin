@@ -338,6 +338,7 @@
 
 // export const { clearNotificationsError } = notificationsSlice.actions;
 // export default notificationsSlice.reducer;
+
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
@@ -351,17 +352,16 @@ const initialState = {
   loading: false,
   error: null,
   notificationStatus: null,
-  absentTraineeNotification: null, 
-  absenceProof: null, 
+  absentTraineeNotification: null,
+  absenceProof: null,
 };
 
 // Helper function to get headers with authorization
 const getHeaders = (getState) => {
   const { auth } = getState();
-  const token = auth?.token;
   return {
     headers: {
-      Authorization: token ? `Bearer ${token}` : '',
+      'Authorization': `Bearer ${auth.token}`,
       'Content-Type': 'application/json',
     },
   };
@@ -374,10 +374,7 @@ export const fetchNotifications = createAsyncThunk(
   'notifications/fetchAll',
   async (traineeId, { getState, rejectWithValue }) => {
     try {
-      const response = await axios.get(
-        `${BASE_URL}/messages/trainee/${traineeId}`,
-        getHeaders(getState)
-      );
+      const response = await axios.get(`${BASE_URL}/messages/trainee/${traineeId}`, getHeaders(getState));
       return response.data;
     } catch (error) {
       console.error('Fetch Notifications Error:', error);
@@ -391,16 +388,11 @@ export const fetchUnreadCount = createAsyncThunk(
   'notifications/unreadCount',
   async (traineeId, { getState, rejectWithValue }) => {
     try {
-      const response = await axios.get(
-        `${BASE_URL}/messages/unread/${traineeId}`,
-        getHeaders(getState)
-      );
+      const response = await axios.get(`${BASE_URL}/messages/unread/${traineeId}`, getHeaders(getState));
       return response.data;
     } catch (error) {
       console.error('Fetch Unread Count Error:', error);
-      return rejectWithValue(
-        error.response?.data || { message: 'Failed to fetch unread count' }
-      );
+      return rejectWithValue(error.response?.data || { message: 'Failed to fetch unread count' });
     }
   }
 );
@@ -410,17 +402,11 @@ export const markAsRead = createAsyncThunk(
   'notifications/markAsRead',
   async ({ notificationId, traineeId }, { getState, rejectWithValue }) => {
     try {
-      const response = await axios.put(
-        `${BASE_URL}/messages/${notificationId}/read`,
-        { traineeId },
-        getHeaders(getState)
-      );
+      const response = await axios.put(`${BASE_URL}/messages/${notificationId}/read`, { traineeId }, getHeaders(getState));
       return response.data;
     } catch (error) {
       console.error('Mark Notification Read Error:', error);
-      return rejectWithValue(
-        error.response?.data || { message: 'Failed to mark notification as read' }
-      );
+      return rejectWithValue(error.response?.data || { message: 'Failed to mark notification as read' });
     }
   }
 );
@@ -430,17 +416,11 @@ export const createNotification = createAsyncThunk(
   'notifications/create',
   async (messageData, { getState, rejectWithValue }) => {
     try {
-      const response = await axios.post(
-        `${BASE_URL}/messages`,
-        messageData,
-        getHeaders(getState)
-      );
+      const response = await axios.post(`${BASE_URL}/messages`, messageData, getHeaders(getState));
       return response.data;
     } catch (error) {
       console.error('Create Notification Error:', error);
-      return rejectWithValue(
-        error.response?.data || { message: 'Failed to create notification' }
-      );
+      return rejectWithValue(error.response?.data || { message: 'Failed to create notification' });
     }
   }
 );
@@ -450,16 +430,11 @@ export const deleteNotification = createAsyncThunk(
   'notifications/delete',
   async (notificationId, { getState, rejectWithValue }) => {
     try {
-      await axios.delete(
-        `${BASE_URL}/messages/${notificationId}`,
-        getHeaders(getState)
-      );
+      await axios.delete(`${BASE_URL}/messages/${notificationId}`, getHeaders(getState));
       return notificationId;
     } catch (error) {
       console.error('Delete Notification Error:', error);
-      return rejectWithValue(
-        error.response?.data || { message: 'Failed to delete notification' }
-      );
+      return rejectWithValue(error.response?.data || { message: 'Failed to delete notification' });
     }
   }
 );
@@ -469,16 +444,11 @@ export const fetchNotificationStatus = createAsyncThunk(
   'notifications/status',
   async (traineeId, { getState, rejectWithValue }) => {
     try {
-      const response = await axios.get(
-        `${BASE_URL}/notifications/status/${traineeId}`,
-        getHeaders(getState)
-      );
+      const response = await axios.get(`${BASE_URL}/notifications/status/${traineeId}`, getHeaders(getState));
       return response.data;
     } catch (error) {
       console.error('Fetch Notification Status Error:', error);
-      return rejectWithValue(
-        error.response?.data || { message: 'Failed to fetch notification status' }
-      );
+      return rejectWithValue(error.response?.data || { message: 'Failed to fetch notification status' });
     }
   }
 );
@@ -488,17 +458,11 @@ export const notifyAbsentTrainees = createAsyncThunk(
   'notifications/notifyAbsent',
   async (absenceData, { getState, rejectWithValue }) => {
     try {
-      const response = await axios.post(
-        `${BASE_URL}/notifications/absent`,
-        absenceData,
-        getHeaders(getState)
-      );
+      const response = await axios.post(`${BASE_URL}/notifications/absent`, absenceData, getHeaders(getState));
       return response.data;
     } catch (error) {
       console.error('Notify Absent Trainees Error:', error);
-      return rejectWithValue(
-        error.response?.data || { message: 'Failed to notify absent trainees' }
-      );
+      return rejectWithValue(error.response?.data || { message: 'Failed to notify absent trainees' });
     }
   }
 );
@@ -508,22 +472,19 @@ export const submitAbsenceProof = createAsyncThunk(
   'notifications/submitAbsenceProof',
   async (proofData, { getState, rejectWithValue }) => {
     try {
-      // Reuse getHeaders and override Content-Type
-      const headers = { ...getHeaders(getState()).headers };
-      headers['Content-Type'] = 'multipart/form-data';
       const formData = new FormData();
-      Object.keys(proofData).forEach((key) => formData.append(key, proofData[key]));
-      const response = await axios.post(
-        `${BASE_URL}/absence/proof`,
-        formData,
-        { headers }
-      );
+      Object.keys(proofData).forEach(key => formData.append(key, proofData[key]));
+
+      const response = await axios.post(`${BASE_URL}/absence/proof`, formData, {
+        headers: {
+          'Authorization': `Bearer ${getState().auth.token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       return response.data;
     } catch (error) {
       console.error('Submit Absence Proof Error:', error);
-      return rejectWithValue(
-        error.response?.data || { message: 'Failed to submit absence proof' }
-      );
+      return rejectWithValue(error.response?.data || { message: 'Failed to submit absence proof' });
     }
   }
 );
@@ -538,7 +499,7 @@ const notificationsSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    // Fetch Notifications
+    // Handle Fetch Notifications
     builder.addCase(fetchNotifications.pending, (state) => {
       state.loading = true;
       state.error = null;
@@ -546,79 +507,48 @@ const notificationsSlice = createSlice({
     builder.addCase(fetchNotifications.fulfilled, (state, action) => {
       state.loading = false;
       state.notifications = action.payload;
+      state.unreadCount = action.payload.filter(n => !n.read).length;
     });
     builder.addCase(fetchNotifications.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload;
     });
 
-    // Fetch Unread Count
-    builder.addCase(fetchUnreadCount.pending, (state) => {
-      state.error = null;
-    });
+    // Handle Fetch Unread Count
     builder.addCase(fetchUnreadCount.fulfilled, (state, action) => {
       state.unreadCount = action.payload;
     });
-    builder.addCase(fetchUnreadCount.rejected, (state, action) => {
-      state.error = action.payload;
-    });
 
-    // Mark As Read
-    builder.addCase(markAsRead.pending, (state) => {
-      state.error = null;
-    });
+    // Handle Mark As Read
     builder.addCase(markAsRead.fulfilled, (state, action) => {
       const updatedNotification = action.payload;
-      state.notifications = state.notifications.map((notification) =>
+      state.notifications = state.notifications.map(notification =>
         notification.id === updatedNotification.id
           ? { ...notification, read: true }
           : notification
       );
-      state.unreadCount -= 1; // Incremental update
-    });
-    builder.addCase(markAsRead.rejected, (state, action) => {
-      state.error = action.payload;
+      state.unreadCount = state.notifications.filter(n => !n.read).length;
     });
 
-    // Create Notification
-    builder.addCase(createNotification.pending, (state) => {
-      state.error = null;
-    });
+    // Handle Create Notification
     builder.addCase(createNotification.fulfilled, (state, action) => {
-      state.notifications.unshift(action.payload); // Newest first
-    });
-    builder.addCase(createNotification.rejected, (state, action) => {
-      state.error = action.payload;
+      state.notifications.unshift(action.payload);
     });
 
-    // Delete Notification
-    builder.addCase(deleteNotification.pending, (state) => {
-      state.error = null;
-    });
+    // Handle Delete Notification
     builder.addCase(deleteNotification.fulfilled, (state, action) => {
       state.notifications = state.notifications.filter(
-        (notification) => notification.id !== action.payload
+        notification => notification.id !== action.payload
       );
-    });
-    builder.addCase(deleteNotification.rejected, (state, action) => {
-      state.error = action.payload;
+      state.unreadCount = state.notifications.filter(n => !n.read).length;
     });
 
-    // Fetch Notification Status
-    builder.addCase(fetchNotificationStatus.pending, (state) => {
-      state.error = null;
-    });
+    // Handle Fetch Notification Status
     builder.addCase(fetchNotificationStatus.fulfilled, (state, action) => {
       state.notificationStatus = action.payload;
     });
-    builder.addCase(fetchNotificationStatus.rejected, (state, action) => {
-      state.error = action.payload;
-    });
 
-    // Notify Absent Trainees
-    builder.addCase(notifyAbsentTrainees.pending, (state) => {
-      state.error = null;
-    });
+    // Handle Notify Absent Trainees
     builder.addCase(notifyAbsentTrainees.fulfilled, (state, action) => {
       state.absentTraineeNotification = action.payload;
     });
@@ -626,10 +556,7 @@ const notificationsSlice = createSlice({
       state.error = action.payload;
     });
 
-    // Submit Absence Proof
-    builder.addCase(submitAbsenceProof.pending, (state) => {
-      state.error = null;
-    });
+    // Handle Submit Absence Proof
     builder.addCase(submitAbsenceProof.fulfilled, (state, action) => {
       state.absenceProof = action.payload;
     });
