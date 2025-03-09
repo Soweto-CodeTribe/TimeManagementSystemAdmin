@@ -10,25 +10,25 @@
   margin: 0 auto; /* Center the form */
 }
 
-h1 {
+.add-user-form-container h1 {
   color: #333;
   margin-bottom: 5px;
   font-size: 24px;
 }
 
-p {
+.add-user-form-container p {
   color: #666;
   margin-top: 0;
   font-size: 14px;
 }
 
-.navigation {
+.add-user-form-container .navigation {
   color: #888;
   font-size: 12px;
   margin-bottom: 20px;
 }
 
-h2 {
+.add-user-form-container h2 {
   color: #333;
   font-size: 18px;
   display: flex;
@@ -36,7 +36,7 @@ h2 {
   margin-bottom: 15px;
 }
 
-.info-icon {
+.add-user-form-container .info-icon {
   width: 20px;
   height: 20px;
   border: 1px solid #999;
@@ -49,22 +49,22 @@ h2 {
   font-size: 12px;
 }
 
-.form-group {
+.add-user-form-container .form-group {
   margin-bottom: 15px;
 }
 
-label {
+.add-user-form-container label {
   display: block;
   color: #555;
   font-size: 14px;
   margin-bottom: 5px;
 }
 
-input[type="text"],
-input[type="email"],
-input[type="tel"],
-input[type="number"],
-select {
+.add-user-form-container input[type="text"],
+.add-user-form-container input[type="email"],
+.add-user-form-container input[type="tel"],
+.add-user-form-container input[type="number"],
+.add-user-form-container select {
   width: 100%;
   padding: 10px;
   border: 1px solid #ccc;
@@ -76,13 +76,13 @@ select {
   margin-bottom: 5px;
 }
 
-input::placeholder,
-select {
+.add-user-form-container input::placeholder,
+.add-user-form-container select {
   color: #999;
 }
 
-button[type="submit"],
-button[type="button"] {
+.add-user-form-container button[type="submit"],
+.add-user-form-container button[type="button"] {
   background-color: #000;
   color: white;
   border: none;
@@ -94,44 +94,44 @@ button[type="button"] {
   margin-top: 15px;
 }
 
-button[type="submit"]:disabled,
-button[type="button"]:disabled {
+.add-user-form-container button[type="submit"]:disabled,
+.add-user-form-container button[type="button"]:disabled {
   background-color: #ccc;
   cursor: not-allowed;
 }
 
-.nav-item {
+.add-user-form-container .nav-item {
   color: #555;
   cursor: pointer;
 }
 
-.nav-item.active {
+.add-user-form-container .nav-item.active {
   color: #000; /* Black for active item */
   font-weight: bold;
 }
 
-.nav-item:hover {
+.add-user-form-container .nav-item:hover {
   color: #4CAF50; /* Darker green on hover */
 }
 
-.checkbox-group {
+.add-user-form-container .checkbox-group {
   display: flex;
   align-items: center;
   margin-bottom: 15px;
 }
 
-.checkbox-group input[type="checkbox"] {
+.add-user-form-container .checkbox-group input[type="checkbox"] {
   width: auto;
   margin-right: 10px;
 }
 
-.checkbox-group label {
+.add-user-form-container .checkbox-group label {
   font-size: 12px;
   color: #555;
   flex: 1;
 }
 
-.modal-overlay {
+.add-user-form-container .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -144,7 +144,7 @@ button[type="button"]:disabled {
   z-index: 1000;
 }
 
-.modal-content {
+.add-user-form-container .modal-content {
   background-color: white;
   padding: 20px;
   border-radius: 8px;
@@ -154,7 +154,7 @@ button[type="button"]:disabled {
   text-align: center;
 }
 
-.modal-content button {
+.add-user-form-container .modal-content button {
   background-color: #000;
   color: white;
   border: none;
@@ -164,18 +164,16 @@ button[type="button"]:disabled {
   margin-top: 10px;
 }
 
-
-
 /* Responsive Layout */
 @media (min-width: 600px) {
-  .form-group {
+  .add-user-form-container .form-group {
     display: inline-block;
     width: 48%; /* Adjust for spacing */
     margin-right: 2%;
   }
 
   /* Remove margin-right from the last element in a row */
-  .form-group:nth-child(2n) {
+  .add-user-form-container .form-group:nth-child(2n) {
     margin-right: 0;
   }
 }

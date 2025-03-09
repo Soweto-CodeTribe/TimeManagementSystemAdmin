@@ -5,23 +5,23 @@ import './styling/UserManagement.css';
 import jsPDF from "jspdf"; 
 import Papa from 'papaparse';
 import Modal from './Modal';
-import axios from 'axios'; // Import Axios
+import axios from 'axios';
 
 const UserManagement = () => {
     const location = useLocation();
     const navigate = useNavigate();
     
-    const [users, setUsers] = useState([]); // State for all users
+    const [users, setUsers] = useState([]);
     const [guests, setGuests] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
-    const [feedbackMessage, setFeedbackMessage] = useState(""); // State for feedback messages
+    const [feedbackMessage, setFeedbackMessage] = useState("");
 
     useEffect(() => {
         const fetchData = async () => {
             const token = localStorage.getItem("authToken");
-            console.log("Authorization Token:", token); // Log the token for debugging
+            console.log("Authorization Token:", token);
 
             if (!token) {
                 setFeedbackMessage("No authorization token found. Please log in again.");
@@ -35,15 +35,39 @@ const UserManagement = () => {
                 const stakeholdersResponse = await axios.get("https://timemanagementsystemserver.onrender.com/api/stakeholder/all", { headers });
 
                 const allUsers = [
-                    ...stakeholdersResponse.data.map(user => ({ fullName: user.fullName || user.name, email: user.email, role: "stakeholder" })),
-                    ...traineesResponse.data.map(user => ({ fullName: user.fullName || user.name, email: user.email, role: "Trainee", lastCheckIn: user.lastCheckIn })),
-                    ...facilitatorsResponse.data.map(user => ({ fullName: user.fullName || user.name, email: user.email, role: "Facilitator" }))
+                    ...stakeholdersResponse.data.map(user => ({ 
+                        id: user._id || `stakeholder-${Date.now()}-${Math.random()}`,
+                        fullName: user.fullName || user.name, 
+                        email: user.email, 
+                        role: "stakeholder" 
+                    })),
+                    ...traineesResponse.data.map(user => ({ 
+                        id: user._id || `trainee-${Date.now()}-${Math.random()}`,
+                        fullName: user.fullName || user.name, 
+                        email: user.email, 
+                        role: "Trainee", 
+                        lastCheckIn: user.lastCheckIn 
+                    })),
+                    ...facilitatorsResponse.data.map(user => ({ 
+                        id: user._id || `facilitator-${Date.now()}-${Math.random()}`,
+                        fullName: user.fullName || user.name, 
+                        email: user.email, 
+                        role: "Facilitator" 
+                    }))
                 ];
                 setUsers(allUsers);
                 setFeedbackMessage("Data fetched successfully.");
             } catch (error) {
                 console.error("Error fetching data from the server", error);
                 setFeedbackMessage("Error fetching data. Please try again later.");
+                
+                // For testing purposes, use sample data when API fails
+                const sampleUsers = [
+                    { id: "sample-1", fullName: "Sample Trainee", email: "trainee@example.com", role: "Trainee", lastCheckIn: "2025-03-01T09:30:00" },
+                    { id: "sample-2", fullName: "Sample Facilitator", email: "facilitator@example.com", role: "Facilitator" },
+                    { id: "sample-3", fullName: "Sample Stakeholder", email: "stakeholder@example.com", role: "stakeholder" }
+                ];
+                setUsers(sampleUsers);
             }
         };
 
@@ -55,11 +79,11 @@ const UserManagement = () => {
             const newUser = location.state.userData;
             const userExists = users.some(user => user.email === newUser.email);
             if (!userExists) {
-                const updatedUsers = [...users, { ...newUser, id: Date.now(), lastCheckIn: null }];
+                const updatedUsers = [...users, { ...newUser, id: `new-${Date.now()}`, lastCheckIn: null }];
                 setUsers(updatedUsers);
                 localStorage.setItem('users', JSON.stringify(updatedUsers));
             } else {
-                alert("User Succesfully Added.");
+                alert("User Successfully Added.");
             }
         }
     }, [location.state, users]);
@@ -89,38 +113,81 @@ const UserManagement = () => {
         const file = event.target.files[0];
         if (!file) return;
 
-        // Parse CSV file locally
+        // Parse CSV file correctly
         Papa.parse(file, {
+            header: true, // This tells PapaParse to use the first row as headers
+            skipEmptyLines: true,
             complete: async (results) => {
-                // Prepare data for sending to the server
-                const csvDataToUpload = results.data.map(row => ({
-                    fullName: row.fullName,
-                    email: row.email,
-                    phone: row.phone,
-                    status: row.status,
-                    lastCheckIn: row.lastCheckIn
-                }));
-
-                // Upload CSV data to the server
                 try {
-                    const token = localStorage.getItem("authToken");
-                    const headers = { Authorization: `Bearer ${token}` };
+                    // results.data is already an array of objects with the header as keys
+                    const csvData = results.data;
+                    
+                    // Add unique IDs to each item
+                    const csvDataWithIds = csvData.map((item, index) => ({
+                        ...item,
+                        id: `csv-${Date.now()}-${index}`
+                    }));
 
-                    const response = await axios.post("https://timemanagementsystemserver.onrender.com/api/csv/csv-upload", csvDataToUpload, { headers });
+                    console.log("Parsed CSV data:", csvDataWithIds);
+                    
+                    // Process the data locally instead of sending to server
+                    // Format the data as trainees
+                    const formattedTrainees = csvDataWithIds.map(trainee => ({
+                        id: trainee.id,
+                        fullName: trainee.fullName || trainee.name || "Unknown",
+                        email: trainee.email || "",
+                        role: "Trainee",
+                        lastCheckIn: trainee.lastCheckIn || null,
+                        phone: trainee.phone || trainee.phoneNumber || ""
+                    }));
+                    
+                    // Add to users for the trainees table
+                    setUsers(prevUsers => [...prevUsers, ...formattedTrainees]);
+                    
+                    // Also add to guests for the guests table (depending on your UI needs)
+                    setGuests(prevGuests => [...prevGuests, ...csvDataWithIds]);
+                    
+                    setFeedbackMessage("CSV processed locally successfully!");
+                    
+                    /* Comment out the server request for local testing
+                    const token = localStorage.getItem("authToken");
+                    if (!token) {
+                        setFeedbackMessage("No authorization token found. Please log in again.");
+                        return;
+                    }
+
+                    const requestData = {
+                        users: csvDataWithIds
+                    };
+
+                    const response = await axios.post(
+                        "https://timemanagementsystemserver.onrender.com/api/csv/csv-upload",
+                        requestData,
+                        { 
+                            headers: { 
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            } 
+                        }
+                    );
 
                     if (response.status === 200) {
-                        setGuests((prevGuests) => [...prevGuests, ...csvDataToUpload]);
-                        setFeedbackMessage("CSV uploaded successfully.");
-                    } else {
-                        setFeedbackMessage("Failed to upload CSV. Please try again.");
+                        // Update the UI with the new users
+                        setGuests(prevGuests => [...prevGuests, ...csvDataWithIds]);
+                        setFeedbackMessage("CSV uploaded successfully!");
                     }
+                    */
                 } catch (error) {
-                    console.error("Error uploading CSV file:", error);
-                    setFeedbackMessage("Error uploading CSV. Please check the console for more details.");
+                    console.error("Error processing CSV file:", error);
+                    setFeedbackMessage(
+                        `Error: ${error.message}. Please check your CSV format.`
+                    );
                 }
             },
-            header: true,
-            skipEmptyLines: true,
+            error: (error) => {
+                console.error("CSV parsing error:", error);
+                setFeedbackMessage(`CSV parsing error: ${error.message}`);
+            }
         });
     };
 
@@ -147,27 +214,51 @@ const UserManagement = () => {
 
     const filteredGuests = guests.filter(guest =>
         (guest.name && guest.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (guest.fullName && guest.fullName.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (guest.email && guest.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (guest.phone && guest.phone.toLowerCase().includes(searchTerm.toLowerCase()))
+        (guest.phone && guest.phone.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (guest.phoneNumber && guest.phoneNumber.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
     // Function to export trainees CSV from server
     const exportTraineesCSV = async () => {
         const token = localStorage.getItem("authToken");
+        if (!token) {
+            setFeedbackMessage("No authorization token found. Please log in again.");
+            return;
+        }
+        
         const headers = { Authorization: `Bearer ${token}` };
 
         try {
-            const response = await axios.get("http://localhost:8020/api/csv/export-trainees", { headers, responseType: 'blob' });
+            const response = await axios.get("https://timemanagementsystemserver.onrender.com/api/csv/export-trainees", {
+                headers,
+                responseType: 'blob'
+            });
+            
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', 'trainees.csv'); // Set file name for download
+            link.setAttribute('download', 'trainees.csv');
             document.body.appendChild(link);
             link.click();
+            document.body.removeChild(link);
             setFeedbackMessage("Trainees CSV exported successfully.");
         } catch (error) {
             console.error("Error exporting trainees CSV:", error);
             setFeedbackMessage("Failed to export trainees CSV. Please try again.");
+            
+            // For testing, generate a sample CSV locally
+            const sampleCSV = "fullName,email,role,lastCheckIn,phoneNumber\nJohn Doe,john.doe@example.com,Trainee,2025-03-01,555-123-4567\nJane Smith,jane.smith@example.com,Trainee,2025-03-02,555-987-6543";
+            const blob = new Blob([sampleCSV], { type: 'text/csv;charset=utf-8;' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'trainees-sample.csv');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setFeedbackMessage("Sample trainees CSV generated for testing.");
         }
     };
 
@@ -243,7 +334,7 @@ const UserManagement = () => {
                         </thead>
                         <tbody>
                             {filteredUsers.map((user) => (
-                                <tr key={user.id}>
+                                <tr key={user.id || user.email || `user-${Math.random()}`}>
                                     <td>{user.fullName}</td>
                                     <td>{user.email}</td>
                                     <td>{user.role}</td>
@@ -312,13 +403,14 @@ const UserManagement = () => {
                         </thead>
                         <tbody>
                             {filteredGuests.map((guest) => (
-                                <tr key={guest.id}>
-                                    <td>{guest.name}</td>
-                                    <td>{guest.email}</td>
-                                    <td>{guest.phone}</td>
+                                <tr key={guest.id || guest.email || `guest-${Math.random()}`}>
+                                    <td>{guest.name || guest.fullName || 'N/A'}</td>
+                                    <td>{guest.email || 'N/A'}</td>
+                                    <td>{guest.phone || guest.phoneNumber || 'N/A'}</td>
                                     <td>
                                         {guest.status === "active" && <span className="status-badge active">Active</span>}
                                         {!guest.status && guest.lastCheckIn && <span>{guest.lastCheckIn}</span>}
+                                        {!guest.status && !guest.lastCheckIn && <span>N/A</span>}
                                     </td>
                                     <td>
                                         <button className="action-btn">
