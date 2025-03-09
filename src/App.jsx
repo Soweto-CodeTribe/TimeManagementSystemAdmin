@@ -17,6 +17,8 @@ import Login from "./Components/Login";
 import AddUserForm from "./Components/AddUserForm";
 import ForgotPassword from "./Components/ForgotPassword";
 import Profile from "./Components/Profile";
+import TwoFactorAuth from "./Components/TwoFactorAuth";
+
 
 function App() {
   const location = useLocation();
@@ -53,6 +55,8 @@ function App() {
     switch (path) {
       case "/":
         return "Dashboard";
+      case "TwoFactorAuth":
+        return "Two Factor Authentication";
       case "/user-management":
         return "User Management";
       case "/session":
@@ -91,9 +95,9 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/login" element={isAuthenticated ? <Navigate to="/" /> : <Login />} />
+      <Route path="/login" element={isAuthenticated ? <Navigate to="/TwoFactorAuth" /> : <Login />} />
       <Route path="/forgotPassword" element={<ForgotPassword />} />
-      
+      <Route path="/TwoFactorAuth" element={<TwoFactorAuth />} />
       <Route
         path="/*"
         element={
