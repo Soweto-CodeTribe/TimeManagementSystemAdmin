@@ -79,7 +79,7 @@ const Login = () => {
           <img src={logo} alt="Brand Logo" className="brand-logo" />
 
           <div className="login-header">
-            <h2>Secure Access to Your Account</h2>
+            <h2>Secure Access to Your Account.</h2>
             <p>Sign in with your email and password to continue.</p>
           </div>
 
