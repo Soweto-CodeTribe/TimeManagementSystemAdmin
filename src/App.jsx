@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { checkAuthStatus } from "./Slices/authSlice";
@@ -19,6 +19,8 @@ import ForgotPassword from "./Components/ForgotPassword";
 import Profile from "./Components/Profile";
 import TwoFactorAuth from "./Components/TwoFactorAuth";
 
+import Loader from "./Components/Loader";
+import Notifications from "./Components/Notifications";
 
 function App() {
   const location = useLocation();
@@ -27,30 +29,25 @@ function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(
     localStorage.getItem("sidebarState") === "true"
   );
-  const [initialAuthCheckDone, setInitialAuthCheckDone] = useState(false);
 
-  // Check authentication on initial load
+  // Initial auth check on app load
   useEffect(() => {
     const verifyAuth = async () => {
-      try {
-        // Only check if we have a token to avoid unnecessary API calls
-        if (localStorage.getItem('authToken')) {
-          await dispatch(checkAuthStatus());
-        }
-      } finally {
-        // Mark auth check as done regardless of result
-        setInitialAuthCheckDone(true);
+      // Only check if a token exists to avoid unnecessary API calls
+      if (localStorage.getItem("authToken")) {
+        await dispatch(checkAuthStatus());
       }
     };
-    
+
     verifyAuth();
   }, [dispatch]);
 
-  // Persist sidebar state
+  // Persist sidebar state in local storage
   useEffect(() => {
     localStorage.setItem("sidebarState", isSidebarOpen);
   }, [isSidebarOpen]);
 
+  // Determine current screen name for Navbar
   const getScreenName = (path) => {
     switch (path) {
       case "/":
@@ -65,7 +62,7 @@ function App() {
         return "Reports";
       case "/settings":
         return "System Settings";
-      case "/Profile":
+      case "/profile":
         return "Profile";
       case "/alerts":
         return "Alerts";
@@ -78,17 +75,11 @@ function App() {
 
   const currentScreen = getScreenName(location.pathname);
 
-  // Show a loading spinner until the initial auth check is complete
-  // This prevents flickering between login and dashboard screens
-  if (!initialAuthCheckDone) {
+  // Global loading overlay while auth status is pending
+  if (isLoading) {
     return (
-      <div className="loading-container" style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh' 
-      }}>
-        <p>Loading application...</p>
+      <div className="loading-overlay">
+        <Loader />
       </div>
     );
   }
@@ -106,22 +97,23 @@ function App() {
               <div className="main-content">
                 <Sidebar isOpen={isSidebarOpen} />
                 <div className="content">
-                  {isLoading ? (
-                    <div className="loading-spinner">Loading...</div>
-                  ) : (
-                    <Routes>
-                      <Route path="/" element={<Dashboard />} />
-                      <Route path="/user-management" element={<UserManagement />} />
-                      <Route path="/session" element={<Session />} />
-                      <Route path="/reports" element={<Reports />} />
-                      <Route path="/settings" element={<SystemSettings />} />
-                      <Route path="/profile" element={<Profile />} />
-                      <Route path="/alerts" element={<Alerts />} />
-                      <Route path="/audit-logs" element={<AuditLogs />} />
-                      <Route path="/logout" element={<Logout />} />
-                      <Route path="/add-user" element={<AddUserForm />} />
-                    </Routes>
-                  )}
+                  <Navbar
+                    currentScreen={currentScreen}
+                    toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+                  />
+                  <Routes>
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/user-management" element={<UserManagement />} />
+                    <Route path="/session" element={<Session />} />
+                    <Route path="/reports" element={<Reports />} />
+                    <Route path="/settings" element={<SystemSettings />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/notifications" element={<Notifications />} />
+                    <Route path="/alerts" element={<Alerts />} />
+                    <Route path="/audit-logs" element={<AuditLogs />} />
+                    <Route path="/logout" element={<Logout />} />
+                    <Route path="/add-user" element={<AddUserForm />} />
+                  </Routes>
                 </div>
               </div>
             </div>

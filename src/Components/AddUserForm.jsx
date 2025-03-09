@@ -1,372 +1,297 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
-// Base URL for all API requests
-const BASE_URL = 'https://timemanagementsystemserver.onrender.com';
+import axios from 'axios';
+import './styling/AddUserForm.css'; // Import the CSS
 
 const AddUserForm = () => {
-  const navigate = useNavigate();
-  
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    role: '',
-    zipCode: '',
-    surname: '',
-    dateOfBirth: '',
-    location: '',
-    address: '',
-  });
+    const navigate = useNavigate();
+    const [currentScreen, setCurrentScreen] = useState('basic-info');
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
+    // State for basic info
+    const [fullName, setFullName] = useState('');
+    const [surname, setSurname] = useState('');
+    const [email, setEmail] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [idNumber, setIdNumber] = useState(''); // State for ID Number
+    const [location, setLocation] = useState(''); // State for Location
+    const [role, setRole] = useState(''); // State for user role
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+    // State for address
+    const [street, setStreet] = useState('');
+    const [city, setCity] = useState('');
+    const [postalCode, setPostalCode] = useState('');
+    const [isConfirmed, setIsConfirmed] = useState(false);
+    const [feedbackMessage, setFeedbackMessage] = useState(''); // State for feedback message
 
-    const endpoint = formData.role === 'Trainee' 
-      ? '/api/trainee' 
-      : '/api/facilitator';
+    const handleContinue = () => {
+        if (currentScreen === 'basic-info') {
+            setCurrentScreen('physical-address');
+        }
+    };
 
-    const token = localStorage.getItem("token"); // Get the stored token
+    const handleSubmit = async (e) => {
+        e.preventDefault();
 
-    try {
-      // First save the user to the backend
-      const response = await axios.post(`${BASE_URL}${endpoint}`, formData, {
-          headers: {
-              Authorization: `Bearer ${token}` // Include the token in the request
-          }
-      });
-      
-      // If the save was successful
-      if (response.data) {
-        // Log the success
-        console.log('Response:', response.data);
-        
-        // Alert the user about successful save
-        alert('User saved successfully!');
-        
-        // Extract just the required data for UserManagement
-        const userManagementData = {
-          name: formData.name,
-          surname: formData.surname,
-          email: formData.email,
-          role: formData.role,
-          id: response.data.id || response.data._id
+        // Prepare the user data to send
+        const userData = { 
+            fullName, 
+            surname, 
+            email, 
+            phoneNumber, 
+            idNumber, 
+            street, 
+            city, 
+            postalCode,
+            location 
         };
-        
-        // Reset form after successful submission
-        setFormData({
-          name: '',
-          email: '',
-          phone: '',
-          role: '',
-          zipCode: '',
-          surname: '',
-          dateOfBirth: '',
-          location: '',
-          address: '',
-        });
-        
-        // Navigate to User Management with the new user data
-        navigate('/user-management', { 
-          state: { userData: userManagementData } 
-        });
-      }
-    } catch (error) {
-      console.error('Error saving user:', error);
-      alert('Failed to save user. Check the console for details.');
+
+        console.log("User Data:", userData); // Log the user data being sent
+
+        const token = localStorage.getItem("authToken");
+        console.log("Authorization Token:", token); // Log the token for debugging
+
+        // Check if the token is present
+        if (!token) {
+            setFeedbackMessage("No authorization token found. Please log in again.");
+            return;
+        }
+
+        try {
+            // Determine the correct endpoint based on the role
+            let endpoint = '';
+            switch (role) {
+                case 'Trainee':
+                    endpoint = '/api/trainees';
+                    break;
+                case 'Facilitator':
+                    endpoint = '/api/facilitators';
+                    break;
+                case 'Stakeholder':
+                    endpoint = '/api/stakeholder';
+                    break;
+                default:
+                    setFeedbackMessage("Please select a role.");
+                    return; // Stop execution if the role is not selected
+            }
+
+            // Send the user data to the selected endpoint
+            const response = await axios.post(`https://timemanagementsystemserver.onrender.com${endpoint}`, userData, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            // Handle the response from the server
+            if (response.status === 201 || response.status === 200) {
+                setFeedbackMessage("User saved successfully!"); // Show success message
+                navigate('/user-management', { state: { userData } }); // Navigate to UserManagement
+            }
+        } catch (error) {
+            console.error('Error saving user:', error);
+
+            // Enhanced error logging
+            if (error.response) {
+                console.error('Response data:', error.response.data);
+                const errorMessage = error.response.data.error || error.response.data || "An unknown error occurred.";
+                setFeedbackMessage("Failed to save user: " + errorMessage); // Show specific error message
+            } else {
+                setFeedbackMessage("Failed to save user: " + error.message); // Show network or other errors
+            }
+        }
+    };
+
+    // Render physical address screen
+    if (currentScreen === 'physical-address') {
+        return (
+            <div className="add-user-form-container">
+                <h1>Add New User</h1>
+                <p>Easily register trainees, guests, or facilitators with the required details.</p>
+
+                <div className="navigation">
+                    <span className="nav-item">Basic Information</span>
+                    {' > '}
+                    <span className="nav-item active">Physical Address</span>
+                    {' > '}
+                    <span className="nav-item">Additional Info</span>
+                </div>
+
+                <h2>Physical Address <span className="info-icon">ⓘ</span></h2>
+
+                <form onSubmit={handleSubmit}>
+                    <div className="form-group">
+                        <label htmlFor="street">Street</label>
+                        <input 
+                            type="text" 
+                            id="street" 
+                            placeholder="Enter Street"
+                            value={street}
+                            onChange={(e) => setStreet(e.target.value)}
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="city">City</label>
+                        <input 
+                            type="text" 
+                            id="city" 
+                            placeholder="Enter City"
+                            value={city}
+                            onChange={(e) => setCity(e.target.value)}
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="postalCode">Postal Code</label>
+                        <input 
+                            type="text" 
+                            id="postalCode" 
+                            placeholder="Enter postal code"
+                            value={postalCode}
+                            onChange={(e) => setPostalCode(e.target.value)}
+                        />
+                    </div>
+
+                    <div className="form-group checkbox-group">
+                        <input 
+                            type="checkbox" 
+                            id="confirm" 
+                            checked={isConfirmed}
+                            onChange={(e) => setIsConfirmed(e.target.checked)}
+                        />
+                        <label htmlFor="confirm">
+                            I confirm that all the information provided is accurate and agree to the system's terms and conditions.
+                        </label>
+                    </div>
+
+                    <button 
+                        type="submit" 
+                        className="submit-btn"
+                        disabled={!isConfirmed}
+                    >
+                        Submit
+                    </button>
+
+                    {feedbackMessage && (
+                        <p className={`feedback-message ${feedbackMessage.includes("Failed") ? 'error' : 'success'}`}>
+                            {feedbackMessage}
+                        </p>
+                    )}
+                </form>
+            </div>
+        );
     }
-  };
 
-  return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '20px',
-      backgroundColor: '#f5f5f5',
-      borderRadius: '8px',
-      width: '100%',
-      height: '100vh',
-      boxSizing: 'border-box',
-      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-      position: 'relative',
-      overflow: 'hidden',
-    }}>
-      <h1 style={{
-        fontSize: '24px',
-        fontWeight: 'bold',
-        color: '#333',
-        marginBottom: '20px',
-        width: '100%',
-        textAlign: 'center',
-      }}>
-        Add a User
-      </h1>
+    // Render basic information screen
+    return (
+        <div className="add-user-form-container">
+            <h1>Add New User</h1>
+            <p>Easily register trainees, guests, or facilitators with the required details.</p>
 
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          width: '100%',
-          maxWidth: '1200px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '20px',
-            width: '100%',
-          }}
-        >
-          <div>
-            <div style={{ marginBottom: '15px' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
-                Name *
-              </label>
-              <input
-                type="text"
-                name="name"
-                placeholder="Enter name"
-                value={formData.name}
-                onChange={handleChange}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  fontSize: '14px',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px',
-                  outline: 'none',
-                  height: '45px',
-                  boxSizing: 'border-box',
-                }}
-                required
-              />
+            <div className="navigation">
+                <span className="nav-item active">Basic Information</span>
+                {' > '}
+                <span className="nav-item">Physical Address</span>
+                {' > '}
+                <span className="nav-item">Additional Info</span>
             </div>
-            <div style={{ marginBottom: '15px' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
-                Email *
-              </label>
-              <input
-                type="email"
-                name="email"
-                placeholder="Enter email"
-                value={formData.email}
-                onChange={handleChange}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  fontSize: '14px',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px',
-                  outline: 'none',
-                  height: '45px',
-                  boxSizing: 'border-box',
-                }}
-                required
-              />
-            </div>
-            <div style={{ marginBottom: '15px' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
-                Phone *
-              </label>
-              <input
-                type="tel"
-                name="phone"
-                placeholder="Enter phone number"
-                value={formData.phone}
-                onChange={handleChange}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  fontSize: '14px',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px',
-                  outline: 'none',
-                  height: '45px',
-                  boxSizing: 'border-box',
-                }}
-                required
-              />
-            </div>
-            <div style={{ marginBottom: '15px' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
-                Role *
-              </label>
-              <select
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  fontSize: '14px',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px',
-                  outline: 'none',
-                  height: '45px',
-                  boxSizing: 'border-box',
-                }}
-                required
-              >
-                <option value="">Select a role</option>
-                <option value="Trainee">Trainee</option>
-                <option value="Facilitator">Facilitator</option>
-                <option value="Stakeholder">Stakeholder</option>
-              </select>
-            </div>
-          </div>
-          <div>
-            <div style={{ marginBottom: '15px' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
-                Zip Code *
-              </label>
-              <input
-                type="text"
-                name="zipCode"
-                placeholder="Enter zip code"
-                value={formData.zipCode}
-                onChange={handleChange}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  fontSize: '14px',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px',
-                  outline: 'none',
-                  height: '45px',
-                  boxSizing: 'border-box',
-                }}
-                required
-              />
-            </div>
-            <div style={{ marginBottom: '15px' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
-                Surname *
-              </label>
-              <input
-                type="text"
-                name="surname"
-                placeholder="Enter surname"
-                value={formData.surname}
-                onChange={handleChange}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  fontSize: '14px',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px',
-                  outline: 'none',
-                  height: '45px',
-                  boxSizing: 'border-box',
-                }}
-                required
-              />
-            </div>
-            <div style={{ marginBottom: '15px' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
-                Date of Birth *
-              </label>
-              <input
-                type="date"
-                name="dateOfBirth"
-                value={formData.dateOfBirth}
-                onChange={handleChange}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  fontSize: '14px',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px',
-                  outline: 'none',
-                  height: '45px',
-                  boxSizing: 'border-box',
-                }}
-                required
-              />
-            </div>
-            <div style={{ marginBottom: '15px' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
-                Location *
-              </label>
-              <input
-                type="text"
-                name="location"
-                placeholder="Enter location"
-                value={formData.location}
-                onChange={handleChange}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  fontSize: '14px',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px',
-                  outline: 'none',
-                  height: '45px',
-                  boxSizing: 'border-box',
-                }}
-                required
-              />
-            </div>
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#333', marginBottom: '5px' }}>
-                Address *
-              </label>
-              <input
-                type="text"
-                name="address"
-                placeholder="Enter address"
-                value={formData.address}
-                onChange={handleChange}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  fontSize: '14px',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px',
-                  outline: 'none',
-                  height: '45px',
-                  boxSizing: 'border-box',
-                }}
-                required
-              />
-            </div>
-          </div>
+
+            <h2>Basic Information <span className="info-icon">ⓘ</span></h2>
+
+            <form onSubmit={(e) => e.preventDefault()}>
+                <div className="form-group">
+                    <label htmlFor="fullName">Full Name</label>
+                    <input 
+                        type="text" 
+                        id="fullName" 
+                        placeholder="Enter full name" 
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)} 
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="surname">Surname</label>
+                    <input 
+                        type="text" 
+                        id="surname" 
+                        placeholder="Enter surname" 
+                        value={surname}
+                        onChange={(e) => setSurname(e.target.value)}
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="email">Email</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        placeholder="Enter email" 
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="phoneNumber">Phone number</label>
+                    <input 
+                        type="tel" 
+                        id="phoneNumber" 
+                        placeholder="Enter phone number" 
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
+                    />
+                </div>
+
+                {/* New ID Number input field */}
+                <div className="form-group">
+                    <label htmlFor="idNumber">ID Number</label>
+                    <input 
+                        type="text" 
+                        id="idNumber" 
+                        placeholder="Enter ID Number" 
+                        value={idNumber}
+                        onChange={(e) => setIdNumber(e.target.value)}
+                    />
+                </div>
+
+                {/* Conditional Location input field */}
+                {(role === 'Trainee' || role === 'Facilitator') && (
+                    <div className="form-group">
+                        <label htmlFor="location">Location</label>
+                        <input 
+                            type="text" 
+                            id="location" 
+                            placeholder="Enter Location" 
+                            value={location}
+                            onChange={(e) => setLocation(e.target.value)}
+                        />
+                    </div>
+                )}
+
+                <div className="form-group">
+                    <label htmlFor="role">Role</label>
+                    <select 
+                        id="role" 
+                        value={role}
+                        onChange={(e) => setRole(e.target.value)}
+                    >
+                        <option value="" disabled>Select role</option>
+                        <option value="Trainee">Trainee</option>
+                        <option value="Facilitator">Facilitator</option>
+                        <option value="Stakeholder">Stakeholder</option>
+                    </select>
+                </div>
+
+                <button type="button" onClick={handleContinue}>Continue</button>
+            </form>
+
+            {feedbackMessage && (
+                <p className={`feedback-message ${feedbackMessage.includes("Failed") ? 'error' : 'success'}`}>
+                    {feedbackMessage}
+                </p>
+            )}
         </div>
-
-        <button
-          type="submit"
-          style={{
-            width: '200px',
-            padding: '14px',
-            fontSize: '16px',
-            fontWeight: 'bold',
-            color: '#fff',
-            backgroundColor: '#4caf50',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            transition: 'background-color 0.3s ease',
-            marginTop: '20px',
-          }}
-          onMouseEnter={(e) => (e.target.style.backgroundColor = '#45a049')}
-          onMouseLeave={(e) => (e.target.style.backgroundColor = '#4caf50')}
-        >
-          Save
-        </button>
-      </form>
-    </div>
-  );
+    );
 };
 
 export default AddUserForm;
-

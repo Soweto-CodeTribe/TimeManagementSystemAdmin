@@ -29,6 +29,7 @@ const Login = () => {
 
     dispatch(clearError());
 
+
     try {
       const response = await fetch("https://timemanagementsystemserver.onrender.com/api/auth/login", {
         method: "POST",
@@ -53,6 +54,7 @@ const Login = () => {
 
       setDebugInfo("Attempting login...");
       console.log("Login attempt with:", { email, password: "********" });
+
 
       const resultAction = await dispatch(loginUser({ email, password }));
       console.log("Login result:", resultAction);

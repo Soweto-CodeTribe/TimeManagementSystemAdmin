@@ -4,250 +4,335 @@ import { useLocation, useNavigate } from "react-router-dom";
 import './styling/UserManagement.css';
 import jsPDF from "jspdf"; 
 import Papa from 'papaparse';
-import Modal from './Modal'; // Import Modal
+import Modal from './Modal';
+import axios from 'axios'; // Import Axios
 
 const UserManagement = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  
-  // Initial Users from localStorage or fallback to an empty array
-  const getInitialUsers = () => {
-    const storedUsers = localStorage.getItem('users');
-    return storedUsers ? JSON.parse(storedUsers) : [];
-  };
+    const location = useLocation();
+    const navigate = useNavigate();
+    
+    const [users, setUsers] = useState([]); // State for all users
+    const [guests, setGuests] = useState([]);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [modalOpen, setModalOpen] = useState(false);
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [feedbackMessage, setFeedbackMessage] = useState(""); // State for feedback messages
 
-  const [users, setUsers] = useState(getInitialUsers());
-  const [guests, setGuests] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
+    useEffect(() => {
+        const fetchData = async () => {
+            const token = localStorage.getItem("authToken");
+            console.log("Authorization Token:", token); // Log the token for debugging
 
-  // Load new user data from location state if available
-  useEffect(() => {
-    if (location.state && location.state.userData) {
-      const newUser = location.state.userData;
+            if (!token) {
+                setFeedbackMessage("No authorization token found. Please log in again.");
+                return;
+            }
 
-      // Check for duplicate user based on email
-      const userExists = users.some(user => user.email === newUser.email);
+            try {
+                const headers = { Authorization: `Bearer ${token}` };
+                const traineesResponse = await axios.get("https://timemanagementsystemserver.onrender.com/api/trainees", { headers });
+                const facilitatorsResponse = await axios.get("https://timemanagementsystemserver.onrender.com/api/facilitators", { headers });
+                const stakeholdersResponse = await axios.get("https://timemanagementsystemserver.onrender.com/api/stakeholder/all", { headers });
 
-      if (!userExists) {
-        const updatedUsers = [...users, newUser];
-        setUsers(updatedUsers);
-        localStorage.setItem('users', JSON.stringify(updatedUsers)); // Save to localStorage
-      } else {
-        console.warn("User already exists");
-      }
-    }
-  }, [location.state, users]);
+                const allUsers = [
+                    ...stakeholdersResponse.data.map(user => ({ fullName: user.fullName || user.name, email: user.email, role: "stakeholder" })),
+                    ...traineesResponse.data.map(user => ({ fullName: user.fullName || user.name, email: user.email, role: "Trainee", lastCheckIn: user.lastCheckIn })),
+                    ...facilitatorsResponse.data.map(user => ({ fullName: user.fullName || user.name, email: user.email, role: "Facilitator" }))
+                ];
+                setUsers(allUsers);
+                setFeedbackMessage("Data fetched successfully.");
+            } catch (error) {
+                console.error("Error fetching data from the server", error);
+                setFeedbackMessage("Error fetching data. Please try again later.");
+            }
+        };
 
-  const exportPDF = () => {
-    const doc = new jsPDF();
-    doc.text("User Management", 10, 10);
-    doc.text("Name, Email, Role, Last Check-In", 10, 20);
-    users.forEach((user, index) => {
-      doc.text(`${user.name}, ${user.email}, ${user.role}, ${user.lastCheckIn}`, 10, 30 + index * 10);
-    });
-    doc.save("UserManagement.pdf");
-  };
+        fetchData();
+    }, []);
 
-  const exportCSV = () => {
-    const csvContent = users.map(user => `${user.name},${user.email},${user.role},${user.lastCheckIn}`).join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.setAttribute('download', 'users.csv');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+    useEffect(() => {
+        if (location.state && location.state.userData) {
+            const newUser = location.state.userData;
+            const userExists = users.some(user => user.email === newUser.email);
+            if (!userExists) {
+                const updatedUsers = [...users, { ...newUser, id: Date.now(), lastCheckIn: null }];
+                setUsers(updatedUsers);
+                localStorage.setItem('users', JSON.stringify(updatedUsers));
+            } else {
+                alert("User Succesfully Added.");
+            }
+        }
+    }, [location.state, users]);
 
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    Papa.parse(file, {
-      complete: (results) => {
-        results.data.forEach((row, index) => {
-          const { name, email, phone, status, lastCheckIn } = row;
-
-          // Check for duplicates before adding guests
-          const guestExists = guests.some(guest => guest.email === email);
-
-          if (!guestExists) { // Only add if not exists
-            const newGuest = { id: guests.length + index + 1, name, email, phone, status, lastCheckIn };
-            setGuests((prevGuests) => [...prevGuests, newGuest]);
-          } else {
-            console.warn("Guest already exists");
-          }
+    const exportPDF = () => {
+        const doc = new jsPDF();
+        doc.text("User Management", 10, 10);
+        doc.text("Full Name, Email, Role, Last Check-In", 10, 20);
+        users.forEach((user, index) => {
+            doc.text(`${user.fullName}, ${user.email}, ${user.role}, ${user.lastCheckIn || 'N/A'}`, 10, 30 + index * 10);
         });
-      },
-      header: true, 
-      skipEmptyLines: true,
-    });
-  };
+        doc.save("UserManagement.pdf");
+    };
 
-  const handleTakeAction = (user) => {
-    setSelectedUser(user);
-    setModalOpen(true);
-  };
+    const exportCSV = () => {
+        const csvContent = users.map(user => `${user.fullName},${user.email},${user.role},${user.lastCheckIn || 'N/A'}`).join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute('download', 'users.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
 
-  const handleDeleteUser = () => {
-    const updatedUsers = users.filter(user => user.id !== selectedUser.id);
-    setUsers(updatedUsers);
-    setModalOpen(false);
-    setSelectedUser(null);
-    localStorage.setItem('users', JSON.stringify(updatedUsers)); // Update localStorage
-  };
+    const handleFileChange = async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
 
-  return (
-    <div className="user-management-container">
-      <Modal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onView={() => console.log("View user", selectedUser)}
-        onExportCSV={exportCSV}
-        onExportPDF={() => exportPDF(selectedUser)}
-        onDelete={handleDeleteUser}
-      />
+        // Parse CSV file locally
+        Papa.parse(file, {
+            complete: async (results) => {
+                // Prepare data for sending to the server
+                const csvDataToUpload = results.data.map(row => ({
+                    fullName: row.fullName,
+                    email: row.email,
+                    phone: row.phone,
+                    status: row.status,
+                    lastCheckIn: row.lastCheckIn
+                }));
 
-      <div className="header">
-        <div className="title-section">
-          <h1>User management</h1>
-          <p className="subtitle">Manage your trainees and guests and control permissions here</p>
-        </div>
-        <button className="add-user-btn" onClick={() => navigate('/add-user')}>
-          <Plus size={16} />
-          <span>Add user</span>
-        </button>
-      </div>
+                // Upload CSV data to the server
+                try {
+                    const token = localStorage.getItem("authToken");
+                    const headers = { Authorization: `Bearer ${token}` };
 
-      <div className="table-section">
-        <div className="table-header">
-          <h2>
-            Trainees <span className="count">{users.length}</span>
-          </h2>
-        </div>
-        <div className="table-controls">
-          <div className="left-controls">
-            <button className="filter-btn">
-              <Filter size={14} />
-              <span>Filter</span>
-            </button>
-            <div className="search-container">
-              <Search size={14} className="search-icon" />
-              <input
-                type="text"
-                placeholder="Search"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input"
-              />
+                    const response = await axios.post("https://timemanagementsystemserver.onrender.com/api/csv/csv-upload", csvDataToUpload, { headers });
+
+                    if (response.status === 200) {
+                        setGuests((prevGuests) => [...prevGuests, ...csvDataToUpload]);
+                        setFeedbackMessage("CSV uploaded successfully.");
+                    } else {
+                        setFeedbackMessage("Failed to upload CSV. Please try again.");
+                    }
+                } catch (error) {
+                    console.error("Error uploading CSV file:", error);
+                    setFeedbackMessage("Error uploading CSV. Please check the console for more details.");
+                }
+            },
+            header: true,
+            skipEmptyLines: true,
+        });
+    };
+
+    const handleTakeAction = (user) => {
+        setSelectedUser(user);
+        setModalOpen(true);
+    };
+
+    const handleDeleteUser = () => {
+        if (selectedUser) {
+            const updatedUsers = users.filter(user => user.id !== selectedUser.id);
+            setUsers(updatedUsers);
+            setModalOpen(false);
+            localStorage.setItem('users', JSON.stringify(updatedUsers));
+            setSelectedUser(null);
+        }
+    };
+
+    const filteredUsers = users.filter(user =>
+        (user.fullName && user.fullName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (user.role && user.role.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+
+    const filteredGuests = guests.filter(guest =>
+        (guest.name && guest.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (guest.email && guest.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (guest.phone && guest.phone.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+
+    // Function to export trainees CSV from server
+    const exportTraineesCSV = async () => {
+        const token = localStorage.getItem("authToken");
+        const headers = { Authorization: `Bearer ${token}` };
+
+        try {
+            const response = await axios.get("http://localhost:8020/api/csv/export-trainees", { headers, responseType: 'blob' });
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'trainees.csv'); // Set file name for download
+            document.body.appendChild(link);
+            link.click();
+            setFeedbackMessage("Trainees CSV exported successfully.");
+        } catch (error) {
+            console.error("Error exporting trainees CSV:", error);
+            setFeedbackMessage("Failed to export trainees CSV. Please try again.");
+        }
+    };
+
+    return (
+        <div className="user-management-container">
+            <Modal
+                isOpen={modalOpen}
+                onClose={() => setModalOpen(false)}
+                onView={() => console.log("View user", selectedUser)}
+                onExportCSV={exportCSV}
+                onExportPDF={() => exportPDF(selectedUser)}
+                onDelete={handleDeleteUser}
+                user={selectedUser}
+            />
+
+            <div className="header">
+                <div className="title-section">
+                    <h1>User Management</h1>
+                    <p className="subtitle">Manage your trainees, facilitators, and guests here</p>
+                    {feedbackMessage && <p className="feedback-message">{feedbackMessage}</p>}
+                </div>
+                <button className="add-user-btn" onClick={() => navigate('/add-user')}>
+                    <Plus size={16} />
+                    <span>Add user</span>
+                </button>
             </div>
-          </div>
-          <div className="right-controls">
-            <button className="export-btn" onClick={exportPDF}>
-              <Download size={14} />
-              <span>Export PDF</span>
-            </button>
-            <input type="file" accept=".csv" onChange={handleFileChange} style={{ display: "none" }} id="csvInput" />
-            <label htmlFor="csvInput" className="import-btn">
-              <Upload size={14} />
-              <span>Import CSV</span>
-            </label>
-          </div>
-        </div>
-        <div className="table-container">
-          <table className="users-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Last Check-in</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((user) => (
-                <tr key={user.id}>
-                  <td>{user.name}</td>
-                  <td>{user.email}</td>
-                  <td>{user.role}</td>
-                  <td>{user.lastCheckIn}</td>
-                  <td>
-                    <button className="action-btn" onClick={() => handleTakeAction(user)}>
-                      <span>Take action</span>
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
 
-      {/* Second Table Section for Guests */}
-      <div className="table-section">
-        <div className="table-header">
-          <h2>
-            Guests <span className="count">{guests.length}</span>
-          </h2>
-        </div>
-        <div className="table-controls">
-          <div className="left-controls">
-            <button className="filter-btn">
-              <Filter size={14} />
-              <span>Filter</span>
-            </button>
-            <div className="search-container">
-              <Search size={14} className="search-icon" />
-              <input type="text" placeholder="Search" className="search-input" />
+            <div className="table-section">
+                <div className="table-header">
+                    <h2>
+                        Trainees and Facilitators <span className="count">{filteredUsers.length}</span>
+                    </h2>
+                </div>
+                <div className="table-controls">
+                    <div className="left-controls">
+                        <button className="filter-btn">
+                            <Filter size={14} />
+                            <span>Filter</span>
+                        </button>
+                        <div className="search-container">
+                            <Search size={14} className="search-icon" />
+                            <input
+                                type="text"
+                                placeholder="Search"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="search-input"
+                            />
+                        </div>
+                    </div>
+                    <div className="right-controls">
+                        <button className="export-btn" onClick={exportPDF}>
+                            <Download size={14} />
+                            <span>Export PDF</span>
+                        </button>
+                        <input type="file" accept=".csv" onChange={handleFileChange} style={{ display: "none" }} id="csvInput" />
+                        <label htmlFor="csvInput" className="import-btn">
+                            <Upload size={14} />
+                            <span>Import CSV</span>
+                        </label>
+                    </div>
+                </div>
+                <div className="table-container">
+                    <table className="users-table">
+                        <thead>
+                            <tr>
+                                <th>Full Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Last Check-in</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredUsers.map((user) => (
+                                <tr key={user.id}>
+                                    <td>{user.fullName}</td>
+                                    <td>{user.email}</td>
+                                    <td>{user.role}</td>
+                                    <td>{user.lastCheckIn || 'N/A'}</td>
+                                    <td>
+                                        <button className="action-btn" onClick={() => handleTakeAction(user)}>
+                                            <span>Take action</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-          </div>
-          <div className="right-controls">
-            <button className="export-btn" onClick={exportPDF}>
-              <Download size={14} />
-              <span>Export PDF</span>
-            </button>
-            <input type="file" accept=".csv" onChange={handleFileChange} style={{ display: "none" }} id="csvInput2" />
-            <label htmlFor="csvInput2" className="import-btn">
-              <Upload size={14} />
-              <span>Import CSV</span>
-            </label>
-          </div>
+
+            <div className="table-section">
+                <div className="table-header">
+                    <h2>
+                        Guests <span className="count">{filteredGuests.length}</span>
+                    </h2>
+                </div>
+                <div className="table-controls">
+                    <div className="left-controls">
+                        <button className="filter-btn">
+                            <Filter size={14} />
+                            <span>Filter</span>
+                        </button>
+                        <div className="search-container">
+                            <Search size={14} className="search-icon" />
+                            <input
+                                type="text"
+                                placeholder="Search"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="search-input"
+                            />
+                        </div>
+                    </div>
+                    <div className="right-controls">
+                        <button className="export-btn" onClick={exportPDF}>
+                            <Download size={14} />
+                            <span>Export PDF</span>
+                        </button>
+                        <input type="file" accept=".csv" onChange={handleFileChange} style={{ display: "none" }} id="csvInput2" />
+                        <label htmlFor="csvInput2" className="import-btn">
+                            <Upload size={14} />
+                            <span>Import CSV</span>
+                        </label>
+                        <button className="export-btn" onClick={exportTraineesCSV}>
+                            <Download size={14} />
+                            <span>Export Trainees CSV</span>
+                        </button>
+                    </div>
+                </div>
+                <div className="table-container">
+                    <table className="users-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredGuests.map((guest) => (
+                                <tr key={guest.id}>
+                                    <td>{guest.name}</td>
+                                    <td>{guest.email}</td>
+                                    <td>{guest.phone}</td>
+                                    <td>
+                                        {guest.status === "active" && <span className="status-badge active">Active</span>}
+                                        {!guest.status && guest.lastCheckIn && <span>{guest.lastCheckIn}</span>}
+                                    </td>
+                                    <td>
+                                        <button className="action-btn">
+                                            <span>Manage</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-        <div className="table-container">
-          <table className="users-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {guests.map((guest) => (
-                <tr key={guest.id}>
-                  <td>{guest.name}</td>
-                  <td>{guest.email}</td>
-                  <td>{guest.phone}</td>
-                  <td>
-                    {guest.status === "active" && <span className="status-badge active">Active</span>}
-                    {!guest.status && guest.lastCheckIn && <span>{guest.lastCheckIn}</span>}
-                  </td>
-                  <td>
-                    <button className="action-btn">
-                      <span>Manage</span>
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default UserManagement;

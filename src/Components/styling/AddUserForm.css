@@ -1,0 +1,181 @@
+/* AddUserForm.css */
+.add-user-form-container {
+  font-family: sans-serif;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 800px; /* Adjust as needed */
+  margin: 0 auto; /* Center the form */
+}
+
+h1 {
+  color: #333;
+  margin-bottom: 5px;
+  font-size: 24px;
+}
+
+p {
+  color: #666;
+  margin-top: 0;
+  font-size: 14px;
+}
+
+.navigation {
+  color: #888;
+  font-size: 12px;
+  margin-bottom: 20px;
+}
+
+h2 {
+  color: #333;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.info-icon {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #999;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 10px;
+  color: #999;
+  font-size: 12px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  color: #555;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="number"],
+select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 14px;
+  color: #333;
+  background-color: #fff;
+  margin-bottom: 5px;
+}
+
+input::placeholder,
+select {
+  color: #999;
+}
+
+button[type="submit"],
+button[type="button"] {
+  background-color: #000;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  font-size: 16px;
+  margin-top: 15px;
+}
+
+button[type="submit"]:disabled,
+button[type="button"]:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.nav-item {
+  color: #555;
+  cursor: pointer;
+}
+
+.nav-item.active {
+  color: #000; /* Black for active item */
+  font-weight: bold;
+}
+
+.nav-item:hover {
+  color: #4CAF50; /* Darker green on hover */
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: auto;
+  margin-right: 10px;
+}
+
+.checkbox-group label {
+  font-size: 12px;
+  color: #555;
+  flex: 1;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  position: relative;
+  max-width: 400px;
+  text-align: center;
+}
+
+.modal-content button {
+  background-color: #000;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 30px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+
+
+/* Responsive Layout */
+@media (min-width: 600px) {
+  .form-group {
+    display: inline-block;
+    width: 48%; /* Adjust for spacing */
+    margin-right: 2%;
+  }
+
+  /* Remove margin-right from the last element in a row */
+  .form-group:nth-child(2n) {
+    margin-right: 0;
+  }
+}
