@@ -128,22 +128,6 @@ const TwoFactorAuth = () => {
               </div>
             </div>
 
-            {phoneNumber === "" && (
-              <div className="form-group">
-                <label htmlFor="phoneNumber">Phone number (optional)</label>
-                <div className="input-wrapper">
-                  <FaPhone className="input-icon" />
-                  <input
-                    id="phoneNumber"
-                    type="text"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    placeholder="Enter phone number (e.g., 821234567)"
-                  />
-                </div>
-              </div>
-            )}
-
             {error && <p className="error-message">{error}</p>}
 
             <button
