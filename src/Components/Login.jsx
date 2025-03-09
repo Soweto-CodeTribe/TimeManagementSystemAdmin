@@ -6,7 +6,7 @@ import "../Components/styling/Login.css";
 import logo from "../assets/CodeTribeImage.png";
 import loginImg from "../assets/loginImg.png";
 import { useNavigate } from "react-router-dom";
-
+import twoFactorAuth from "./TwoFactorAuth";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -47,7 +47,7 @@ const Login = () => {
         // You might want to store it in localStorage or context/state depending on your app's needs
         // localStorage.setItem("token", data.token); // Example if you receive a token
         console.log("user: ", data);
-        navigate("/"); // Redirect to Dashboard after successful login
+        navigate("/twoFactorAuth"); // Redirect to Dashboard after successful login
       } else {
         alert(data.message || "Invalid credentials!"); // Show message from the server
       }
