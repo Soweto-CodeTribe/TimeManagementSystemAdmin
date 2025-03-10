@@ -45,8 +45,7 @@ const UserManagement = () => {
                         id: user._id || `trainee-${Date.now()}-${Math.random()}`,
                         fullName: user.fullName || user.name, 
                         email: user.email, 
-                        role: "Trainee", 
-                        lastCheckIn: user.lastCheckIn 
+                        role: "Trainee" 
                     })),
                     ...facilitatorsResponse.data.map(user => ({ 
                         id: user._id || `facilitator-${Date.now()}-${Math.random()}`,
@@ -61,9 +60,8 @@ const UserManagement = () => {
                 console.error("Error fetching data from the server", error);
                 setFeedbackMessage("Error fetching data. Please try again later.");
                 
-                // For testing purposes, use sample data when API fails
                 const sampleUsers = [
-                    { id: "sample-1", fullName: "Sample Trainee", email: "trainee@example.com", role: "Trainee", lastCheckIn: "2025-03-01T09:30:00" },
+                    { id: "sample-1", fullName: "Sample Trainee", email: "trainee@example.com", role: "Trainee" },
                     { id: "sample-2", fullName: "Sample Facilitator", email: "facilitator@example.com", role: "Facilitator" },
                     { id: "sample-3", fullName: "Sample Stakeholder", email: "stakeholder@example.com", role: "stakeholder" }
                 ];
@@ -79,7 +77,7 @@ const UserManagement = () => {
             const newUser = location.state.userData;
             const userExists = users.some(user => user.email === newUser.email);
             if (!userExists) {
-                const updatedUsers = [...users, { ...newUser, id: `new-${Date.now()}`, lastCheckIn: null }];
+                const updatedUsers = [...users, { ...newUser, id: `new-${Date.now()}` }];
                 setUsers(updatedUsers);
                 localStorage.setItem('users', JSON.stringify(updatedUsers));
             } else {
@@ -91,15 +89,15 @@ const UserManagement = () => {
     const exportPDF = () => {
         const doc = new jsPDF();
         doc.text("User Management", 10, 10);
-        doc.text("Full Name, Email, Role, Last Check-In", 10, 20);
+        doc.text("Full Name, Email, Role", 10, 20);
         users.forEach((user, index) => {
-            doc.text(`${user.fullName}, ${user.email}, ${user.role}, ${user.lastCheckIn || 'N/A'}`, 10, 30 + index * 10);
+            doc.text(`${user.fullName}, ${user.email}, ${user.role}`, 10, 30 + index * 10);
         });
         doc.save("UserManagement.pdf");
     };
 
     const exportCSV = () => {
-        const csvContent = users.map(user => `${user.fullName},${user.email},${user.role},${user.lastCheckIn || 'N/A'}`).join('\n');
+        const csvContent = users.map(user => `${user.fullName},${user.email},${user.role}`).join('\n');
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
@@ -121,7 +119,7 @@ const UserManagement = () => {
                 try {
                     // results.data is already an array of objects with the header as keys
                     const csvData = results.data;
-                    
+
                     // Add unique IDs to each item
                     const csvDataWithIds = csvData.map((item, index) => ({
                         ...item,
@@ -130,58 +128,27 @@ const UserManagement = () => {
 
                     console.log("Parsed CSV data:", csvDataWithIds);
                     
-                    // Process the data locally instead of sending to server
-                    // Format the data as trainees
+                    // Format the data as trainees (without lastCheckIn)
                     const formattedTrainees = csvDataWithIds.map(trainee => ({
                         id: trainee.id,
-                        fullName: trainee.fullName || trainee.name || "Unknown",
+                        fullName: trainee.fullName || "Unknown",
+                        surname: trainee.surname || "",
                         email: trainee.email || "",
-                        role: "Trainee",
-                        lastCheckIn: trainee.lastCheckIn || null,
-                        phone: trainee.phone || trainee.phoneNumber || ""
+                        phoneNumber: trainee.phoneNumber || "",
+                        idNumber: trainee.idNumber || "",
+                        street: trainee.street || "",
+                        city: trainee.city || "",
+                        postalCode: trainee.postalCode || "",
+                        location: trainee.location || "",
+                        role: "Trainee"
                     }));
                     
                     // Add to users for the trainees table
                     setUsers(prevUsers => [...prevUsers, ...formattedTrainees]);
-                    
-                    // Also add to guests for the guests table (depending on your UI needs)
-                    setGuests(prevGuests => [...prevGuests, ...csvDataWithIds]);
-                    
                     setFeedbackMessage("CSV processed locally successfully!");
-                    
-                    /* Comment out the server request for local testing
-                    const token = localStorage.getItem("authToken");
-                    if (!token) {
-                        setFeedbackMessage("No authorization token found. Please log in again.");
-                        return;
-                    }
-
-                    const requestData = {
-                        users: csvDataWithIds
-                    };
-
-                    const response = await axios.post(
-                        "https://timemanagementsystemserver.onrender.com/api/csv/csv-upload",
-                        requestData,
-                        { 
-                            headers: { 
-                                'Authorization': `Bearer ${token}`,
-                                'Content-Type': 'application/json'
-                            } 
-                        }
-                    );
-
-                    if (response.status === 200) {
-                        // Update the UI with the new users
-                        setGuests(prevGuests => [...prevGuests, ...csvDataWithIds]);
-                        setFeedbackMessage("CSV uploaded successfully!");
-                    }
-                    */
                 } catch (error) {
                     console.error("Error processing CSV file:", error);
-                    setFeedbackMessage(
-                        `Error: ${error.message}. Please check your CSV format.`
-                    );
+                    setFeedbackMessage(`Error: ${error.message}. Please check your CSV format.`);
                 }
             },
             error: (error) => {
@@ -231,7 +198,7 @@ const UserManagement = () => {
         const headers = { Authorization: `Bearer ${token}` };
 
         try {
-            const response = await axios.get("https://timemanagementsystemserver.onrender.com/api/csv/export-trainees", {
+            const response = await axios.get("https://timemanagementsystemserver.onrender.com/api/trainees", {
                 headers,
                 responseType: 'blob'
             });
@@ -247,18 +214,6 @@ const UserManagement = () => {
         } catch (error) {
             console.error("Error exporting trainees CSV:", error);
             setFeedbackMessage("Failed to export trainees CSV. Please try again.");
-            
-            // For testing, generate a sample CSV locally
-            const sampleCSV = "fullName,email,role,lastCheckIn,phoneNumber\nJohn Doe,john.doe@example.com,Trainee,2025-03-01,555-123-4567\nJane Smith,jane.smith@example.com,Trainee,2025-03-02,555-987-6543";
-            const blob = new Blob([sampleCSV], { type: 'text/csv;charset=utf-8;' });
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', 'trainees-sample.csv');
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            setFeedbackMessage("Sample trainees CSV generated for testing.");
         }
     };
 
@@ -328,7 +283,6 @@ const UserManagement = () => {
                                 <th>Full Name</th>
                                 <th>Email</th>
                                 <th>Role</th>
-                                <th>Last Check-in</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -338,7 +292,6 @@ const UserManagement = () => {
                                     <td>{user.fullName}</td>
                                     <td>{user.email}</td>
                                     <td>{user.role}</td>
-                                    <td>{user.lastCheckIn || 'N/A'}</td>
                                     <td>
                                         <button className="action-btn" onClick={() => handleTakeAction(user)}>
                                             <span>Take action</span>
