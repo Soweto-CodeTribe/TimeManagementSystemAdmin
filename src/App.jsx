@@ -52,7 +52,7 @@ function App() {
     switch (path) {
       case "/":
         return "Dashboard";
-      case "TwoFactorAuth":
+      case "/TwoFactorAuth":
         return "Two Factor Authentication";
       case "/user-management":
         return "User Management";
