@@ -140,3 +140,35 @@
   color: #777;
 }
 
+/* Dashboard Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.page-button {
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  padding: 8px 15px;
+  margin: 0 5px;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+}
+
+.page-button:hover {
+  background-color: #dfe6e9;
+}
+
+.page-button.active {
+  background-color: #000;
+  color: white;
+  font-weight: bold;
+}
+
+.page-button:disabled {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
+}

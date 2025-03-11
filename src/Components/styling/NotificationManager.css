@@ -1,0 +1,105 @@
+/* NotificationManager.css */
+
+/* Base styles for notification manager */
+.notification-manager {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  
+  /* Button styles */
+  .notification-manager button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .notification-manager button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  /* Icon styles */
+  .notification-manager .text-blue-600 {
+    color: #2563eb;
+  }
+  
+  .notification-manager .text-gray-600 {
+    color: #4b5563;
+  }
+  
+  /* Animation for loader */
+  .animate-spin {
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  /* Notification banner */
+  .notification-banner {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 15px;
+    border-left-width: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 50;
+    max-width: 400px;
+  }
+  
+  /* Banner type styles */
+  .notification-banner.success {
+    background-color: #dcfce7;
+    border-color: #22c55e;
+    color: #166534;
+  }
+  
+  .notification-banner.error {
+    background-color: #fee2e2;
+    border-color: #ef4444;
+    color: #b91c1c;
+  }
+  
+  .notification-banner.info {
+    background-color: #dbeafe;
+    border-color: #3b82f6;
+    color: #1e40af;
+  }
+  
+  /* Close button */
+  .notification-banner .close {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    font-weight: bold;
+    margin-left: 10px;
+    cursor: pointer;
+    color: inherit;
+    opacity: 0.7;
+  }
+  
+  .notification-banner .close:hover {
+    opacity: 1;
+  }
+  
+  /* Additional Lucide icon styling */
+  svg {
+    width: 20px;
+    height: 20px;
+  }

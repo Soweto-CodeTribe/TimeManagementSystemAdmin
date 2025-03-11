@@ -1,40 +1,19 @@
-// import React from 'react'
-
-const Notifications = () => {
-
-    
-  return (
-    <div>
-      Notiffications
-    </div>
-  )
-}
-
-export default Notifications
-
-
-/*
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchNotifications, markAsRead } from '../Slices/notificationsSlice';
 import './styling/Notifications.css';
-
 const Notifications = () => {
   const dispatch = useDispatch();
   const { notifications, loading, error } = useSelector((state) => state.notifications);
   const traineeId = '20'; // Use dynamic ID, just for now using hardcoded value
-
   useEffect(() => {
     dispatch(fetchNotifications(traineeId));
   }, [dispatch, traineeId]);
-
   const handleMarkAsRead = (notificationId) => {
     dispatch(markAsRead({ notificationId, traineeId }));
   };
-
   if (loading) return <p>Loading notifications...</p>;
   if (error) return <p>Error: {error}</p>;
-
   return (
     <div className="notifications-container">
       <h2>Notifications</h2>
@@ -63,6 +42,4 @@ const Notifications = () => {
     </div>
   );
 };
-
 export default Notifications;
-*/

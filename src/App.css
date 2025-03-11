@@ -11,6 +11,11 @@ html, body, #root {
   font-family: Poppins;
 }
 
+::selection{
+  background:#8CC63F;
+  color:#f2f2f8;
+}
+
 .app-container {
   display: flex;
   height: 100vh;

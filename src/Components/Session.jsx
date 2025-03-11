@@ -30,10 +30,11 @@ const SessionMonitoring = () => {
 
   const fetchData = async (page = 1) => {
     setIsLoading(true);
+  
     try {
-      const response = await axios.get(`${BASE_URL}api/session/daily-report`, {
+      const response = await axios.get(`${BASE_URL}api/session/daily-report?pages`, {
         params: {
-          page: page,
+          pages: page,
           limit: itemsPerPage
         },
         headers: {
@@ -41,19 +42,23 @@ const SessionMonitoring = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      
+  
       // Store API data in state - separate summary from reports
-      setSummaryData(response.data.summary || {});
-      setReports(response.data.paginatedReports || []);
-      setData(response.data || []);
-      
+      const { summary = {}, paginatedReports = [], pagination = {} } = response.data;
+  
+      setSummaryData(summary);
+      setReports(paginatedReports);
+      setData(response.data);
+  
+      console.log('my summary data', summary);  // Log the response directly
+  
       // Set pagination data
-      if (response.data.pagination) {
-        setCurrentPage(response.data.pagination.currentPage);
-        setTotalPages(response.data.pagination.totalPages);
-        setTotalItems(response.data.pagination.totalItems);
+      if (pagination) {
+        setCurrentPage(pagination.currentPage);
+        setTotalPages(pagination.totalPages);
+        setTotalItems(pagination.totalItems);
       }
-      
+  
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching daily report:", error);
@@ -61,6 +66,7 @@ const SessionMonitoring = () => {
       setIsLoading(false);
     }
   };
+  
 
   // Handle page change
   const handlePageChange = (page) => {

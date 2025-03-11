@@ -1,99 +1,164 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { Users, UserCheck, BarChart2, AlertCircle } from "lucide-react"
-import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts"
-import "./styling/Dashboard.css"
-import axios from "axios"
-import { useSelector } from "react-redux"
+import { useEffect, useState } from "react";
+import { Users, UserCheck, BarChart2, AlertCircle } from "lucide-react";
+import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+import axios from "axios";
+import { useSelector } from "react-redux";
+import fetchReports from "../utils/fetchReports";
+import DataLoader from "./dataLoader";
+import "./styling/Dashboard.css"; 
 
 const data = [
-  { name: "M", value: 60 },
-  { name: "T", value: 40 },
-  { name: "W", value: 30 },
-  { name: "T", value: 70 },
-  { name: "F", value: 50 },
-]
+  { name: "Mon", value: 60 },
+  { name: "Tue", value: 40 },
+  { name: "Wed", value: 30 },
+  { name: "Thu", value: 70 },
+  { name: "Fri", value: 50 },
+];
 
-const trainees = [
-  {
-    name: "Karabo Mokoena",
-    email: "karabo@example.com",
-    phone: "083 456 7890",
-    lastCheckIn: "25 Feb, 09:30",
-    attendanceRate: 95,
-  },
-  {
-    name: "Tumi Mokgatlhe",
-    email: "tumi@example.com",
-    phone: "072 345 6789",
-    lastCheckIn: "25 Feb, 09:45",
-    attendanceRate: 90,
-  },
-  {
-    name: "Sipho Mabaso",
-    email: "sipho@example.com",
-    phone: "060 234 5678",
-    lastCheckIn: "25 Feb, 10:00",
-    attendanceRate: 85,
-  },
-  {
-    name: "Lerato Molefe",
-    email: "lerato@example.com",
-    phone: "076 123 4567",
-    lastCheckIn: "25 Feb, 10:15",
-    attendanceRate: 80,
-  },
-  {
-    name: "Thabo Nkosi",
-    email: "thabo@example.com",
-    phone: "082 345 6789",
-    lastCheckIn: "25 Feb, 10:30",
-    attendanceRate: 75,
-  },
-]
-
-const totalTrainees = trainees.length;
-const totalFacilitators = 20;
-const dailyAttendanceRate = Math.round(
-  trainees.reduce((sum, trainee) => sum + trainee.attendanceRate, 0) / trainees.length
-);
-const missedCheckIns = 100 - dailyAttendanceRate;
-
+// Pagination settings
+const ITEMS_PER_PAGE = 5;
 
 function Dashboard() {
-  const [name] = useState("Super Admin")
-  const currentDate = new Date().toDateString()
-
-
-  const [checkIns, setCheckIns] = useState([]);
-  const BASE_URL = 'https://timemanagementsystemserver.onrender.com/api/session/all-session-status';
+  const name = localStorage.getItem('name');
+  const currentDate = new Date().toDateString();
+  const [summaryData, setSummaryData] = useState([]);
+  const role = useSelector((state) => state.auth.role);
+  const [loading, setLoading] = useState(true);
+  const [allTrainees, setAllTrainees] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1); // State for current page
+  const [superAdminCheckIns, setSuperAdminCheckIns] = useState([]);
+  const [facilitatorAdminCheckIns, setFacilitatorAdminCheckIns] = useState([]);
+  const BASE_URL = 'https://timemanagementsystemserver.onrender.com';
   const token = useSelector((state) => state.auth.token);
+  const [Overview, setOverview] = useState([]);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchOverViews = async () => {
       try {
-        const response = await axios.get(BASE_URL, {
+        const overviewResponse = await axios.get('https://timemanagementsystemserver.onrender.com/api/trainee-overview', {
           headers: {
             'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json' 
+            'Content-Type': 'application/json',
           }
         });
+
+        // Extracting the programStats array from the response data
+        const { programStats } = overviewResponse.data;
         
-        const sessionsArray = Object.values(response.data);
-        setCheckIns(sessionsArray);
+        if (Array.isArray(programStats)) {
+          setOverview(programStats); // Store the array directly
+          console.log('Overview Stats as Array:', programStats);
+        } else {
+          console.error('Program stats is not an array:', programStats);
+        }
+        
       } catch (error) {
-        console.error('Error fetching check-ins:', error);
+        console.error('Error fetching overview stats:', error);
       }
     };
+    
+    fetchOverViews();
+  }, []);
 
-    fetchData();
+  // Fetch trainees data
+  const fetchTrainees = async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}/api/trainees`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-type': 'application/json'
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.log("Error fetching trainees", error);
+    }
+  };
+
+  // Fetch session check-ins for super_admin
+  const fetchCheckIns = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${BASE_URL}/api/session/all-session-status`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      const superAdminSessionsArray = Object.values(response.data);
+      setSuperAdminCheckIns(superAdminSessionsArray);
+    } catch (error) {
+      console.error('Error fetching check-ins:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch facilitator check-ins
+  const fetchFacilitatorCheckIns = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${BASE_URL}/api/facilitator/daily`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      const facilitatorSessionsArray = Object.values(response.data);
+      setFacilitatorAdminCheckIns(facilitatorSessionsArray);
+    } catch (error) {
+      console.error('Error fetching check-ins:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch reports summary
+  const loadOtherData = async () => {
+    try {
+      const { summaryData } = await fetchReports(token, 1, 20);
+      setSummaryData(summaryData);
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
+
+  useEffect(() => {
+    const getTrainees = async () => {
+      const trainees = await fetchTrainees();
+      setAllTrainees(trainees);
+    };
+    getTrainees();
+  }, []);
+
+  useEffect(() => {
+    fetchCheckIns();
+    fetchFacilitatorCheckIns();
+    loadOtherData();
   }, [token]);
+
+  // Pagination logic
+  const indexOfLastItem = currentPage * ITEMS_PER_PAGE;
+  const indexOfFirstItem = indexOfLastItem - ITEMS_PER_PAGE;
+  const currentItems = Overview.slice(indexOfFirstItem, indexOfLastItem);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const totalPages = Math.ceil(Overview.length / ITEMS_PER_PAGE);
+
+  
+
+  // If loading, show loader
+  if (loading) return <DataLoader message="Loading dashboard..." />;
 
   return (
     <div className="dashboard">
       <div className="dashboard-header">
-        <h3>Howsit, {name}</h3>
+        <h3>Hi, {name || 'User'}</h3>
         <p>{currentDate}</p>
       </div>
 
@@ -104,19 +169,21 @@ function Dashboard() {
             <Users className="stat-icon" />
           </div>
           <div className="stat-content">
-            <div className="stat-value">{totalTrainees}</div>
+            <div className="stat-value">{summaryData?.totalTrainees}</div>
           </div>
         </div>
 
-        <div className="stat-card">
-          <div className="stat-header">
-            <h4>Total Facilitators</h4>
-            <UserCheck className="stat-icon" />
+        {role === 'super_admin' && (
+          <div className="stat-card">
+            <div className="stat-header">
+              <h4>Total Facilitators</h4>
+              <UserCheck className="stat-icon" />
+            </div>
+            <div className="stat-content">
+              <div className="stat-value">{20}</div>
+            </div>
           </div>
-          <div className="stat-content">
-            <div className="stat-value">{totalFacilitators}</div>
-          </div>
-        </div>
+        )}
 
         <div className="stat-card">
           <div className="stat-header">
@@ -124,7 +191,7 @@ function Dashboard() {
             <BarChart2 className="stat-icon" />
           </div>
           <div className="stat-content">
-            <div className="stat-value">{dailyAttendanceRate}%</div>
+            <div className="stat-value">75%</div>
           </div>
         </div>
 
@@ -134,7 +201,7 @@ function Dashboard() {
             <AlertCircle className="stat-icon" />
           </div>
           <div className="stat-content">
-            <div className="stat-value">{missedCheckIns}</div>
+            <div className="stat-value">{100 - 75}%</div>
           </div>
         </div>
       </div>
@@ -176,10 +243,16 @@ function Dashboard() {
           <div className="card-content">
             <table className="check-ins-table">
               <tbody>
-                {checkIns.map((checkIn) => (
+                {role === 'super_admin' && superAdminCheckIns.map((checkIn) => (
                   <tr key={checkIn.name}>
                     <td>{checkIn.name}</td>
-                    <td className="time">{checkIn.time}</td>
+                    <td className="time">{checkIn.checkInTime}</td>
+                  </tr>
+                ))}
+                {role === 'facilitator' && facilitatorAdminCheckIns.map((checkIn) => (
+                  <tr key={checkIn.name}>
+                    <td>{checkIn.name}</td>
+                    <td className="time">{checkIn.checkInTime}</td>
                   </tr>
                 ))}
               </tbody>
@@ -197,21 +270,21 @@ function Dashboard() {
             <thead>
               <tr>
                 <th>Name</th>
+                <th>Location</th>
                 <th>Email</th>
                 <th>Phone</th>
-                <th>Last Check-in</th>
                 <th>Attendance Rate</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {trainees.map((trainee) => (
+              {role === 'super_admin' && currentItems.map((trainee) => (
                 <tr key={trainee.email}>
-                  <td>{trainee.name}</td>
-                  <td>{trainee.email}</td>
-                  <td>{trainee.phone}</td>
-                  <td>{trainee.lastCheckIn}</td>
-                  <td>{trainee.attendanceRate}%</td>
+                  <td>{trainee.traineeName}</td>
+                  <td>{trainee.traineeLocation}</td>
+                  <td>{trainee.traineeEmail}</td>
+                  <td>{trainee.traineePhoneNumber}</td>
+                  <td>{trainee.attendanceLevel}</td>
                   <td>
                     <button className="action-button">Take Action</button>
                   </td>
@@ -219,10 +292,23 @@ function Dashboard() {
               ))}
             </tbody>
           </table>
+
+          {/* Pagination Controls */}
+          <div className="pagination">
+            {Array.from({ length: totalPages }, (_, index) => (
+              <button
+                key={index + 1}
+                onClick={() => handlePageChange(index + 1)}
+                className={`page-button ${currentPage === index + 1 ? 'active' : ''}`}
+              >
+                {index + 1}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export default Dashboard;
