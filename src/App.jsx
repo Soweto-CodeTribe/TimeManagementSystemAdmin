@@ -18,6 +18,7 @@ import AddUserForm from "./Components/AddUserForm";
 import ForgotPassword from "./Components/ForgotPassword";
 import Profile from "./Components/Profile";
 import TwoFactorAuth from "./Components/TwoFactorAuth";
+import Tickets from "./Components/Tickets";
 
 import Loader from "./Components/Loader";
 import Notifications from "./Components/Notifications";
@@ -68,6 +69,8 @@ function App() {
         return "Alerts";
       case "/audit-logs":
         return "Audit Logs";
+      case "/Tickets":
+        return "Tickets";
       default:
         return "";
     }
@@ -111,6 +114,7 @@ function App() {
                     <Route path="/notifications" element={<Notifications />} />
                     <Route path="/alerts" element={<Alerts />} />
                     <Route path="/audit-logs" element={<AuditLogs />} />
+                    <Route path="/Tickets" element={<Tickets />} />
                     <Route path="/logout" element={<Logout />} />
                     <Route path="/add-user" element={<AddUserForm />} />
                   </Routes>

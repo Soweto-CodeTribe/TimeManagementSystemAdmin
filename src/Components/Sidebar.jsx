@@ -8,7 +8,8 @@ import {
   FaCogs,
   FaSignOutAlt,
   FaBars,
-  FaTimes
+  FaTimes,
+  FaComment 
 } from 'react-icons/fa';
 import Modal from 'react-modal';
 import { useDispatch } from 'react-redux';
@@ -56,6 +57,7 @@ const Sidebar = ({ activeScreen }) => {
     { name: 'User Management', icon: <FaUsers style={{ fontSize: '20px' }} />, route: '/user-management' },
     { name: 'Session Monitoring', icon: <FaClock style={{ fontSize: '20px' }} />, route: '/session' },
     { name: 'Reports', icon: <FaChartBar style={{ fontSize: '20px' }} />, route: '/reports' },
+    {name:'Tickets', icon: <FaComment style={{ fontSize: '20px' }} />, route: '/tickets'},
     {name : 'Other', icon:null, route:null},
     { name: 'Settings', icon: <FaCogs style={{ fontSize: '20px' }} />, route: '/settings' },
   ];
