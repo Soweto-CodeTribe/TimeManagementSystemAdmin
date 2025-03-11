@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser, clearError } from "../Slices/authSlice";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
@@ -41,13 +41,18 @@ const Login = () => {
 
       const data = await response.json();
       console.log("user: ", data);
+      localStorage.setItem("verificationID", data.verificationId);
+console.log("Stored verificationID:", localStorage.getItem("verificationID"));
 
       if (response.ok) {
         // Assuming the response conatains a JWT or user data for authentication
         // You might want to store it in localStorage or context/state depending on your app's needs
         // localStorage.setItem("token", data.token); // Example if you receive a token
+       
+        
         console.log("user: ", data);
-        navigate("/twoFactorAuth"); // Redirect to Dashboard after successful login
+       
+        
       } else {
         alert(data.message || "Invalid credentials!"); // Show message from the server
       }
@@ -58,10 +63,14 @@ const Login = () => {
 
       const resultAction = await dispatch(loginUser({ email, password }));
       console.log("Login result:", resultAction);
-
+     
+      
       if (loginUser.fulfilled.match(resultAction)) {
         setDebugInfo("Login successful!");
         console.log("Login successful:", resultAction.payload);
+        localStorage.setItem("verificationID", resultAction.payload.verificationId);
+        console.log("Stored verificationID:", localStorage.getItem("verificationID"));
+  
       } else if (loginUser.rejected.match(resultAction)) {
         const errorMessage = resultAction.payload || resultAction.error.message || "Unknown error";
         setDebugInfo(`Login failed: ${errorMessage}`);
