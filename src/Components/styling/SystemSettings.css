@@ -1,84 +1,80 @@
 body {
   font-family: sans-serif;
   margin: 0;
-  background-color: #f9f9f9;
-  -webkit-font-smoothing: antialiased; /* Improve font rendering */
+  background-color: #f9f9f9; /* Default light background */
+  -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color 0.3s, color 0.3s;
 }
 
 .settings-container {
-  width: 100%;  /* Full width */
-  height: 100vh; /* Full height */
-  margin: 0; /* Remove margin */
-  background-color: #fff;
-  border-radius: 0; /* Remove border radius for full-screen */
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+  background-color: #fff; /* White background */
   padding: 20px;
-  overflow: auto; /* Allow scrolling if content exceeds screen height */
+  display: flex;
+  flex-direction: column;
+  transition: background-color 0.3s, color 0.3s; /* Smooth transition */
 }
 
-/* Light Mode Styles */
 header {
   padding-bottom: 15px;
   border-bottom: 1px solid #eee;
 }
 
 header h1 {
-  font-size: 18px;
+  font-size: 24px;
   margin: 0;
-  color: #222; /* Darker heading */
-  font-weight: 500; /* Lighter font weight */
+  color: #222;
 }
 
 header p {
-  font-size: 11px;
+  font-size: 14px;
   color: #666;
   margin: 5px 0 0;
 }
 
 .settings-content {
   display: flex;
-  border: 1px solid #eee;
-  border-radius: 8px;
-  overflow: hidden;
-  background-color: #fff; /* White background */
+  flex: 1;
+  margin-top: 20px;
 }
 
 .settings-nav {
   width: 200px;
-  padding: 15px 0;
+  padding: 15px;
   background-color: #f9f9f9;
+  border-right: 1px solid #eee;
 }
 
 .nav-item {
-  padding: 12px 20px; /* Adjusted padding */
-  margin-bottom: 0;
+  padding: 12px 20px;
   cursor: pointer;
   color: #555;
   display: flex;
   align-items: center;
   gap: 10px;
-  border-radius: 0;
-  font-size: 13px;
-  font-weight: 400; /* Regular font weight */
-  transition: background-color 0.2s ease;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: background-color 0.2s ease, color 0.2s ease; /* Added color transition */
 }
 
 .nav-item.active,
 .nav-item:hover {
-  background-color: #fff;
-  color: #222;
+  background-color: #e0e0e0;
+  color: #222; /* Dark text for light background */
 }
 
-.nav-item.active {
-  font-weight: 500;
+.nav-item.active.dark,
+.nav-item.dark:hover {
+  background-color: #666; /* Darker background for active/hover in dark mode */
+  color: #fff; /* Light text for dark background */
 }
 
 .nav-icon {
-  width: 18px;  /* Adjusted icon size */
+  width: 18px;
   height: 18px;
-  opacity: 0.6;
 }
 
 .settings-panel {
@@ -100,60 +96,8 @@ header p {
 }
 
 .setting-row label {
-  font-size: 14px;
+  font-size: 16px;
   color: #333;
-}
-
-/* Dark Mode Styles */
-body.dark {
-  background-color: #333; /* Background for dark mode */
-}
-
-.settings-container.dark {
-  background-color: #444; /* Dark container background */
-  color: #ddd; /* Light text color */
-}
-
-header.dark {
-  border-bottom: 1px solid #555; /* Darker border */
-}
-
-header.dark h1 {
-  color: #fff; /* White heading */
-}
-
-header.dark p {
-  color: #aaa; /* Lighter grey for dark mode */
-}
-
-.settings-content.dark {
-  background-color: #444; /* Dark background */
-}
-
-.settings-nav.dark {
-  background-color: #555; /* Dark navigation background */
-}
-
-.nav-item.dark {
-  color: #ddd; /* Light text color for nav items */
-}
-
-.nav-item.dark.active,
-.nav-item.dark:hover {
-  background-color: #666; /* Darker hover effect */
-  color: #fff;
-}
-
-.settings-panel.dark {
-  background-color: #444; /* Dark panel background */
-}
-
-.setting-row.dark {
-  border-bottom: 1px solid #555; /* Darker row borders */
-}
-
-.setting-row.dark label {
-  color: #ddd; /* Light text color for labels */
 }
 
 /* Toggle Switch Styles */
@@ -204,4 +148,44 @@ input:focus + .slider {
 
 input:checked + .slider:before {
   transform: translateX(18px);
+}
+
+/* Dark Mode Styles */
+body.dark {
+  background-color: #333; /* Background for dark mode */
+}
+
+.settings-container.dark {
+  background-color: #444; /* Dark container background */
+  color: #ddd; /* Light text color */
+}
+
+header.dark {
+  border-bottom: 1px solid #555; /* Darker border */
+}
+
+header.dark h1 {
+  color: #fff; /* White heading */
+}
+
+header.dark p {
+  color: #aaa; /* Lighter grey for dark mode */
+}
+
+.settings-nav.dark {
+  background-color: #555; /* Dark navigation background */
+}
+
+.nav-item.dark {
+  color: #ddd; /* Light text color for nav items */
+}
+
+.nav-item.dark.active,
+.nav-item.dark:hover {
+  background-color: #666; /* Darker hover effect */
+  color: #fff; /* Light text for dark mode */
+}
+
+.settings-panel.dark {
+  background-color: #444; /* Dark panel background */
 }

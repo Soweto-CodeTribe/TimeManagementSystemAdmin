@@ -21,8 +21,6 @@ const UserManagement = () => {
     useEffect(() => {
         const fetchData = async () => {
             const token = localStorage.getItem("authToken");
-            console.log("Authorization Token:", token);
-
             if (!token) {
                 setFeedbackMessage("No authorization token found. Please log in again.");
                 return;
@@ -30,9 +28,11 @@ const UserManagement = () => {
 
             try {
                 const headers = { Authorization: `Bearer ${token}` };
-                const traineesResponse = await axios.get("https://timemanagementsystemserver.onrender.com/api/trainees", { headers });
-                const facilitatorsResponse = await axios.get("https://timemanagementsystemserver.onrender.com/api/facilitators", { headers });
-                const stakeholdersResponse = await axios.get("https://timemanagementsystemserver.onrender.com/api/stakeholder/all", { headers });
+                const [traineesResponse, facilitatorsResponse, stakeholdersResponse] = await Promise.all([
+                    axios.get("https://timemanagementsystemserver.onrender.com/api/trainees", { headers }),
+                    axios.get("https://timemanagementsystemserver.onrender.com/api/facilitators", { headers }),
+                    axios.get("https://timemanagementsystemserver.onrender.com/api/stakeholder/all", { headers })
+                ]);
 
                 const allUsers = [
                     ...stakeholdersResponse.data.map(user => ({ 
@@ -59,13 +59,6 @@ const UserManagement = () => {
             } catch (error) {
                 console.error("Error fetching data from the server", error);
                 setFeedbackMessage("Error fetching data. Please try again later.");
-                
-                const sampleUsers = [
-                    { id: "sample-1", fullName: "Sample Trainee", email: "trainee@example.com", role: "Trainee" },
-                    { id: "sample-2", fullName: "Sample Facilitator", email: "facilitator@example.com", role: "Facilitator" },
-                    { id: "sample-3", fullName: "Sample Stakeholder", email: "stakeholder@example.com", role: "stakeholder" }
-                ];
-                setUsers(sampleUsers);
             }
         };
 
@@ -111,44 +104,69 @@ const UserManagement = () => {
         const file = event.target.files[0];
         if (!file) return;
 
-        // Parse CSV file correctly
+        const token = localStorage.getItem("authToken");
+        if (!token) {
+            setFeedbackMessage("No authorization token found. Please log in again.");
+            return;
+        }
+
         Papa.parse(file, {
-            header: true, // This tells PapaParse to use the first row as headers
+            header: true,
             skipEmptyLines: true,
             complete: async (results) => {
                 try {
-                    // results.data is already an array of objects with the header as keys
                     const csvData = results.data;
 
-                    // Add unique IDs to each item
-                    const csvDataWithIds = csvData.map((item, index) => ({
-                        ...item,
-                        id: `csv-${Date.now()}-${index}`
-                    }));
+                    // Validate CSV data
+                    if (!Array.isArray(csvData) || csvData.length === 0) {
+                        setFeedbackMessage("No valid data found in the CSV file.");
+                        return;
+                    }
 
-                    console.log("Parsed CSV data:", csvDataWithIds);
-                    
-                    // Format the data as trainees (without lastCheckIn)
-                    const formattedTrainees = csvDataWithIds.map(trainee => ({
-                        id: trainee.id,
+                    // Format the data to match backend requirements
+                    const formattedTrainees = csvData.map(trainee => ({
                         fullName: trainee.fullName || "Unknown",
                         surname: trainee.surname || "",
                         email: trainee.email || "",
                         phoneNumber: trainee.phoneNumber || "",
+                        location: trainee.location || "",
                         idNumber: trainee.idNumber || "",
+                        address: trainee.address || "",
                         street: trainee.street || "",
                         city: trainee.city || "",
                         postalCode: trainee.postalCode || "",
-                        location: trainee.location || "",
                         role: "Trainee"
                     }));
-                    
-                    // Add to users for the trainees table
-                    setUsers(prevUsers => [...prevUsers, ...formattedTrainees]);
-                    setFeedbackMessage("CSV processed locally successfully!");
+
+                    // Upload CSV data to server
+                    const response = await axios.post(
+                        "https://timemanagementsystemserver.onrender.com/api/csv/csv-upload", 
+                        formattedTrainees, 
+                        {
+                            headers: { 
+                                Authorization: `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            }
+                        }
+                    );
+
+                    // Update local state with server response
+                    if (response.data && response.data.trainees) {
+                        const newTrainees = response.data.trainees.map(trainee => ({
+                            id: trainee._id,
+                            fullName: trainee.fullName,
+                            email: trainee.email,
+                            role: "Trainee"
+                        }));
+
+                        setUsers(prevUsers => [...prevUsers, ...newTrainees]);
+                        setFeedbackMessage("CSV uploaded and processed successfully!");
+                    } else {
+                        setFeedbackMessage("CSV uploaded, but no trainees returned.");
+                    }
                 } catch (error) {
-                    console.error("Error processing CSV file:", error);
-                    setFeedbackMessage(`Error: ${error.message}. Please check your CSV format.`);
+                    console.error("Error uploading CSV file:", error);
+                    setFeedbackMessage(`Upload error: ${error.response?.data?.message || error.message}`);
                 }
             },
             error: (error) => {
@@ -173,6 +191,44 @@ const UserManagement = () => {
         }
     };
 
+    const exportTraineesCSV = async () => {
+        const token = localStorage.getItem("authToken");
+        if (!token) {
+            setFeedbackMessage("No authorization token found. Please log in again.");
+            return;
+        }
+        
+        try {
+            const response = await axios.get(
+                "https://timemanagementsystemserver.onrender.com/api/csv/export-trainees", 
+                {
+                    headers: { 
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'text/csv'
+                    },
+                    responseType: 'blob'
+                }
+            );
+            
+            // Create a link to download the CSV
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'trainees.csv');
+            document.body.appendChild(link);
+            link.click();
+            
+            // Clean up
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            
+            setFeedbackMessage("Trainees CSV exported successfully.");
+        } catch (error) {
+            console.error("Error exporting trainees CSV:", error);
+            setFeedbackMessage(`Export failed: ${error.response?.data?.message || error.message}`);
+        }
+    };
+
     const filteredUsers = users.filter(user =>
         (user.fullName && user.fullName.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -186,36 +242,6 @@ const UserManagement = () => {
         (guest.phone && guest.phone.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (guest.phoneNumber && guest.phoneNumber.toLowerCase().includes(searchTerm.toLowerCase()))
     );
-
-    // Function to export trainees CSV from server
-    const exportTraineesCSV = async () => {
-        const token = localStorage.getItem("authToken");
-        if (!token) {
-            setFeedbackMessage("No authorization token found. Please log in again.");
-            return;
-        }
-        
-        const headers = { Authorization: `Bearer ${token}` };
-
-        try {
-            const response = await axios.get("https://timemanagementsystemserver.onrender.com/api/trainees", {
-                headers,
-                responseType: 'blob'
-            });
-            
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', 'trainees.csv');
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            setFeedbackMessage("Trainees CSV exported successfully.");
-        } catch (error) {
-            console.error("Error exporting trainees CSV:", error);
-            setFeedbackMessage("Failed to export trainees CSV. Please try again.");
-        }
-    };
 
     return (
         <div className="user-management-container">
@@ -269,11 +295,21 @@ const UserManagement = () => {
                             <Download size={14} />
                             <span>Export PDF</span>
                         </button>
-                        <input type="file" accept=".csv" onChange={handleFileChange} style={{ display: "none" }} id="csvInput" />
+                        <input 
+                            type="file" 
+                            accept=".csv" 
+                            onChange={handleFileChange} 
+                            style={{ display: "none" }} 
+                            id="csvInput" 
+                        />
                         <label htmlFor="csvInput" className="import-btn">
                             <Upload size={14} />
                             <span>Import CSV</span>
                         </label>
+                        <button className="export-btn" onClick={exportTraineesCSV}>
+                            <Download size={14} />
+                            <span>Export Trainees CSV</span>
+                        </button>
                     </div>
                 </div>
                 <div className="table-container">
@@ -332,15 +368,17 @@ const UserManagement = () => {
                             <Download size={14} />
                             <span>Export PDF</span>
                         </button>
-                        <input type="file" accept=".csv" onChange={handleFileChange} style={{ display: "none" }} id="csvInput2" />
+                        <input 
+                            type="file" 
+                            accept=".csv" 
+                            onChange={handleFileChange} 
+                            style={{ display: "none" }} 
+                            id="csvInput2" 
+                        />
                         <label htmlFor="csvInput2" className="import-btn">
                             <Upload size={14} />
                             <span>Import CSV</span>
                         </label>
-                        <button className="export-btn" onClick={exportTraineesCSV}>
-                            <Download size={14} />
-                            <span>Export Trainees CSV</span>
-                        </button>
                     </div>
                 </div>
                 <div className="table-container">
