@@ -322,6 +322,8 @@ export const loginFacilitator = createAsyncThunk(
   }
 );
 
+
+
 // OTP verification
 export const verifyOTP = createAsyncThunk(
   'auth/verifyOTP',
@@ -345,7 +347,7 @@ export const verifyOTP = createAsyncThunk(
 
         localStorage.setItem('authToken', data.token);
         localStorage.setItem('role',data.role);
-        localStorage.setItem('name',data.facilitator?.name)
+        localStorage.setItem('name',data.facilitator?.name || data.facilitator?.fullName)
         localStorage.setItem('Location',data.location)
         localStorage.setItem('Email',data.facilitator?.email)
 
@@ -358,6 +360,41 @@ export const verifyOTP = createAsyncThunk(
     }
   }
 );
+
+// Add this to your authSlice.js file
+// Updated resend2FA thunk that gets data from localStorage directly
+export const resend2FA = createAsyncThunk(
+  'auth/resend2FA',
+  async (_, { rejectWithValue }) => {
+    try {
+      // Get values directly from localStorage
+      const verificationId = localStorage.getItem("verificationID");
+      const email = localStorage.getItem("Email");
+      
+      // Check if both values exist
+      if (!verificationId || !email) {
+        return rejectWithValue('Missing verification details. Please try logging in again.');
+      }
+      
+      const response = await fetch('https://timemanagementsystemserver.onrender.com/api/auth/resend-2fa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ verificationId, email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        return data;
+      } else {
+        return rejectWithValue(data.error || 'Failed to resend OTP');
+      }
+    } catch (error) {
+      return rejectWithValue('An error occurred while resending OTP.');
+    }
+  }
+);
+
 
 // Authentication status check
 export const checkAuthStatus = createAsyncThunk(
@@ -483,6 +520,18 @@ const authSlice = createSlice({
         state.role = null;
         state.requires2FA = false;
         localStorage.clear();
+        state.error = action.payload;
+      })
+      .addCase(resend2FA.pending, (state) => { 
+        state.isLoading = true; 
+        state.error = null; 
+      })
+      .addCase(resend2FA.fulfilled, (state) => {
+        state.isLoading = false;
+        // You could add a success message here if needed
+      })
+      .addCase(resend2FA.rejected, (state, action) => {
+        state.isLoading = false;
         state.error = action.payload;
       });
   }
