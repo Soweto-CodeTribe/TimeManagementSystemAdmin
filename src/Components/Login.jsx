@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser, clearError } from "../Slices/authSlice";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
@@ -6,7 +6,7 @@ import "../Components/styling/Login.css";
 import logo from "../assets/CodeTribeImage.png";
 import loginImg from "../assets/loginImg.png";
 import { useNavigate } from "react-router-dom";
-
+import twoFactorAuth from "./TwoFactorAuth";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -29,6 +29,7 @@ const Login = () => {
 
     dispatch(clearError());
 
+
     try {
       const response = await fetch("https://timemanagementsystemserver.onrender.com/api/auth/login", {
         method: "POST",
@@ -40,13 +41,18 @@ const Login = () => {
 
       const data = await response.json();
       console.log("user: ", data);
+      localStorage.setItem("verificationID", data.verificationId);
+console.log("Stored verificationID:", localStorage.getItem("verificationID"));
 
       if (response.ok) {
-        // Assuming the response contains a JWT or user data for authentication
+        // Assuming the response conatains a JWT or user data for authentication
         // You might want to store it in localStorage or context/state depending on your app's needs
         // localStorage.setItem("token", data.token); // Example if you receive a token
+       
+        
         console.log("user: ", data);
-        navigate("/"); // Redirect to Dashboard after successful login
+       
+        
       } else {
         alert(data.message || "Invalid credentials!"); // Show message from the server
       }
@@ -54,12 +60,17 @@ const Login = () => {
       setDebugInfo("Attempting login...");
       console.log("Login attempt with:", { email, password: "********" });
 
+
       const resultAction = await dispatch(loginUser({ email, password }));
       console.log("Login result:", resultAction);
-
+     
+      
       if (loginUser.fulfilled.match(resultAction)) {
         setDebugInfo("Login successful!");
         console.log("Login successful:", resultAction.payload);
+        localStorage.setItem("verificationID", resultAction.payload.verificationId);
+        console.log("Stored verificationID:", localStorage.getItem("verificationID"));
+  
       } else if (loginUser.rejected.match(resultAction)) {
         const errorMessage = resultAction.payload || resultAction.error.message || "Unknown error";
         setDebugInfo(`Login failed: ${errorMessage}`);
@@ -79,7 +90,7 @@ const Login = () => {
           <img src={logo} alt="Brand Logo" className="brand-logo" />
 
           <div className="login-header">
-            <h2>Secure Access to Your Account</h2>
+            <h2>Secure Access to Your Account.</h2>
             <p>Sign in with your email and password to continue.</p>
           </div>
 
@@ -139,9 +150,9 @@ const Login = () => {
               {isLoading ? "Please wait..." : "Continue"}
             </button>
 
-            <div className="progress-dots">
-              <span className="dot active"></span>
-              <span className="dot"></span>
+            <div className="progress-bars">
+              <span className="bar active"></span>
+              <span className="bar"></span>
             </div>
           </form>
         </div>

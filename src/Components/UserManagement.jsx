@@ -185,7 +185,11 @@ const UserManagement = () => {
             setUsers((prevUsers) => [...prevUsers, ...newTrainees]);
             setFeedbackMessage("CSV uploaded and processed successfully!");
           } else {
+
             setFeedbackMessage("CSV uploaded.");
+
+            setFeedbackMessage("CSV uploaded, but no trainees returned.");
+
           }
         } catch (error) {
           console.error("Error uploading CSV file:", error);

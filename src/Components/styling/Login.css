@@ -11,6 +11,7 @@
   min-height: 100vh;
   background-color: #fff;
   font-family: Poppins;
+  width: 100vw;
 }
 
 /* Left Section */
@@ -157,7 +158,7 @@
   background-color: #e0e0e0;
 }
 
-.progress-dots {
+.progress-bars {
   position: absolute;
   bottom: 2rem;
   left: 0;
@@ -168,14 +169,14 @@
   padding: 0 2rem;
 }
 
-.dot {
-  width: 3rem;
-  height: 0.25rem;
+.bar {
+  width: 6rem;
+  height: 0.5rem;
   background-color: #e0e0e0;
   border-radius: 1rem;
 }
 
-.dot.active {
+.bar.active {
   background-color: #8bc34a;
 }
 
@@ -278,4 +279,74 @@
   .login-right {
     display: none;
   }
+
+
+  /* Add these styles to your Login.css file */
+
+.two-fa-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  width: 100%;
+}
+
+.verify-2fa-form {
+  width: 100%;
+  max-width: 400px;
+}
+
+.code-input {
+  text-align: center;
+  letter-spacing: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.code-timer {
+  margin: 1rem 0;
+  font-size: 0.875rem;
+  color: #666;
+  text-align: center;
+}
+
+.resend-btn {
+  background-color: transparent;
+  border: none;
+  color: #4a90e2;
+  cursor: pointer;
+  margin-top: 1rem;
+  padding: 0.5rem;
+  width: 100%;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.resend-btn:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.resend-btn:disabled {
+  color: #999;
+  cursor: not-allowed;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: transparent;
+  border: 1px solid #ddd;
+  color: #333;
+  cursor: pointer;
+  margin-top: 2rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+  background-color: #f5f5f5;
+}
 }

@@ -21,7 +21,7 @@ const Navbar = ({ activeScreen }) => {
 
   // Handle notifications click
   const handleNotificationsClick = () => {
-    alert("You have new notifications!"); // Placeholder for notifications (can be expanded)
+    navigate("/notifications"); // Navigate to the settings page
   };
 
   return (
@@ -33,7 +33,7 @@ const Navbar = ({ activeScreen }) => {
         </div>
 
         {/* Right: Icons */}
-        <div className="icon-container">
+        <div className="navicon-container">
           <IoMdNotificationsOutline
             size={30}  // Set size to 30px to match the Avatar size
             className="icon"

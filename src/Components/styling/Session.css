@@ -295,7 +295,7 @@
   /* Pagination Styles */
 .pagination-container {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   margin-top: 1rem;
   padding: 0.5rem 0;
@@ -342,7 +342,7 @@
 }
 
 .pagination-number.active {
-  background-color: #3b82f6;
+  background-color: #000000;
   color: white;
-  border-color: #3b82f6;
+  border-color: #000000;
 }
