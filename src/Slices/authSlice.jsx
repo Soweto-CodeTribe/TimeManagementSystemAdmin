@@ -252,16 +252,24 @@ export const loginUser = createAsyncThunk(
       });
       
       const data = await response.json();
+      
+      localStorage.setItem('role', data.facilitator?.role);
 
+
+      console.log('Role set during user login:', data);
+
+
+      console.log("data",data);
       if (response.ok) {
         if (data.token) {
           console.log("LoginUser: Token received from API:", data.token); // Debugging
           localStorage.setItem('authToken', data.token);
-          localStorage.setItem('role', data.facilitator?.role || 'user');
 
           if (data.requires2FA !== undefined) {
             localStorage.setItem('requires2FA', data.requires2FA.toString());
-          } else if (data.user?.requires2FA !== undefined) {
+          } 
+          
+          else if (data.user?.requires2FA !== undefined) {
             localStorage.setItem('requires2FA', data.user.requires2FA.toString());
           }
         }
@@ -289,12 +297,14 @@ export const loginFacilitator = createAsyncThunk(
       });
       
       const data = await response.json();
-      
+      localStorage.setItem('role', data.facilitator.role);
+      console.log('Role set during user login:', data.facilitator?.role);
+
+
       if (response.ok) {
         if (data.token) {
           console.log("LoginFacilitator: Token received from API:", data.token); // Debugging
           localStorage.setItem('authToken', data.token);
-          localStorage.setItem('role', data.facilitator?.role);
           
           if (data.requires2FA !== undefined) {
             localStorage.setItem('requires2FA', data.requires2FA.toString());
@@ -327,7 +337,18 @@ export const verifyOTP = createAsyncThunk(
 
       if (response.ok) {
         console.log("verifyOTP: Token received from API:", data.token); // Debugging
+        console.log("Data",data);
+        console.log("Role:",data.role);
+        console.log("Name:",data.facilitator?.name);
+        console.log("Location:",data.location);
+        console.log("Email:",data.facilitator?.email);
+
         localStorage.setItem('authToken', data.token);
+        localStorage.setItem('role',data.role);
+        localStorage.setItem('name',data.facilitator?.name)
+        localStorage.setItem('Location',data.location)
+        localStorage.setItem('Email',data.facilitator?.email)
+
         return data.token;
       } else {
         return rejectWithValue(data.error || 'Verification failed');
@@ -345,7 +366,6 @@ export const checkAuthStatus = createAsyncThunk(
     try {
       const token = localStorage.getItem('authToken');
       console.log("checkAuthStatus: Token from localStorage:", token); // Debugging
-
       if (!token) {
         return rejectWithValue('No token found');
       }
@@ -388,7 +408,7 @@ export const checkAuthStatus = createAsyncThunk(
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
-    isAuthenticated: false,
+    isAuthenticated: true,
     user: null,
     token: getAuthToken(), // Use the function here
     role: localStorage.getItem('role') || null,
