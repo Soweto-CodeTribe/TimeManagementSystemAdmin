@@ -101,7 +101,7 @@ const ManageTrainees = () => {
     }
     try {
       setLoading(true);
-      const token = localStorage.getItem("authToken"); // Changed to exactly your requirement
+      const token = localStorage.getItem("authToken");
 
       // Log the token and selected trainees for debugging
       console.log("Authorization Token:", token); // Log the token for debugging
