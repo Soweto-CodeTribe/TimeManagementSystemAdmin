@@ -341,7 +341,7 @@ export const verifyOTP = createAsyncThunk(
         console.log("verifyOTP: Token received from API:", data.token); // Debugging
         console.log("Data",data);
         console.log("Role:",data.role);
-        console.log("Name:",data.facilitator?.name);
+        console.log("Name:",data.facilitator?.name || data.facilitator?.fullName);
         console.log("Location:",data.location);
         console.log("Email:",data.facilitator?.email);
 

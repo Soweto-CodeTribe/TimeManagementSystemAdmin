@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { verifyOTP } from "../Slices/authSlice"; // Import the Redux action
+import { verifyOTP, resend2FA } from "../Slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import { FaEnvelope } from "react-icons/fa";
 import "../Components/styling/Login.css";
@@ -9,6 +9,8 @@ import factorimg from "../assets/two-factor-authentication.png";
 
 const TwoFactorAuth = () => {
   const [otp, setOtp] = useState("");
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isLoading, error } = useSelector((state) => state.auth);
@@ -31,6 +33,22 @@ const TwoFactorAuth = () => {
       .catch((err) => {
         console.error("Verification failed:", err);
       });
+  };
+
+  const handleResendOTP = async () => {
+    setResendLoading(true);
+    setResendSuccess(false);
+    
+    try {
+      // No need to pass parameters anymore
+      await dispatch(resend2FA()).unwrap();
+      setResendSuccess(true);
+      setTimeout(() => setResendSuccess(false), 5000); // Hide success message after 5 seconds
+    } catch (err) {
+      console.error("Failed to resend OTP:", err);
+    } finally {
+      setResendLoading(false);
+    }
   };
 
   return (
@@ -58,8 +76,17 @@ const TwoFactorAuth = () => {
               </div>
             </div>
             {error && <p className="error-message">{error}</p>}
+            {resendSuccess && <p className="success-message">OTP sent successfully! Check your email.</p>}
             <button type="submit" className="continue-btn" disabled={isLoading}>
               {isLoading ? "Verifying..." : "Verify OTP"}
+            </button>
+            <button 
+              type="button" 
+              className="resend-btn" 
+              onClick={handleResendOTP} 
+              disabled={resendLoading}
+            >
+              {resendLoading ? "Sending..." : "Resend OTP"}
             </button>
           </form>
         </div>
