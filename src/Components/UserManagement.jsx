@@ -6,6 +6,7 @@ import jsPDF from "jspdf";
 import Papa from "papaparse";
 import Modal from "./Modal";
 import axios from "axios";
+import DataLoader from './dataLoader'
 
 const UserManagement = () => {
   const location = useLocation();
@@ -17,8 +18,10 @@ const UserManagement = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [feedbackMessage, setFeedbackMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
+    setIsLoading(true)
     const fetchData = async () => {
       const token = localStorage.getItem("authToken");
       if (!token) {
@@ -71,6 +74,9 @@ const UserManagement = () => {
       } catch (error) {
         console.error("Error fetching data from the server", error);
         setFeedbackMessage("Error fetching data. Please try again later.");
+      }
+      finally{
+        setIsLoading(false)
       }
     };
 
@@ -221,6 +227,7 @@ const UserManagement = () => {
   };
 
   const exportTraineesCSV = async () => {
+    setIsLoading(true)
     const token = localStorage.getItem("authToken");
     if (!token) {
       setFeedbackMessage("No authorization token found. Please log in again.");
@@ -258,6 +265,9 @@ const UserManagement = () => {
         `Export failed: ${error.response?.data?.message || error.message}`
       );
     }
+    finally{
+      setIsLoading(false)
+    }
   };
 
   const filteredUsers = users.filter(
@@ -283,6 +293,7 @@ const UserManagement = () => {
         guest.phoneNumber.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
+  if(isLoading) return <DataLoader/>
   return (
     <div className="user-management-container">
       <Modal
