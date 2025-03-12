@@ -17,6 +17,9 @@ import Login from "./Components/Login";
 import AddUserForm from "./Components/AddUserForm";
 import ForgotPassword from "./Components/ForgotPassword";
 import Profile from "./Components/Profile";
+import TwoFactorAuth from "./Components/TwoFactorAuth";
+import Tickets from "./Components/Tickets";
+
 import Loader from "./Components/Loader";
 import Notifications from "./Components/Notifications";
 import { messaging, requestFCMToken } from "./firebaseConfig";
@@ -65,6 +68,8 @@ function App() {
     switch (path) {
       case "/":
         return "Dashboard";
+      case "/TwoFactorAuth":
+        return "Two Factor Authentication";
       case "/user-management":
         return "User Management";
       case "/session":
@@ -79,6 +84,8 @@ function App() {
         return "Alerts";
       case "/audit-logs":
         return "Audit Logs";
+      case "/Tickets":
+        return "Tickets";
       default:
         return "";
     }
@@ -97,20 +104,9 @@ function App() {
 
   return (
     <Routes>
-      {/* Public Routes */}
-      <Route
-        path="/login"
-        element={
-          isAuthenticated ? <Navigate to="/" /> : (
-            <div className="login-container">
-              <Login />
-            </div>
-          )
-        }
-      />
+      <Route path="/login" element={isAuthenticated ? <Navigate to="/TwoFactorAuth" /> : <Login />} />
       <Route path="/forgotPassword" element={<ForgotPassword />} />
-
-      {/* Protected Routes */}
+      <Route path="/TwoFactorAuth" element={<TwoFactorAuth />} />
       <Route
         path="/*"
         element={
@@ -133,6 +129,7 @@ function App() {
                     <Route path="/notifications" element={<Notifications />} />
                     <Route path="/alerts" element={<Alerts />} />
                     <Route path="/audit-logs" element={<AuditLogs />} />
+                    <Route path="/Tickets" element={<Tickets />} />
                     <Route path="/logout" element={<Logout />} />
                     <Route path="/add-user" element={<AddUserForm />} />
                   </Routes>
