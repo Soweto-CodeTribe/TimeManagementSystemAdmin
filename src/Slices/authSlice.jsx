@@ -388,6 +388,9 @@ export const resend2FA = createAsyncThunk(
         console.log("Response:", response);
         const data = await response.json();
         // Return success message or data
+        localStorage.setItem("verificationID",data.verificationId);
+        console.log("The new Verification ID:", data.verificationId);
+
         return data;
       } else {
         const errorData = await response.json();

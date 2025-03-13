@@ -30,7 +30,7 @@ const TwoFactorAuth = () => {
   const handleVerifyOTP = async (e) => {
     e.preventDefault();
     const verificationId = localStorage.getItem("verificationID");
-
+    
     if (!verificationId) {
       alert("No verification ID found.");
       return;
