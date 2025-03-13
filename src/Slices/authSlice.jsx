@@ -370,6 +370,8 @@ export const resend2FA = createAsyncThunk(
       // Get values directly from localStorage
       const verificationId = localStorage.getItem("verificationID");
       const email = localStorage.getItem("Email");
+      console.log("The Verification ID:", verificationId);
+      console.log("The Email:", email);
       
       // Check if both values exist
       if (!verificationId || !email) {
@@ -381,15 +383,18 @@ export const resend2FA = createAsyncThunk(
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ verificationId, email }),
       });
-
-      const data = await response.json();
-
+      
       if (response.ok) {
+        console.log("Response:", response);
+        const data = await response.json();
+        // Return success message or data
         return data;
       } else {
-        return rejectWithValue(data.error || 'Failed to resend OTP');
+        const errorData = await response.json();
+        return rejectWithValue(errorData.error || 'Failed to resend OTP');
       }
     } catch (error) {
+      console.error('Resend OTP error:', error);
       return rejectWithValue('An error occurred while resending OTP.');
     }
   }
