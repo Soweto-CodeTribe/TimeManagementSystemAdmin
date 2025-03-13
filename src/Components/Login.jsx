@@ -1,17 +1,18 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { loginUser, clearError } from "../Slices/authSlice";
+import { loginUser, loginStakeholder, clearError } from "../Slices/authSlice";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import "../Components/styling/Login.css";
 import logo from "../assets/CodeTribeImage.png";
 import loginImg from "../assets/loginImg.png";
 import { useNavigate } from "react-router-dom";
-import twoFactorAuth from "./TwoFactorAuth";
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [debugInfo, setDebugInfo] = useState("");
+  const [userType, setUserType] = useState("user"); // Added user type state: "user" or "stakeholder"
   const dispatch = useDispatch();
   const { isLoading, error } = useSelector((state) => state.auth);
   const navigate = useNavigate();
@@ -28,50 +29,51 @@ const Login = () => {
     }
 
     dispatch(clearError());
-
+    localStorage.setItem("Email", email);
 
     try {
-      const response = await fetch("https://timemanagementsystemserver.onrender.com/api/auth/login", {
+      // Choose the appropriate login action based on user type
+      const loginAction = userType === "stakeholder" ? loginStakeholder : loginUser;
+      const apiEndpoint = userType === "stakeholder" 
+        ? "https://timemanagementsystemserver.onrender.com/api/auth/login-stakeholder" 
+        : "https://timemanagementsystemserver.onrender.com/api/auth/login";
+
+      const response = await fetch(apiEndpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }), // Send credentials in the request body
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
-      console.log("user: ", data);
-      localStorage.setItem("verificationID", data.verificationId);
-console.log("Stored verificationID:", localStorage.getItem("verificationID"));
+      console.log(`${userType} data:`, data);
+      
+      if (data.verificationId) {
+        localStorage.setItem("verificationID", data.verificationId);
+        console.log("Stored verificationID:", localStorage.getItem("verificationID"));
+      }
 
-      if (response.ok) {
-        // Assuming the response conatains a JWT or user data for authentication
-        // You might want to store it in localStorage or context/state depending on your app's needs
-        // localStorage.setItem("token", data.token); // Example if you receive a token
-       
-        
-        console.log("user: ", data);
-       
-        
-      } else {
-        alert(data.message || "Invalid credentials!"); // Show message from the server
+      if (!response.ok) {
+        alert(data.message || "Invalid credentials!");
+        return;
       }
 
       setDebugInfo("Attempting login...");
-      console.log("Login attempt with:", { email, password: "********" });
-      localStorage.setItem("Email",email);
+      console.log("Login attempt with:", { email, password: "********", userType });
 
-      const resultAction = await dispatch(loginUser({ email, password }));
+      const resultAction = await dispatch(loginAction({ email, password }));
       console.log("Login result:", resultAction);
-     
       
-      if (loginUser.fulfilled.match(resultAction)) {
+      if (loginAction.fulfilled.match(resultAction)) {
         setDebugInfo("Login successful!");
         console.log("Login successful:", resultAction.payload);
-        localStorage.setItem("verificationID", resultAction.payload.verificationId);
-        console.log("Stored verificationID:", localStorage.getItem("verificationID"));
-  
-      } else if (loginUser.rejected.match(resultAction)) {
+        
+        if (resultAction.payload.verificationId) {
+          localStorage.setItem("verificationID", resultAction.payload.verificationId);
+          console.log("Stored verificationID:", localStorage.getItem("verificationID"));
+        }
+      } else if (loginAction.rejected.match(resultAction)) {
         const errorMessage = resultAction.payload || resultAction.error.message || "Unknown error";
         setDebugInfo(`Login failed: ${errorMessage}`);
         console.error("Login rejected:", errorMessage);
@@ -90,11 +92,32 @@ console.log("Stored verificationID:", localStorage.getItem("verificationID"));
           <img src={logo} alt="Brand Logo" className="brand-logo" />
 
           <div className="login-header">
-            <h2>Secure Access to Your Account.</h2>
+            <h2>Secure Access to Your Account</h2>
             <p>Sign in with your email and password to continue.</p>
           </div>
 
           <form onSubmit={handleLogin} className="login-form">
+            {/* User type selection */}
+            <div className="form-group">
+              <label>Login as</label>
+              <div className="user-type-selector">
+                <button 
+                  type="button" 
+                  className={`user-type-btn ${userType === 'user' ? 'active' : ''}`}
+                  onClick={() => setUserType('user')}
+                >
+                  Admin or Facillitator
+                </button>
+                <button 
+                  type="button" 
+                  className={`user-type-btn ${userType === 'stakeholder' ? 'active' : ''}`}
+                  onClick={() => setUserType('stakeholder')}
+                >
+                  Stakeholder
+                </button>
+              </div>
+            </div>
+
             <div className="form-group">
               <label htmlFor="email">Email</label>
               <div className="input-wrapper">
@@ -114,15 +137,15 @@ console.log("Stored verificationID:", localStorage.getItem("verificationID"));
               <div className="password-header">
                 <label htmlFor="password">Password</label>
                 <a
-            href="/forgot-password"
-            className="forgot-link"
-            onClick={(e) => {
-              e.preventDefault(); // Prevent default anchor behavior
-              navigate("/forgotPassword"); // Navigate to Forgot Password page
-            }}
-          >
-             Forgot password?
-          </a>
+                  href="/forgot-password"
+                  className="forgot-link"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate("/forgotPassword");
+                  }}
+                >
+                  Forgot password?
+                </a>
               </div>
               <div className="input-wrapper">
                 <FaLock className="input-icon" />
