@@ -321,7 +321,43 @@ export const loginFacilitator = createAsyncThunk(
     }
   }
 );
-
+// Stakeholder login thunk
+export const loginStakeholder = createAsyncThunk(
+  'auth/loginStakeholder',
+  async ({ email, password }, { rejectWithValue }) => {
+    try {
+      const response = await fetch('https://timemanagementsystemserver.onrender.com/api/auth/login-stakeholder', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        if (data.token) {
+          console.log("LoginStakeholder: Token received from API:", data.token); // Debugging
+          localStorage.setItem('authToken', data.token);
+          localStorage.setItem('role', data.stakeholder?.role || 'stakeholder');
+          console.log('Role set during stakeholder login:', data.stakeholder?.role || 'stakeholder');
+          
+          if (data.requires2FA !== undefined) {
+            localStorage.setItem('requires2FA', data.requires2FA.toString());
+          } else if (data.stakeholder?.requires2FA !== undefined) {
+            localStorage.setItem('requires2FA', data.stakeholder.requires2FA.toString());
+          }
+        }
+        return data;
+      } else {
+        return rejectWithValue(data.message || 'Invalid stakeholder credentials!');
+      }
+    } catch (error) {
+      return rejectWithValue('Network error during stakeholder login. Please try again.');
+    }
+  }
+);
 
 
 // OTP verification
@@ -341,7 +377,7 @@ export const verifyOTP = createAsyncThunk(
         console.log("verifyOTP: Token received from API:", data.token); // Debugging
         console.log("Data",data);
         console.log("Role:",data.role);
-        console.log("Name:",data.facilitator?.name);
+        console.log("Name:",data.facilitator?.name || data.facilitator?.fullName);
         console.log("Location:",data.location);
         console.log("Email:",data.facilitator?.email);
 
@@ -370,6 +406,8 @@ export const resend2FA = createAsyncThunk(
       // Get values directly from localStorage
       const verificationId = localStorage.getItem("verificationID");
       const email = localStorage.getItem("Email");
+      console.log("The Verification ID:", verificationId);
+      console.log("The Email:", email);
       
       // Check if both values exist
       if (!verificationId || !email) {
@@ -381,15 +419,21 @@ export const resend2FA = createAsyncThunk(
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ verificationId, email }),
       });
-
-      const data = await response.json();
-
+      
       if (response.ok) {
+        console.log("Response:", response);
+        const data = await response.json();
+        // Return success message or data
+        localStorage.setItem("verificationID",data.verificationId);
+        console.log("The new Verification ID:", data.verificationId);
+
         return data;
       } else {
-        return rejectWithValue(data.error || 'Failed to resend OTP');
+        const errorData = await response.json();
+        return rejectWithValue(errorData.error || 'Failed to resend OTP');
       }
     } catch (error) {
+      console.error('Resend OTP error:', error);
       return rejectWithValue('An error occurred while resending OTP.');
     }
   }
@@ -445,7 +489,7 @@ export const checkAuthStatus = createAsyncThunk(
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
-    isAuthenticated: true,
+    isAuthenticated: false,
     user: null,
     token: getAuthToken(), // Use the function here
     role: localStorage.getItem('role') || null,
@@ -491,6 +535,23 @@ const authSlice = createSlice({
         state.requires2FA = action.payload.requires2FA || action.payload.facilitator?.requires2FA || false;
       })
       .addCase(loginFacilitator.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+
+      .addCase(loginStakeholder.pending, (state) => { 
+        state.isLoading = true; 
+        state.error = null; 
+      })
+      .addCase(loginStakeholder.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isAuthenticated = true;
+        state.user = action.payload.stakeholder;
+        state.token = action.payload.token;
+        state.role = action.payload.stakeholder?.role || 'stakeholder';
+        state.requires2FA = action.payload.requires2FA || action.payload.stakeholder?.requires2FA || false;
+      })
+      .addCase(loginStakeholder.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       })

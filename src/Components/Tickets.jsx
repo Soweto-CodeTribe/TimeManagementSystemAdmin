@@ -541,6 +541,7 @@ import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import DataLoader from './dataLoader';
 import './styling/Tickets.css';
+import axios from 'axios';
 
 const Tickets = () => {
   const [tickets, setTickets] = useState([]);
@@ -708,6 +709,18 @@ const Tickets = () => {
   
   if (isLoading && !selectedTicket) return <DataLoader/>;
   if (error) return <div>Error: {error}</div>;
+
+  const handleDeleteTicket = async ()=>{
+    try {
+      await axios.delete(`${API_BASE_URL}/tickets/${selectedTicket.id}`, {
+        headers:{
+          'Authorization': `Bearer ${token}`
+        }
+      })
+    } catch (error) {
+      console.error(error)
+    }
+  }
   
   return (
     <div className="session-container">
@@ -760,7 +773,7 @@ const Tickets = () => {
           <div className="ticket-detail-container">
             <div className="ticket-detail-header">
               <h3>Ticket Details</h3>
-              <button onClick={closeDetailView} className="close-button">×</button>
+              <button onClick={closeDetailView} className="close-button">X</button>
             </div>
             
             {isLoading ? (
@@ -849,6 +862,9 @@ const Tickets = () => {
                     <div className="detail-actions">
                       <button onClick={() => setUpdateMode(true)} className="update-button">
                         Update Ticket
+                      </button>
+                      <button onClick={handleDeleteTicket}>
+                        Delete
                       </button>
                     </div>
                   </>
