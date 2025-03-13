@@ -489,7 +489,7 @@ export const checkAuthStatus = createAsyncThunk(
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
-    isAuthenticated: false,
+    isAuthenticated: true,
     user: null,
     token: getAuthToken(), // Use the function here
     role: localStorage.getItem('role') || null,
