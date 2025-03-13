@@ -98,7 +98,7 @@ const Login = () => {
 
           <form onSubmit={handleLogin} className="login-form">
             {/* User type selection */}
-            <div className="form-group">
+            {/* <div className="form-group">
               <label>Login as</label>
               <div className="user-type-selector">
                 <button 
@@ -116,7 +116,7 @@ const Login = () => {
                   Stakeholder
                 </button>
               </div>
-            </div>
+            </div> */}
 
             <div className="form-group">
               <label htmlFor="email">Email</label>
