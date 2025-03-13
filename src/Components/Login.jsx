@@ -59,7 +59,7 @@ console.log("Stored verificationID:", localStorage.getItem("verificationID"));
 
       setDebugInfo("Attempting login...");
       console.log("Login attempt with:", { email, password: "********" });
-
+      localStorage.setItem("Email",email);
 
       const resultAction = await dispatch(loginUser({ email, password }));
       console.log("Login result:", resultAction);
