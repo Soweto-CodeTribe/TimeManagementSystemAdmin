@@ -1,0 +1,110 @@
+/* Container */
+.profile-container {
+  display: flex;
+  height: 100vh;
+  background: url('./background.jpg') no-repeat center center fixed;
+  background-size: cover;
+}
+
+/* Sidebar */
+.profile-sidebar {
+  width: 25%;
+  background-color: #ffffff;
+  padding: 20px;
+  box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.1);
+}
+
+.profile-sidebar h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.avatar-section {
+  text-align: center;
+}
+
+.avatar-placeholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: #f4f4f4;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Custom file upload button */
+.upload-btn {
+  display: inline-block; /* Make it inline */
+  margin-top: 10px;
+  background-color: #04AA6D; /* Green */
+  color: white;
+  border: none;
+  padding: 5px 10px; /* Smaller padding */
+  cursor: pointer;
+  border-radius: 5px; /* Optional: Adds a slight rounding to the button */
+}
+
+/* Hide original file input */
+input[type="file"] {
+  display: none; /* Hide original file input */
+}
+
+/* Uploaded Image Display */
+.uploaded-image {
+  margin-top: 10px;
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  object-fit: cover; /* Keeps the aspect ratio of the image */
+}
+
+/* Main Content */
+.profile-main {
+  width: calc(75% - 200px);
+  margin-left: auto;
+}
+
+.profile-form {
+  padding: 40px;
+}
+
+.profile-form label {
+  display: block;
+  margin-top: 20px;
+}
+
+.profile-form input,
+.profile-form textarea {
+  width: calc(100% - 20px);
+  padding: 10px;
+}
+
+textarea {
+  height: auto !important;
+}
+
+/* Buttons */
+.upload-btn,
+.update-btn {
+  background-color: #04AA6D; /* Green */
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer; /* Makes it clear that buttons are clickable */
+}
+
+/* Right Sidebar */
+.right-sidebar {
+  margin-top: 20px; /* Space above the right sidebar */
+}
+
+.right-sidebar button {
+  display: block; /* Buttons in the right sidebar */
+  margin: 10px 0; /* Space between buttons */
+  background-color: #04AA6D; /* Green */
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer; /* Makes it clear that buttons are clickable */
+}
