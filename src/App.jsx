@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { checkAuthStatus } from "./Slices/authSlice";
@@ -19,13 +19,14 @@ import ForgotPassword from "./Components/ForgotPassword";
 import Profile from "./Components/Profile";
 import TwoFactorAuth from "./Components/TwoFactorAuth";
 import Tickets from "./Components/Tickets";
-
 import Loader from "./Components/Loader";
 import Notifications from "./Components/Notifications";
 import { messaging, requestFCMToken } from "./firebaseConfig";
 import NotificationManager from "./Components/NotificationManager";
 import NotificationDisplay from "./Components/NotificationDisplay";
 import { onMessage } from "firebase/messaging";
+import ManageTrainees from "./Components/ManageTrainees";
+import LocationManagement from "./Components/LocationManagement"; 
 
 function App() {
 
@@ -40,7 +41,6 @@ function App() {
   // Initial auth check on app load
   useEffect(() => {
     const verifyAuth = async () => {
-      // Only check if a token exists to avoid unnecessary API calls
       if (localStorage.getItem("authToken")) {
         await dispatch(checkAuthStatus());
       }
@@ -78,6 +78,10 @@ function App() {
         return "Reports";
       case "/settings":
         return "System Settings";
+      case "/manage-trainees":
+        return "Manage Trainees"; // Corrected to match the route
+      case "/location-management": // Added case for Location Management
+        return "Location Management";
       case "/profile":
         return "Profile";
       case "/alerts":
@@ -125,6 +129,8 @@ function App() {
                     <Route path="/session" element={<Session />} />
                     <Route path="/reports" element={<Reports />} />
                     <Route path="/settings" element={<SystemSettings />} />
+                    <Route path="/manage-trainees" element={<ManageTrainees />} /> {/* Added ManageTrainees route */}
+                    <Route path="/location-management" element={<LocationManagement />} /> {/* Add Location Management route */}
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/notifications" element={<Notifications />} />
                     <Route path="/alerts" element={<Alerts />} />

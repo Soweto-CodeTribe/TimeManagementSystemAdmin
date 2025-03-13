@@ -1,0 +1,139 @@
+.program-manager-container {
+  max-width: 800px; /* Maximum width of the container */
+  margin: 0 auto; /* Center the container */
+  padding: 20px; /* Padding inside the container */
+  font-family: Arial, sans-serif; /* Font family */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Soft shadow around the container */
+  border-radius: 8px; /* Rounded corners */
+  background-color: #FFFFFF; /* White background */
+}
+
+.program-title {
+  font-size: 24px; /* Title font size */
+  margin-bottom: 20px; /* Space below the title */
+  font-weight: bold; /* Bold title */
+  color: #333; /* Dark grey color */
+  border-bottom: 1px solid #eee; /* Bottom border */
+  padding-bottom: 10px; /* Padding below the title */
+}
+
+.date-inputs {
+  display: flex; /* Flexbox layout */
+  gap: 20px; /* Space between date inputs */
+  margin-bottom: 20px; /* Space below the date inputs */
+}
+
+.date-input-group {
+  flex: 1; /* Allow the groups to grow equally */
+}
+
+.date-label {
+  display: block; /* Block display for labels */
+  margin-bottom: 8px; /* Space below labels */
+  font-weight: 500; /* Medium weight for labels */
+  color: #444; /* Dark grey color for labels */
+}
+
+.date-input {
+  width: 100%; /* Full width of the input */
+  padding: 10px; /* Padding inside dates inputs */
+  border: 1px solid #ccc; /* Light gray border */
+  border-radius: 4px; /* Rounded corners */
+  font-size: 16px; /* Font size for the inputs */
+}
+
+.trainees-selection {
+  margin-bottom: 20px; /* Space below trainees selection section */
+}
+
+.select-all-container {
+  display: flex; /* Use flexbox for alignment */
+  align-items: center; /* Center items vertically */
+  margin-bottom: 10px; /* Space below the select all section */
+}
+
+.checkbox {
+  margin-right: 8px; /* Space to the right of the checkbox */
+  cursor: pointer; /* Pointer on hover */
+  width: 18px; /* Width of the checkbox */
+  height: 18px; /* Height of the checkbox */
+}
+
+.select-all-label {
+  font-weight: 500; /* Medium weight for 'Select All' label */
+  cursor: pointer; /* Pointer on hover */
+}
+
+.trainees-list {
+  border: 1px solid #ddd; /* Light gray border around the list */
+  border-radius: 5px; /* Rounded corners */
+  max-height: 250px; /* Maximum height of the list */
+  overflow-y: auto; /* Scroll if content overflows */
+}
+
+.trainee-item {
+  display: flex; /* Flexbox for aligning items */
+  align-items: center; /* Center content */
+  padding: 10px; /* Padding inside item */
+  border-bottom: 1px solid #eee; /* Bottom border for each item */
+}
+
+.trainee-item:last-child {
+  border-bottom: none; /* Remove border for the last item */
+}
+
+.trainee-item:hover {
+  background-color: #F5F5F5; /* Light gray background on hover */
+}
+
+.trainee-label {
+  cursor: pointer; /* Pointer on hover */
+  flex-grow: 1; /* Allow the label to take remaining space */
+}
+
+.action-button {
+  width: 100%; /* Full width of the button */
+  padding: 12px; /* Padding inside the button */
+  background-color: #2C5282; /* Dark blue background */
+  color: white; /* White text color */
+  border: none; /* No border */
+  border-radius: 4px; /* Rounded corners for button */
+  font-size: 16px; /* Font size for button text */
+  font-weight: 500; /* Medium weight for button text */
+  cursor: pointer; /* Pointer on hover */
+  transition: background-color 0.3s; /* Smooth background color transition */
+}
+
+.action-button:hover {
+  background-color: #1E3A66; /* Darker blue on hover */
+}
+
+.button-disabled {
+  background-color: #99B4D8; /* Light blue for disabled state */
+  cursor: not-allowed; /* Not allowed cursor */
+}
+
+.message {
+  margin-top: 15px; /* Space above message section */
+  padding: 12px; /* Padding inside message section */
+  border-radius: 4px; /* Rounded corners for message section */
+  font-weight: 500; /* Medium weight for message text */
+}
+
+.success-message {
+  background-color: #E6F7E6; /* Light green background for success */
+  color: #2E7D32; /* Dark green text for success */
+  border: 1px solid #A5D6A7; /* Green border for success */
+}
+
+.error-message {
+  background-color: #FDECEA; /* Light red background for error */
+  color: #D32F2F; /* Dark red text for error */
+  border: 1px solid #F5C6CB; /* Red border for error */
+}
+
+.loading-text {
+  text-align: center; /* Center-align loading text */
+  padding: 15px; /* Padding inside loading text */
+  color: #666; /* Gray color for loading text */
+}

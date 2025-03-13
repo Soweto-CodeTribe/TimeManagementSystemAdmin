@@ -173,19 +173,21 @@ function Dashboard() {
           </div>
         </div>
 
-        {role === 'super_admin' && (
+        {role !== 'facilitator' && (
           <div className="stat-card">
             <div className="stat-header">
               <h4>Total Facilitators</h4>
               <UserCheck className="stat-icon" />
             </div>
             <div className="stat-content">
-              <div className="stat-value">{20}</div>
+              <div className="stat-value">{15}</div>
             </div>
           </div>
         )}
 
-        <div className="stat-card">
+        {role !== 'facilitator' && (
+          <>
+            <div className="stat-card">
           <div className="stat-header">
             <h4>Daily Attendance Rate</h4>
             <BarChart2 className="stat-icon" />
@@ -204,6 +206,8 @@ function Dashboard() {
             <div className="stat-value">{100 - 75}%</div>
           </div>
         </div>
+          </>
+        )}
       </div>
 
       <div className="chart-grid">
@@ -236,20 +240,21 @@ function Dashboard() {
           </div>
         </div>
 
-        <div className="chart-card">
+        {role !== 'facilitator' && (
+          <div className="chart-card">
           <div className="card-header">
             <h4>Check-ins for today</h4>
           </div>
           <div className="card-content">
             <table className="check-ins-table">
               <tbody>
-                {role === 'super_admin' && superAdminCheckIns.map((checkIn) => (
+                {superAdminCheckIns.map((checkIn) => (
                   <tr key={checkIn.name}>
                     <td>{checkIn.name}</td>
                     <td className="time">{checkIn.checkInTime}</td>
                   </tr>
                 ))}
-                {role === 'facilitator' && facilitatorAdminCheckIns.map((checkIn) => (
+                {facilitatorAdminCheckIns.map((checkIn) => (
                   <tr key={checkIn.name}>
                     <td>{checkIn.name}</td>
                     <td className="time">{checkIn.checkInTime}</td>
@@ -258,7 +263,8 @@ function Dashboard() {
               </tbody>
             </table>
           </div>
-        </div>
+        </div>  
+        )}
       </div>
 
       <div className="overview-card">
@@ -274,17 +280,22 @@ function Dashboard() {
                 <th>Email</th>
                 <th>Phone</th>
                 <th>Attendance Rate</th>
+                <th>Level</th>
                 <th>Actions</th>
+
               </tr>
             </thead>
             <tbody>
-              {role === 'super_admin' && currentItems.map((trainee) => (
+              {console.log(currentItems, 'current overview stats')}
+              {currentItems.map((trainee) => (
                 <tr key={trainee.email}>
                   <td>{trainee.traineeName}</td>
                   <td>{trainee.traineeLocation}</td>
                   <td>{trainee.traineeEmail}</td>
                   <td>{trainee.traineePhoneNumber}</td>
+                  <td>{trainee.attendancePercentage}</td>
                   <td>{trainee.attendanceLevel}</td>
+
                   <td>
                     <button className="action-button">Take Action</button>
                   </td>

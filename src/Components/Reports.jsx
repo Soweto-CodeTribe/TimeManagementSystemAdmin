@@ -137,7 +137,7 @@ const ReportsScreen = () => {
                 {data.reports.map((report, index) => (
                   <tr key={report.traineeId} onClick={() => setSelectedTrainee(report)}>
                     <td>{report.traineeId || `REP-${index + 1}`}</td>
-                    <td>{report.name}</td>
+                    <td>{report.name || report.fullName}</td>
                     <td className={report.status.toLowerCase()}>
                       {report.status}
                     </td>

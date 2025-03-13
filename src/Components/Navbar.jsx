@@ -36,13 +36,13 @@ const Navbar = ({ activeScreen }) => {
 
         {/* Right: Icons */}
         <div className="navicon-container">
-          <IoMdNotificationsOutline
+          <NotificationDisplay
             size={30}  // Set size to 30px to match the Avatar size
             className="icon"
             onClick={handleNotificationsClick} // Notification icon click
           /> 
-          <NotificationManager />
-          <NotificationDisplay />         
+          {/* <NotificationManager /> */}
+          {/* <NotificationDisplay />          */}
           {/* Avatar for Profile */}
           <Avatar
             alt="Profile Avatar"
