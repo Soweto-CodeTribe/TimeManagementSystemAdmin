@@ -19,6 +19,10 @@ import ForgotPassword from "./Components/ForgotPassword";
 import Profile from "./Components/Profile";
 import TwoFactorAuth from "./Components/TwoFactorAuth";
 import Tickets from "./Components/Tickets";
+<<<<<<< HEAD
+=======
+import NotFound from "./Components/NotFound";
+>>>>>>> de02c1efd8c29dc344b27ccefc1acb5e68eefd11
 import Loader from "./Components/Loader";
 import Notifications from "./Components/Notifications";
 import { messaging, requestFCMToken } from "./firebaseConfig";
@@ -34,6 +38,7 @@ function App() {
   const location = useLocation();
   const dispatch = useDispatch();
   const { isAuthenticated, isLoading } = useSelector((state) => state.auth);
+  const [authChecked, setAuthChecked] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(
     localStorage.getItem("sidebarState") === "true"
   );
@@ -41,8 +46,22 @@ function App() {
   // Initial auth check on app load
   useEffect(() => {
     const verifyAuth = async () => {
+<<<<<<< HEAD
       if (localStorage.getItem("authToken")) {
         await dispatch(checkAuthStatus());
+=======
+      try {
+        // Get token from localStorage
+        const token = localStorage.getItem("authToken");
+        
+        if (token) {
+          // Only dispatch check if token exists
+          await dispatch(checkAuthStatus());
+        }
+      } finally {
+        // Mark auth check as complete regardless of result
+        setAuthChecked(true);
+>>>>>>> de02c1efd8c29dc344b27ccefc1acb5e68eefd11
       }
     };
 
@@ -54,6 +73,7 @@ function App() {
     localStorage.setItem("sidebarState", isSidebarOpen);
   }, [isSidebarOpen]);
 
+<<<<<<< HEAD
   useEffect(()=>{
     requestFCMToken();
     onMessage(messaging, (payload)=>{
@@ -63,6 +83,17 @@ function App() {
   
   
 
+=======
+  // Show loading state until auth check completes
+  if (isLoading || !authChecked) {
+    return (
+      <div className="loading-overlay">
+        <Loader />
+      </div>
+    );
+  }
+  
+>>>>>>> de02c1efd8c29dc344b27ccefc1acb5e68eefd11
   // Determine current screen name for Navbar
   const getScreenName = (path) => {
     switch (path) {
@@ -138,6 +169,8 @@ function App() {
                     <Route path="/Tickets" element={<Tickets />} />
                     <Route path="/logout" element={<Logout />} />
                     <Route path="/add-user" element={<AddUserForm />} />
+                    {/* NotFound route that catches any undefined routes */}
+                    <Route path="*" element={<NotFound />} />
                   </Routes>
                 </div>
               </div>

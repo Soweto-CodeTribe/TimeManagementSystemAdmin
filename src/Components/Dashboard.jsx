@@ -248,8 +248,8 @@ function Dashboard() {
           <div className="card-content">
             <table className="check-ins-table">
               <tbody>
-                {superAdminCheckIns.map((checkIn) => (
-                  <tr key={checkIn.name}>
+                {superAdminCheckIns.map((index, checkIn) => (
+                  <tr key={index}>
                     <td>{checkIn.name}</td>
                     <td className="time">{checkIn.checkInTime}</td>
                   </tr>
@@ -285,10 +285,10 @@ function Dashboard() {
 
               </tr>
             </thead>
-            <tbody>
+            <tbody key={Date.now().toString()}>
               {console.log(currentItems, 'current overview stats')}
               {currentItems.map((trainee) => (
-                <tr key={trainee.email}>
+                <tr key={trainee.id}>
                   <td>{trainee.traineeName}</td>
                   <td>{trainee.traineeLocation}</td>
                   <td>{trainee.traineeEmail}</td>

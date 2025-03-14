@@ -1,4 +1,3 @@
-// src/screens/ReportsScreen.js
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
@@ -12,7 +11,10 @@ const ReportsScreen = () => {
   const [error, setError] = useState(null);
   const [selectedTrainee, setSelectedTrainee] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const maxVisiblePages = 5; 
+  const [searchTerm, setSearchTerm] = useState(""); // State for search term
+  const [filterDate, setFilterDate] = useState(""); // State for date filter
+  const [isFilterOpen, setIsFilterOpen] = useState(false); // State for filter visibility
+  const maxVisiblePages = 5;
 
   const fetchData = async (page) => {
     setLoading(true);
@@ -46,10 +48,10 @@ const ReportsScreen = () => {
 
     const { totalPages } = data;
     const pageNumbers = [];
-    
+
     let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-    
+
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
@@ -69,6 +71,20 @@ const ReportsScreen = () => {
     return pageNumbers;
   };
 
+  // Filter reports based on search term and date
+  const filteredReports = data?.reports
+    ?.filter((report) => report.name?.trim()) // Exclude reports without a name
+    .filter((report) =>
+      (report.name?.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (report.traineeId?.toString().includes(searchTerm)) ||
+      (report.status?.toLowerCase().includes(searchTerm.toLowerCase()))
+    )
+    .filter((report) => {
+      if (!filterDate) return true; // No date filter applied
+      const reportDate = new Date(report.date).toLocaleDateString();
+      return reportDate === filterDate;
+    }) || [];
+
   if (loading) return <DataLoader />; // Use the Loader component here
 
   if (error) return (
@@ -76,10 +92,10 @@ const ReportsScreen = () => {
       <p>Error: {error}</p>
     </div>
   );
-  
-  if (!data) return (
+
+  if (!data || filteredReports.length === 0) return (
     <div className="no-data-container">
-      <p>No data available</p>
+      <p>No matching records found</p>
     </div>
   );
 
@@ -96,17 +112,38 @@ const ReportsScreen = () => {
           <div className="card-header">
             <h2 className="card-title">Issue Management Table</h2>
             <div className="card-actions">
-              <button className="filter-button">
-                <FilterIcon className="filter-icon" />
-                <span>Filter</span>
-              </button>
+              {/* Search Input */}
               <div className="search-container">
                 <SearchIcon className="search-icon" />
-                <input 
-                  type="text" 
-                  placeholder="Search..." 
+                <input
+                  type="text"
+                  placeholder="Search..."
                   className="search-input"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)} // Update search term
                 />
+              </div>
+
+              {/* Filter Button and Dropdown */}
+              <div className="filter-wrapper">
+                <button
+                  className="filter-button"
+                  onClick={() => setIsFilterOpen(!isFilterOpen)}
+                >
+                  <FilterIcon className="filter-icon" />
+                  <span>Filter</span>
+                </button>
+                {isFilterOpen && (
+                  <div className="filter-dropdown">
+                    <label htmlFor="filter-date">Filter by Date:</label>
+                    <input
+                      type="date"
+                      id="filter-date"
+                      value={filterDate}
+                      onChange={(e) => setFilterDate(e.target.value)} // Update date filter
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -134,14 +171,14 @@ const ReportsScreen = () => {
                 </tr>
               </thead>
               <tbody>
-                {data.reports.map((report, index) => (
+                {filteredReports.map((report, index) => (
                   <tr key={report.traineeId} onClick={() => setSelectedTrainee(report)}>
                     <td>{report.traineeId || `REP-${index + 1}`}</td>
-                    <td>{report.name || report.fullName}</td>
+                    <td>{report.name || "N/A"}</td>
                     <td className={report.status.toLowerCase()}>
-                      {report.status}
+                      {report.status || "N/A"}
                     </td>
-                    <td>{new Date().toLocaleDateString()}</td>
+                    <td>{new Date(report.date).toLocaleDateString()}</td>
                     <td>
                       <button className="view-button">View</button>
                     </td>
@@ -152,19 +189,19 @@ const ReportsScreen = () => {
           </div>
 
           <div className="pagination">
-            <button 
+            <button
               className="pagination-arrow"
-              onClick={() => handlePageChange(currentPage - 1)} 
+              onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
             >
               <ChevronLeftIcon />
             </button>
-            
+
             {renderPaginationNumbers()}
 
-            <button 
+            <button
               className="pagination-arrow"
-              onClick={() => handlePageChange(currentPage + 1)} 
+              onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === data.totalPages}
             >
               <ChevronRightIcon />
@@ -189,17 +226,17 @@ const ReportsScreen = () => {
   );
 };
 
-// Icon Components (keep them here for now)
+// Icon Components (kept unchanged)
 const SearchIcon = (props) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width="16" 
-    height="16" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
     strokeLinejoin="round"
     {...props}
   >
@@ -209,15 +246,15 @@ const SearchIcon = (props) => (
 );
 
 const FilterIcon = (props) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width="16" 
-    height="16" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
     strokeLinejoin="round"
     {...props}
   >
@@ -226,15 +263,15 @@ const FilterIcon = (props) => (
 );
 
 const PDFIcon = (props) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width="16" 
-    height="16" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
     strokeLinejoin="round"
     {...props}
   >
@@ -247,15 +284,15 @@ const PDFIcon = (props) => (
 );
 
 const CSVIcon = (props) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width="16" 
-    height="16" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
     strokeLinejoin="round"
     {...props}
   >
@@ -266,15 +303,15 @@ const CSVIcon = (props) => (
 );
 
 const ChevronLeftIcon = () => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width="16" 
-    height="16" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
     strokeLinejoin="round"
   >
     <polyline points="15 18 9 12 15 6"></polyline>
@@ -282,15 +319,15 @@ const ChevronLeftIcon = () => (
 );
 
 const ChevronRightIcon = () => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width="16" 
-    height="16" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
     strokeLinejoin="round"
   >
     <polyline points="9 18 15 12 9 6"></polyline>
