@@ -16,7 +16,6 @@ import Logout from "./Components/Logout";
 import Login from "./Components/Login";
 import AddUserForm from "./Components/AddUserForm";
 import ForgotPassword from "./Components/ForgotPassword";
-import Profile from "./Components/Profile";
 import TwoFactorAuth from "./Components/TwoFactorAuth";
 import Tickets from "./Components/Tickets";
 import Loader from "./Components/Loader";
@@ -27,6 +26,7 @@ import NotificationDisplay from "./Components/NotificationDisplay";
 import { onMessage } from "firebase/messaging";
 import ManageTrainees from "./Components/ManageTrainees";
 import LocationManagement from "./Components/LocationManagement"; 
+import Profile from "./Components/AdminProfile";
 
 function App() {
 
@@ -82,8 +82,8 @@ function App() {
         return "Manage Trainees"; // Corrected to match the route
       case "/location-management": // Added case for Location Management
         return "Location Management";
-      case "/profile":
-        return "Profile";
+      // case "/profile":
+      //   return "Profile";
       case "/alerts":
         return "Alerts";
       case "/audit-logs":
