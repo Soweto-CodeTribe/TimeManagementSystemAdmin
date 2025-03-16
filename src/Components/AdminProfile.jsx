@@ -9,8 +9,8 @@ const AdminProfile = () => {
   });
 
   const [userData, setUserData] = useState({
-    firstName: '',
-    lastName: '',
+    fullName: '',
+    surname: '',
     role: '',
     email: ''
   });
@@ -156,19 +156,19 @@ const AdminProfile = () => {
 
       <div className="profile-main">
         <form className="profile-form" onSubmit={handleUpdate}>
-          <label>First Name:</label>
+          <label>fullName:</label>
           <input 
             type="text" 
-            name="firstName"
-            value={userData.firstName} 
+            name="fullName"
+            value={userData.fullName} 
             onChange={handleInputChange} 
           />
 
-          <label>Last Name:</label>
+          <label>surname:</label>
           <input 
             type="text" 
-            name="lastName"
-            value={userData.lastName} 
+            name="surname"
+            value={userData.surname} 
             onChange={handleInputChange} 
           />
 
@@ -195,7 +195,6 @@ const AdminProfile = () => {
         {successMessage && <p className="success-message">{successMessage}</p>}
         {feedbackMessage && <p className="error-message">{feedbackMessage}</p>}
 
-        <button onClick={handleLogout} className="logout-btn">Logout</button>
       </div>
     </div>
   );
