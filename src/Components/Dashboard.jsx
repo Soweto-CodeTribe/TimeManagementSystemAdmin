@@ -37,7 +37,7 @@ function Dashboard() {
   useEffect(() => {
     const fetchOverViews = async () => {
       try {
-        const overviewResponse = await axios.get('https://timemanagementsystemserver.onrender.com/api/trainee-overview', {
+        const overviewResponse = await axios.get('https://timemanagementsystemserver.onrender.com/api/trainees-overview', {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',

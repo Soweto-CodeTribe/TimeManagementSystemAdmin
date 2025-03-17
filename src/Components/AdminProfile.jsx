@@ -6,7 +6,7 @@ import { FaUser } from 'react-icons/fa';
 const AdminProfile = () => {
   // Initialize selectedImage from localStorage, use empty string as default
   const [selectedImage, setSelectedImage] = useState(() => {
-    return localStorage.getItem('profileImage') || ''; // Set to empty string instead of null
+    return localStorage.getItem('profileImage') || ''; // Set to empty string if not found
   });
   
   const [userData, setUserData] = useState({
@@ -165,7 +165,7 @@ const AdminProfile = () => {
           <input 
             type="text" 
             name="fullName"
-            value={userData.name} 
+            value={userData.fullName} // Ensure you're referencing the correct value here
             onChange={handleInputChange} 
           />
 

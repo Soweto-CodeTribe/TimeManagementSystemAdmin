@@ -12,61 +12,69 @@
   background-color: #ffffff;
   padding: 20px;
   box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.1);
+  display: flex; /* Use flexbox for layout */
+  flex-direction: column; /* Stack elements vertically */
+  align-items: center; /* Center elements */
 }
 
+/* Sidebar Header */
 .profile-sidebar h2 {
   font-size: 24px;
   margin-bottom: 20px;
 }
 
+/* Avatar Section */
 .avatar-section {
   text-align: center;
+  margin-bottom: 20px; /* Add a margin to space it from other content */
 }
 
 .avatar-placeholder {
-  width: 270px; /* Extended size for the avatar placeholder */
-  height: 270px; /* Extended size for the avatar placeholder */
+  width: 270px; /* Fixed size for avatar placeholder */
+  height: 270px; /* Fixed size for avatar placeholder */
   border-radius: 50%;
   background-color: #f4f4f4;
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: hidden; /* Ensure no overflow */
 }
 
-/* Custom file upload button */
+/* Custom File Upload Button */
 .upload-btn {
-  display: inline-block; /* Make it inline */
+  display: inline-block;
   margin-top: 10px;
   background-color: #04AA6D; /* Green */
   color: white;
   border: none;
-  padding: 5px 10px; /* Smaller padding */
+  padding: 5px 10px;
   cursor: pointer;
-  border-radius: 5px; /* Optional: Adds a slight rounding to the button */
+  border-radius: 5px; /* Adds slight rounding to the button */
 }
 
-/* Hide original file input */
+/* Hide Original File Input */
 input[type="file"] {
   display: none; /* Hide original file input */
 }
 
 /* Uploaded Image Display */
 .uploaded-image {
-  margin-top: 10px;
   border-radius: 50%;
-  width: 270px; /* Extended size for the uploaded image */
-  height: 270px; /* Extended size for the uploaded image */
-  object-fit: cover; /* Keeps the aspect ratio of the image */
+  width: 100%; /* Fill the avatar placeholder */
+  height: 100%; /* Fill the avatar placeholder */
+  object-fit: cover; /* Maintain the aspect ratio of the image */
 }
 
 /* Main Content */
 .profile-main {
   width: calc(75%);
   margin-left: auto;
+  padding: 40px; /* Add padding for the main content */
 }
 
+/* Profile Form Styles */
 .profile-form {
-  padding: 40px;
+  width: 100%; /* Use full width */
 }
 
 .profile-form label {
@@ -80,6 +88,7 @@ input[type="file"] {
   padding: 10px;
 }
 
+/* Adjust Right Panel */
 textarea {
   height: auto !important;
 }
@@ -91,14 +100,33 @@ textarea {
   color: white;
   border: none;
   padding: 10px;
-  cursor: pointer; /* Makes it clear that buttons are clickable */
+  cursor: pointer; /* Clarifies buttons are clickable */
 }
+
+/* Success Message */
 .success-message {
   color: green;
   margin-top: 10px;
 }
 
-.success-message {
-  color: green;
-  margin-top: 10px;
+/* Media Queries */
+@media (max-width: 768px) { /* Adjust for smaller screens */
+  .profile-sidebar {
+    width: 100%; /* Full width for smaller screens */
+    padding: 10px; /* Reduce padding */
+  }
+
+  .avatar-placeholder {
+    width: 150px; /* Adjust the size for smaller screens */
+    height: 150px; /* Adjust the size for smaller screens */
+  }
+
+  .uploaded-image {
+    width: 150px; /* Ensure the uploaded image fits */
+    height: 150px; /* Ensure the uploaded image fits */
+  }
+
+  .profile-main {
+    width: 100%; /* Take full width on smaller screens */
+  }
 }
