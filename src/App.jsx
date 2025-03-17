@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { checkAuthStatus } from "./Slices/authSlice";
@@ -19,22 +19,11 @@ import ForgotPassword from "./Components/ForgotPassword";
 import Profile from "./Components/Profile";
 import TwoFactorAuth from "./Components/TwoFactorAuth";
 import Tickets from "./Components/Tickets";
-<<<<<<< HEAD
-=======
 import NotFound from "./Components/NotFound";
->>>>>>> de02c1efd8c29dc344b27ccefc1acb5e68eefd11
 import Loader from "./Components/Loader";
 import Notifications from "./Components/Notifications";
-import { messaging, requestFCMToken } from "./firebaseConfig";
-import NotificationManager from "./Components/NotificationManager";
-import NotificationDisplay from "./Components/NotificationDisplay";
-import { onMessage } from "firebase/messaging";
-import ManageTrainees from "./Components/ManageTrainees";
-import LocationManagement from "./Components/LocationManagement"; 
 
 function App() {
-
- 
   const location = useLocation();
   const dispatch = useDispatch();
   const { isAuthenticated, isLoading } = useSelector((state) => state.auth);
@@ -46,10 +35,6 @@ function App() {
   // Initial auth check on app load
   useEffect(() => {
     const verifyAuth = async () => {
-<<<<<<< HEAD
-      if (localStorage.getItem("authToken")) {
-        await dispatch(checkAuthStatus());
-=======
       try {
         // Get token from localStorage
         const token = localStorage.getItem("authToken");
@@ -61,7 +46,6 @@ function App() {
       } finally {
         // Mark auth check as complete regardless of result
         setAuthChecked(true);
->>>>>>> de02c1efd8c29dc344b27ccefc1acb5e68eefd11
       }
     };
 
@@ -73,17 +57,6 @@ function App() {
     localStorage.setItem("sidebarState", isSidebarOpen);
   }, [isSidebarOpen]);
 
-<<<<<<< HEAD
-  useEffect(()=>{
-    requestFCMToken();
-    onMessage(messaging, (payload)=>{
-      console.log(payload)
-    })
-  },[])
-  
-  
-
-=======
   // Show loading state until auth check completes
   if (isLoading || !authChecked) {
     return (
@@ -93,7 +66,6 @@ function App() {
     );
   }
   
->>>>>>> de02c1efd8c29dc344b27ccefc1acb5e68eefd11
   // Determine current screen name for Navbar
   const getScreenName = (path) => {
     switch (path) {
@@ -109,10 +81,6 @@ function App() {
         return "Reports";
       case "/settings":
         return "System Settings";
-      case "/manage-trainees":
-        return "Manage Trainees"; // Corrected to match the route
-      case "/location-management": // Added case for Location Management
-        return "Location Management";
       case "/profile":
         return "Profile";
       case "/alerts":
@@ -160,8 +128,6 @@ function App() {
                     <Route path="/session" element={<Session />} />
                     <Route path="/reports" element={<Reports />} />
                     <Route path="/settings" element={<SystemSettings />} />
-                    <Route path="/manage-trainees" element={<ManageTrainees />} /> {/* Added ManageTrainees route */}
-                    <Route path="/location-management" element={<LocationManagement />} /> {/* Add Location Management route */}
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/notifications" element={<Notifications />} />
                     <Route path="/alerts" element={<Alerts />} />
