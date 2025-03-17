@@ -21,7 +21,6 @@ import Tickets from "./Components/Tickets";
 import NotFound from "./Components/NotFound";
 import Loader from "./Components/Loader";
 import Notifications from "./Components/Notifications";
-<<<<<<< HEAD
 import { messaging, requestFCMToken } from "./firebaseConfig";
 import NotificationManager from "./Components/NotificationManager";
 import NotificationDisplay from "./Components/NotificationDisplay";
@@ -29,9 +28,7 @@ import { onMessage } from "firebase/messaging";
 import ManageTrainees from "./Components/ManageTrainees";
 import LocationManagement from "./Components/LocationManagement"; 
 import Profile from "./Components/AdminProfile";
-=======
 import Feedback from "./Components/Feedback";
->>>>>>> ae19d5e257c25019ac24fa678ce8e1dfb18dd513
 
 function App() {
   const location = useLocation();
@@ -91,17 +88,14 @@ function App() {
         return "Reports";
       case "/settings":
         return "System Settings";
-<<<<<<< HEAD
       case "/manage-trainees":
         return "Manage Trainees"; // Corrected to match the route
       case "/location-management": // Added case for Location Management
         return "Location Management";
       // case "/profile":
       //   return "Profile";
-=======
-      case "/profile":
-        return "Profile";
->>>>>>> ae19d5e257c25019ac24fa678ce8e1dfb18dd513
+      case "/AdminProfile":
+        return "AdminProfile";
       case "/alerts":
         return "Alerts";
       case "/audit-logs":
@@ -149,7 +143,7 @@ function App() {
                     <Route path="/session" element={<Session />} />
                     <Route path="/reports" element={<Reports />} />
                     <Route path="/settings" element={<SystemSettings />} />
-                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/AdminProfile" element={<Profile />} />
                     <Route path="/notifications" element={<Notifications />} />
                     <Route path="/alerts" element={<Alerts />} />
                     <Route path="/audit-logs" element={<AuditLogs />} />
