@@ -4,22 +4,25 @@ import './styling/AdminProfile.css';
 import { FaUser } from 'react-icons/fa';
 
 const AdminProfile = () => {
+  // Initialize selectedImage from localStorage, use empty string as default
   const [selectedImage, setSelectedImage] = useState(() => {
-    return localStorage.getItem('profileImage') || null;
+    return localStorage.getItem('profileImage') || ''; // Set to empty string instead of null
   });
-
+  
   const [userData, setUserData] = useState({
     fullName: '',
     surname: '',
     role: '',
     email: ''
   });
+  
   const [successMessage, setSuccessMessage] = useState('');
   const [feedbackMessage, setFeedbackMessage] = useState('');
 
   const fetchUserData = async () => {
     const token = localStorage.getItem('authToken');
     const userId = localStorage.getItem('userId');
+    console.log("User-id:" ,userId)
 
     console.log("Authorization Token:", token);
 
@@ -41,6 +44,8 @@ const AdminProfile = () => {
       if (response.data) {
         setUserData(response.data);
         console.log("Fetched User Data:", response.data);
+        console.log("User id:" , response.data.uid)
+
       }
     } catch (error) {
       handleError(error);
@@ -52,6 +57,7 @@ const AdminProfile = () => {
   }, []);
 
   useEffect(() => {
+    // Persist selectedImage to localStorage when it changes
     if (selectedImage) {
       localStorage.setItem('profileImage', selectedImage);
     }
@@ -73,9 +79,8 @@ const AdminProfile = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        const base64String = reader.result;
-        setSelectedImage(base64String);
-        localStorage.setItem('profileImage', base64String);
+        const base64String = reader.result; 
+        setSelectedImage(base64String); // Set selectedImage state
       };
       reader.readAsDataURL(file);
     }
@@ -126,6 +131,8 @@ const AdminProfile = () => {
     // Only remove authentication-related data
     localStorage.removeItem('authToken');
     localStorage.removeItem('userId');
+    // Optionally keep the profile image in localStorage if user wants to persist it
+    // localStorage.removeItem('profileImage'); // Uncomment if you want to clear the image on logout
     window.location.href = '/login';
   };
 
@@ -136,14 +143,12 @@ const AdminProfile = () => {
         <div className="avatar-section">
           <div className="avatar-placeholder">
             {selectedImage ? (
-              <img src={selectedImage} alt="Profile" className="uploaded-image" />
+              <img src={selectedImage} alt="Profile" className="uploaded-image"/>
             ) : (
               <FaUser size={50} />
             )}
           </div>
-          <label htmlFor="file-input" className="upload-btn">
-            Choose File
-          </label>
+          <label htmlFor="file-input" className="upload-btn">Choose File</label>
           <input 
             type="file" 
             id="file-input" 
@@ -160,7 +165,7 @@ const AdminProfile = () => {
           <input 
             type="text" 
             name="fullName"
-            value={userData.fullName} 
+            value={userData.name} 
             onChange={handleInputChange} 
           />
 
@@ -194,7 +199,6 @@ const AdminProfile = () => {
 
         {successMessage && <p className="success-message">{successMessage}</p>}
         {feedbackMessage && <p className="error-message">{feedbackMessage}</p>}
-
       </div>
     </div>
   );

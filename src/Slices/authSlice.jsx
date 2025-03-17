@@ -264,6 +264,7 @@ export const loginUser = createAsyncThunk(
         if (data.token) {
           console.log("LoginUser: Token received from API:", data.token); // Debugging
           localStorage.setItem('authToken', data.token);
+          localStorage.setItem('userId', data.uid);
 
           if (data.requires2FA !== undefined) {
             localStorage.setItem('requires2FA', data.requires2FA.toString());
@@ -344,12 +345,14 @@ export const verifyOTP = createAsyncThunk(
         console.log("Name:",data.facilitator?.name);
         console.log("Location:",data.location);
         console.log("Email:",data.facilitator?.email);
+        console.log('userId', data.facilitator?.uid);
 
         localStorage.setItem('authToken', data.token);
         localStorage.setItem('role',data.role);
         localStorage.setItem('name',data.facilitator?.name || data.facilitator?.fullName)
         localStorage.setItem('Location',data.location)
         localStorage.setItem('Email',data.facilitator?.email)
+        localStorage.setItem('userId', data.facilitator?.uid);
 
         return data.token;
       } else {
