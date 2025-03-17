@@ -22,6 +22,7 @@ import Tickets from "./Components/Tickets";
 import NotFound from "./Components/NotFound";
 import Loader from "./Components/Loader";
 import Notifications from "./Components/Notifications";
+import Feedback from "./Components/Feedback";
 
 function App() {
   const location = useLocation();
@@ -89,6 +90,8 @@ function App() {
         return "Audit Logs";
       case "/Tickets":
         return "Tickets";
+      case "/Feedback":
+        return "Feedback"
       default:
         return "";
     }
@@ -133,6 +136,7 @@ function App() {
                     <Route path="/alerts" element={<Alerts />} />
                     <Route path="/audit-logs" element={<AuditLogs />} />
                     <Route path="/Tickets" element={<Tickets />} />
+                    <Route path="/Feedback" element={<Feedback />} />
                     <Route path="/logout" element={<Logout />} />
                     <Route path="/add-user" element={<AddUserForm />} />
                     {/* NotFound route that catches any undefined routes */}
