@@ -173,9 +173,9 @@ const Login = () => {
               {isLoading ? "Please wait..." : "Continue"}
             </button>
 
-            <div className="progress-bars">
-              <span className="bar active"></span>
-              <span className="bar"></span>
+            <div className="progress-dots">
+              <span className="dot active"></span>
+              <span className="dot"></span>
             </div>
           </form>
         </div>

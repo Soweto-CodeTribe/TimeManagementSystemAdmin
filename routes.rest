@@ -1,0 +1,78 @@
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiJscUVpekswRlJWTWtqeGF6SDc0eWZRc2VJSzYyIiwiZW1haWwiOiJzdGF5d2lzZWhvdGVsc0BnbWFpbC5jb20iLCJsb2NhdGlvbiI6IlRlbWJpc2EiLCJyb2xlIjoiZmFjaWxpdGF0b3IiLCJpYXQiOjE3NDIxOTYyNDEsImV4cCI6MTc0MjIyODY0MX0.VkjCn3h7o3lQYivwI1UjFUH_q5usvxWwsFh87o0Xvc4
+
+### Get Trainee Overview
+GET https://timemanagementsystemserver.onrender.com/api/trainee-overview
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+###
+
+### Get Daily Report (Super Admin)
+### Get Daily Report (Super Admin)
+GET https://timemanagementsystemserver.onrender.com/api/session/daily-report?date=2025-03-12&pages=2&limit=4
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+
+
+###
+
+### Login Request
+POST https://timemanagementsystemserver.onrender.com/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "staywisehotels@gmail.com",
+  "password": "Testing123"
+}
+
+###
+
+### Verify 2FA
+POST https://timemanagementsystemserver.onrender.com/api/auth/verify-2fa
+Content-Type: application/json
+
+{
+  "verificationCode": "634678",
+  "verificationId": "VY8FekBt7zkReQ2UYepb"
+}
+
+@page = 1
+@itemsPerPage = 10
+
+### Get Daily Report (Super Admin)
+GET https://timemanagementsystemserver.onrender.com/api/session/daily-report?date=2025-03-11&page={{page}}&limit={{itemsPerPage}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+
+###
+
+
+### Get Daily Session Report (Super Admin)
+@page = 1
+@itemsPerPage = 10
+@debouncedSearchTerm = ""
+@filterStatus = ""
+@filterDate = ""
+
+### Get Daily Report (Super Admin)@token = YOUR_ACCESS_TOKEN_HERE
+@page = 1
+@itemsPerPage = 10
+@debouncedSearchTerm = "searchTerm"  # Replace with actual search term if needed
+@filterStatus = "active"  # Example status
+@filterDate = "2025-03-17"  # Example date
+
+### Get Daily Report (Super Admin)
+GET https://timemanagementsystemserver.onrender.com/api/super-admin/daily?page={{page}}&limit={{itemsPerPage}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+
+###
+
+
+### Get Facilitator Daily Check-Ins
+GET https://timemanagementsystemserver.onrender.com/api/facilitator/daily
+Authorization: Bearer {{token}}
+Content-Type: application/json

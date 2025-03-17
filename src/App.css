@@ -12,8 +12,8 @@ html, body, #root {
 }
 
 ::selection{
-  background: #8CC63F;
-  color: #fff ;
+  background:#8CC63F;
+  color:#f2f2f8;
 }
 
 .app-container {

@@ -4,7 +4,7 @@ const DataLoader = () => {
     return (
       <div className="loading-container">
         <div className="loading-spinner"></div>
-        <p>Loading attendance data...</p>
+        <p>Please Wait...</p>
       </div>
     );
   };

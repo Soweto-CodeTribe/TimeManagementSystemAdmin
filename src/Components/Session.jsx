@@ -1,5 +1,4 @@
 "use client"
-
 import { useState, useEffect } from "react"
 import { FileText, Search, Filter, Info, ChevronLeft, ChevronRight } from "lucide-react"
 import "./styling/Session.css"
@@ -9,103 +8,98 @@ import DataLoader from "./dataLoader"
 
 const SessionMonitoring = () => {
   const BASE_URL = "https://timemanagementsystemserver.onrender.com/"
-  const token = useSelector((state) => state.auth.token);
-  
+  const token = useSelector((state) => state.auth.token)
+
   // State for API data
-  const [summaryData, setSummaryData] = useState(null);
-  const [reports, setReports] = useState([]);
-  const [data, setData] = useState([])
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState("")
-  
+  const [summaryData, setSummaryData] = useState(null)
+  const [reports, setReports] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [searchTerm, setSearchTerm] = useState("") // User input
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("") // Debounced search term
+  const [filterStatus, setFilterStatus] = useState("") // State for status filter
+  const [filterDate, setFilterDate] = useState("") // State for date filter
+  const [isFilterOpen, setIsFilterOpen] = useState(false) // State for filter visibility
+
   // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
-  const [itemsPerPage, setItemsPerPage] = useState(10); // Default items per page
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
+
+  // Debounce logic
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm) // Update debounced search term after 500ms
+    }, 1400)
+
+    return () => clearTimeout(debounceTimer) // Clear timer on re-render
+  }, [searchTerm])
 
   useEffect(() => {
-    if (token) fetchData(currentPage);
-  }, [currentPage]); // Removed token to prevent unnecessary re-fetching
-  
+    fetchData(currentPage)
+  }, [token, currentPage, itemsPerPage, debouncedSearchTerm, filterStatus, filterDate])
+
   const fetchData = async (page = 1) => {
-    setIsLoading(true);
+    setIsLoading(true)
     try {
-      const response = await axios.get(`${BASE_URL}api/session/daily-report`, {
-        params: { page, limit: itemsPerPage },
+      const response = await axios.get(`${BASE_URL}api/super-admin/daily`, {
+        params: {
+          page: page,
+          limit: itemsPerPage,
+          search: debouncedSearchTerm, // Use debounced search term
+          status: filterStatus || undefined,
+          date: filterDate || undefined,
+        },
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-      });
-  
-      const data = response?.data || {}; // Ensure `data` exists
-      setSummaryData(data.summary || {});
-      setReports(data.paginatedReports || []);
-      setData(data || []);
-  
-      // Update pagination only if data is valid
-      if (data.pagination) {
-        setCurrentPage(data.pagination.currentPage);
-        setTotalPages(data.pagination.totalPages);
-        setTotalItems(data.pagination.totalItems);
-      }
-    } catch (error) {
-      console.error("Error fetching daily report:", error);
-      setError(error?.response?.data?.message || "Failed to load attendance data");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
+      })
 
-  // Handle page change
+      const { summary = {}, reports: apiReports = [], currentPage: apiCurrentPage, totalPages: apiTotalPages } = response.data
+
+      setSummaryData(summary)
+      setReports(apiReports)
+      setCurrentPage(Number(apiCurrentPage) || 1)
+      setTotalPages(Number(apiTotalPages) || 1)
+    } catch (error) {
+      console.error("Error fetching daily report:", error)
+      setError("Failed to load attendance data")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
+      setCurrentPage(page)
     }
-  };
+  }
 
-  // Reset to first page when searching
   useEffect(() => {
-    if (searchTerm) {
-      setCurrentPage(1);
-    }
-  }, [searchTerm]);
-
-  // Filter employees based on search term - only if we have reports
-  const filteredReports = reports.length > 0 
-    ? reports.filter(report => 
-        report.name?.toLowerCase().includes(searchTerm.toLowerCase()))
-    : [];
+    setCurrentPage(1)
+  }, [debouncedSearchTerm, filterStatus, filterDate])
 
   const formatTime = (timeString) => {
-    if (!timeString) return "-";
-    
+    if (!timeString) return "-"
     try {
-      // Assuming timeString is in ISO format or a standard format
-      const date = new Date(timeString);
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const [hours, minutes] = timeString.split(":")
+      return `${hours.padStart(2, "0")}:${minutes.padStart(2, "0")}`
     } catch (error) {
-      console.error(error)
-      return timeString; // Return as is if parsing fails
+      console.error("Error formatting time:", error)
+      return "-"
     }
-  };
+  }
 
-  // Generate page numbers for pagination
   const renderPaginationNumbers = () => {
-    const pageNumbers = [];
-    const maxVisiblePages = 5; // Maximum number of page buttons to show
-    
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-    
-    // Adjust start page if end range is too small
+    const pageNumbers = []
+    const maxVisiblePages = 5
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2))
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1)
+
     if (endPage - startPage + 1 < maxVisiblePages) {
-      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+      startPage = Math.max(1, endPage - maxVisiblePages + 1)
     }
-    
+
     for (let i = startPage; i <= endPage; i++) {
       pageNumbers.push(
         <button
@@ -115,13 +109,22 @@ const SessionMonitoring = () => {
         >
           {i}
         </button>
-      );
+      )
     }
-    
-    return pageNumbers;
-  };
+    return pageNumbers
+  }
 
-  if(isLoading) return <DataLoader/>
+  const renderDate = () => {
+    if (!summaryData?.date) return ""
+    try {
+      return new Date(summaryData.date).toLocaleDateString()
+    } catch (error) {
+      console.error("Error formatting date:", error)
+      return ""
+    }
+  }
+
+  if (isLoading) return <DataLoader />
 
   return (
     <div className="session-container">
@@ -130,77 +133,84 @@ const SessionMonitoring = () => {
         Monitor check-ins, check-outs, and lunch breaks. Add time logs, update session attendance and activity.
       </p>
 
-      {/* Metrics Cards */}
       <div className="metrics-grid">
-        <div className="metric-card blue">
-          <div className="metric-header">
-            <div className="metric-icon blue">
-              <div className="metric-dot blue"></div>
+        {[
+          { label: 'Present', value: summaryData?.presentCount, color: 'blue' },
+          { label: 'Total Trainees', value: summaryData?.totalTrainees, color: 'green' },
+          { label: 'Absent', value: summaryData?.absentCount, color: 'red' },
+          { label: 'Late Check-Ins', value: summaryData?.lateCount, color: 'yellow' }
+        ].map((metric, index) => (
+          <div className={`metric-card ${metric.color}`} key={index}>
+            <div className="metric-header">
+              <div className={`metric-icon ${metric.color}`}>
+                <div className={`metric-dot ${metric.color}`}></div>
+              </div>
+              <span className="metric-label">{metric.label}</span>
             </div>
-            <span className="metric-label">Present</span>
+            <div className={`metric-value ${metric.color}`}>{metric.value || 0}</div>
           </div>
-          <div className="metric-value blue">{isLoading ? "-" :  summaryData?.presentCount || 0}</div>
-        </div>
-
-        <div className="metric-card green">
-          <div className="metric-header">
-            <div className="metric-icon green">
-              <div className="metric-dot green"></div>
-            </div>
-            <span className="metric-label">Total Trainees</span>
-          </div>
-          <div className="metric-value green">{isLoading ? "-" : summaryData?.totalTrainees || 0}</div>
-        </div>
-
-        <div className="metric-card red">
-          <div className="metric-header">
-            <div className="metric-icon red">
-              <div className="metric-dot red"></div>
-            </div>
-            <span className="metric-label">Absent</span>
-          </div>
-          <div className="metric-value red">{isLoading ? "-" : summaryData?.absentCount || 0}</div>
-        </div>
-
-        <div className="metric-card yellow">
-          <div className="metric-header">
-            <div className="metric-icon yellow">
-              <div className="metric-dot yellow"></div>
-            </div>
-            <span className="metric-label">Late Check-Ins</span>
-          </div>
-          <div className="metric-value yellow">{isLoading ? "-" : summaryData?.lateCount || 0}</div>
-        </div>
+        ))}
       </div>
 
-      {/* Daily Attendance Log */}
       <div className="table-container">
         <div className="table-header">
           <h2 className="table-title">
             Daily Attendance Log
-            {summaryData && <span className="table-date"> - {new Date(summaryData.date).toLocaleDateString()}</span>}
+            {summaryData && <span className="table-date"> - {renderDate()}</span>}
           </h2>
           <div className="table-actions">
-            <button className="btn filter-btn">
-              <Filter className="btn-icon" />
-              <span>Filter</span>
-            </button>
+            {/* Filter Button */}
+            <div className="filter-wrapper">
+              <button
+                className="btn filter-btn"
+                onClick={() => setIsFilterOpen(!isFilterOpen)}
+              >
+                <Filter className="btn-icon" />
+                <span>Filter</span>
+              </button>
+              {isFilterOpen && (
+                <div className="filter-dropdown">
+                  <div className="filter-group">
+                    <label>Status:</label>
+                    <select
+                      value={filterStatus}
+                      onChange={(e) => setFilterStatus(e.target.value)}
+                    >
+                      <option value="">All</option>
+                      <option value="present">Present</option>
+                      <option value="absent">Absent</option>
+                      <option value="late">Late</option>
+                    </select>
+                  </div>
+                  <div className="filter-group">
+                    <label>Date:</label>
+                    <input
+                      type="date"
+                      value={filterDate}
+                      onChange={(e) => setFilterDate(e.target.value)}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Search Input */}
             <div className="search-wrapper">
               <Search className="search-icon" />
               <input
                 type="text"
-                placeholder="Search by name"
+                placeholder="Search by ID or Name"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="search-input"
-                disabled={reports.length === 0 || isLoading}
+                disabled={reports.length === 0}
               />
             </div>
           </div>
         </div>
 
         <div className="export-actions">
-          <button className="btn export-btn" disabled={reports.length === 0 || isLoading}>
+          <button className="btn export-btn" disabled={reports.length === 0}>
             <FileText className="btn-icon" />
             <span>Export PDF</span>
           </button>
@@ -215,7 +225,7 @@ const SessionMonitoring = () => {
             <Info size={48} />
             <h3>No Attendance Records</h3>
             <p>
-              {summaryData?.isWorkingDay === false 
+              {summaryData?.isWorkingDay === false
                 ? "Today is not a working day. No attendance data is available."
                 : "No attendance records found for today. Check back later."}
             </p>
@@ -225,42 +235,36 @@ const SessionMonitoring = () => {
             <table className="attendance-table">
               <thead>
                 <tr>
-                  <th>Name</th>
                   <th>ID</th>
+                  <th>Name</th>
+                  <th>Date</th>
                   <th>Check-In</th>
                   <th>Lunch Start</th>
                   <th>Lunch End</th>
                   <th>Check-Out</th>
                   <th>Status</th>
+                  <th>Hours Worked</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredReports.length > 0 ? (
-                  filteredReports.map((report, index) => (
-                    <tr key={index}>
-                      <td>{report.name || "-"}</td>
-                      <td>{report.traineeId}</td>
-                      <td>{report.checkInTime || "-"}</td>
-                      <td>{report.lunchStartTime || "-"}</td>
-                      <td>{report.lunchEndTime || "-"}</td>
-                      <td>{report.checkOutTime || "-"}</td>
-                      <td>{report.status || "-"}</td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr className="no-results">
-                    <td colSpan="7">No results match your search. Try a different name.</td>
+                {reports.map((report, index) => (
+                  <tr key={index}>
+                    <td>{report.traineeId || "-"}</td>
+                    <td>{report.name || "N/A"}</td>
+                    <td>{new Date(report.date).toLocaleDateString()}</td>
+                    <td>{formatTime(report.checkInTime)}</td>
+                    <td>{formatTime(report.lunchStartTime)}</td>
+                    <td>{formatTime(report.lunchEndTime)}</td>
+                    <td>{formatTime(report.checkOutTime)}</td>
+                    <td className={`status-${report.status?.toLowerCase()}`}>{report.status || "-"}</td>
+                    <td>{report.totalHoursWorked || "0"}</td>
                   </tr>
-                )}
+                ))}
               </tbody>
             </table>
-            
-            {/* Pagination controls */}
-            {!searchTerm && filteredReports.length > 0 && totalPages > 1 && (
+
+            {totalPages > 1 && (
               <div className="pagination-container">
-                {/* <div className="pagination-info">
-                  Showing {reports.length} of {totalItems} entries
-                </div> */}
                 <div className="pagination-controls">
                   <button 
                     className="pagination-arrow" 
@@ -269,9 +273,7 @@ const SessionMonitoring = () => {
                   >
                     <ChevronLeft size={18} />
                   </button>
-                  
                   {renderPaginationNumbers()}
-                  
                   <button 
                     className="pagination-arrow" 
                     onClick={() => handlePageChange(currentPage + 1)}

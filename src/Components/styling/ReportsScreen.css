@@ -398,4 +398,39 @@
     margin-bottom: 4px;
   }
 }
+/* Filter Dropdown */
+.filter-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.filter-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 12px;
+  z-index: 100;
+  min-width: 200px;
+}
+
+.filter-dropdown label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
+}
+
+.filter-dropdown input[type="date"] {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
 

@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom"; // To handle navigation
 import { Avatar } from '@mui/material'; // Importing MUI Avatar component
 import "./styling/Navbar.css";
 import imgAvater from '../assets/hacker.png'; // Avatar image
+import NotificationManager from "./NotificationManager";
+import NotificationDisplay from "./NotificationDisplay";
 
 const Navbar = ({ activeScreen }) => {
   const navigate = useNavigate();
@@ -34,11 +36,13 @@ const Navbar = ({ activeScreen }) => {
 
         {/* Right: Icons */}
         <div className="navicon-container">
-          <IoMdNotificationsOutline
+          <NotificationDisplay
             size={30}  // Set size to 30px to match the Avatar size
             className="icon"
             onClick={handleNotificationsClick} // Notification icon click
-          />          
+          /> 
+          {/* <NotificationManager /> */}
+          {/* <NotificationDisplay />          */}
           {/* Avatar for Profile */}
           <Avatar
             alt="Profile Avatar"
