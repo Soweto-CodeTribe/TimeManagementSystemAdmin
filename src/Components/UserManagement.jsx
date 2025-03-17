@@ -7,9 +7,11 @@ import Papa from "papaparse";
 import Modal from "./Modal";
 import axios from "axios";
 
+
 const UserManagement = () => {
   const location = useLocation();
   const navigate = useNavigate();
+
 
   const [users, setUsers] = useState([]);
   const [guests, setGuests] = useState([]);
@@ -17,6 +19,7 @@ const UserManagement = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [feedbackMessage, setFeedbackMessage] = useState("");
+
 
   const fetchData = async () => {
     const token = localStorage.getItem("authToken");
@@ -27,6 +30,21 @@ const UserManagement = () => {
 
     try {
       const headers = { Authorization: `Bearer ${token}` };
+
+
+
+  const fetchData = async () => {
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      setFeedbackMessage(
+        "No authorization token found. Please log in again."
+      );
+      return;
+    }
+
+    try {
+      const headers = { Authorization: `Bearer ${token}` };
+      
 
       // Make API calls
       const traineesResponse = await axios.get(
@@ -42,10 +60,20 @@ const UserManagement = () => {
         { headers }
       );
 
+
       const traineesArray = traineesResponse.data.trainees || [];
       const facilitatorsArray = facilitatorsResponse.data.facilitators || facilitatorsResponse.data || [];
       const stakeholdersArray = stakeholdersResponse.data || [];
 
+
+      
+      // Extract trainees array from the response structure
+      const traineesArray = traineesResponse.data.trainees || [];
+      // Assume similar structure for facilitators and stakeholders - adjust if different
+      const facilitatorsArray = facilitatorsResponse.data.facilitators || facilitatorsResponse.data || [];
+      const stakeholdersArray = stakeholdersResponse.data || [];
+      
+      // Map trainees
       const trainees = traineesArray.map(user => ({
         id: user._id || user.id || `trainee-${Date.now()}-${Math.random()}`,
         fullName: user.fullName || user.name || `${user.name || ''} ${user.surname || ''}`.trim(),
@@ -53,6 +81,8 @@ const UserManagement = () => {
         role: "Trainee",
       }));
 
+      
+      // Map facilitators and stakeholders
       const facilitators = Array.isArray(facilitatorsArray) 
         ? facilitatorsArray.map(user => ({
             id: user._id || user.id || `facilitator-${Date.now()}-${Math.random()}`,
@@ -61,6 +91,86 @@ const UserManagement = () => {
             role: "Facilitator",
           }))
         : [];
+
+        
+      const stakeholders = Array.isArray(stakeholdersArray)
+        ? stakeholdersArray.map(user => ({
+            id: user._id || user.id || `stakeholder-${Date.now()}-${Math.random()}`,
+            fullName: user.fullName || user.name || `${user.name || ''} ${user.surname || ''}`.trim(),
+            email: user.email,
+            role: "Stakeholder",
+          }))
+        : [];
+      
+      // Combine all users
+      const allUsers = [...stakeholders, ...trainees, ...facilitators];
+      
+      setUsers(allUsers);
+      setFeedbackMessage("Data fetched successfully.");
+    } catch (error) {
+      console.error("Error fetching data from the server", error);
+      setFeedbackMessage("Error fetching data. Please try again later.");
+    }
+  };
+
+  useEffect(() => {
+    // const fetchData = async () => {
+    //   const token = localStorage.getItem("authToken");
+    //   if (!token) {
+    //     setFeedbackMessage(
+    //       "No authorization token found. Please log in again."
+    //     );
+    //     return;
+    //   }
+  
+  
+    //   try {
+    //     const headers = { Authorization: `Bearer ${token}` };
+    //     const [traineesResponse, facilitatorsResponse, stakeholdersResponse] =
+    //       await Promise.all([
+    //         axios.get(
+    //           "https://timemanagementsystemserver.onrender.com/api/trainees",
+    //           { headers }
+    //         ),
+    //         axios.get(
+    //           "https://timemanagementsystemserver.onrender.com/api/facilitators",
+    //           { headers }
+    //         ),
+    //         axios.get(
+    //           "https://timemanagementsystemserver.onrender.com/api/stakeholder/all",
+    //           { headers }
+    //         ),
+    //       ]);
+  
+  
+    //     const allUsers = [
+    //       ...stakeholdersResponse.data.map((user) => ({
+    //         id: user._id || `stakeholder-${Date.now()}-${Math.random()}`,
+    //         fullName: user.fullName || user.name,
+    //         email: user.email,
+    //         role: "stakeholder",
+    //       })),
+    //       ...traineesResponse.data.map((user) => ({
+    //         id: user._id || `trainee-${Date.now()}-${Math.random()}`,
+    //         fullName: user.fullName || user.name,
+    //         email: user.email,
+    //         role: "Trainee",
+    //       })),
+    //       ...facilitatorsResponse.data.map((user) => ({
+    //         id: user._id || `facilitator-${Date.now()}-${Math.random()}`,
+    //         fullName: user.fullName || user.name,
+    //         email: user.email,
+    //         role: "Facilitator",
+    //       })),
+    //     ];
+    //     setUsers(allUsers);
+    //     setFeedbackMessage("Data fetched successfully.");
+    //   } catch (error) {
+    //     console.error("Error fetching data from the server", error);
+    //     setFeedbackMessage("Error fetching data. Please try again later.");
+    //   }
+    // };
+
 
       const stakeholders = Array.isArray(stakeholdersArray)
         ? stakeholdersArray.map(user => ({
@@ -85,6 +195,7 @@ const UserManagement = () => {
     fetchData();
   }, []);
 
+
   useEffect(() => {
     if (location.state && location.state.userData) {
       const newUser = location.state.userData;
@@ -102,6 +213,7 @@ const UserManagement = () => {
     }
   }, [location.state, users]);
 
+
   const exportPDF = () => {
     const doc = new jsPDF();
     doc.text("User Management", 10, 10);
@@ -116,6 +228,7 @@ const UserManagement = () => {
     doc.save("UserManagement.pdf");
   };
 
+
   const exportCSV = () => {
     const csvContent = users
       .map((user) => `${user.fullName},${user.email},${user.role}`)
@@ -129,21 +242,123 @@ const UserManagement = () => {
     document.body.removeChild(link);
   };
 
+
+  // const handleFileChange = async (event) => {
+  //   const file = event.target.files[0];
+  //   if (!file) return;
+
+
+  //   const token = localStorage.getItem("authToken");
+  //   if (!token) {
+  //     setFeedbackMessage("No authorization token found. Please log in again.");
+  //     return;
+  //   }
+
+
+  //   Papa.parse(file, {
+  //     header: true,
+  //     skipEmptyLines: true,
+  //     complete: async (results) => {
+  //       try {
+  //         const csvData = results.data;
+
+
+  //         // Validate CSV data
+  //         if (!Array.isArray(csvData) || csvData.length === 0) {
+  //           setFeedbackMessage("No valid data found in the CSV file.");
+  //           return;
+  //         }
+
+
+  //         // Format the data to match backend requirements
+  //         // const formattedTrainees = csvData.map(trainee => ({
+  //         //     fullName: trainee.fullName || "Unknown",
+  //         //     surname: trainee.surname || "",
+  //         //     email: trainee.email || "",
+  //         //     phoneNumber: trainee.phoneNumber || "",
+  //         //     location: trainee.location || "",
+  //         //     idNumber: trainee.idNumber || "",
+  //         //     address: trainee.address || "",
+  //         //     street: trainee.street || "",
+  //         //     city: trainee.city || "",
+  //         //     postalCode: trainee.postalCode || "",
+  //         //     role: "Trainee"
+  //         // }));
+  //         const formData = new FormData();
+  //         formData.append("file", file);
+
+
+  //         // Upload CSV data to server
+  //         const response = await axios.post(
+  //           "https://timemanagementsystemserver.onrender.com/api/csv/csv-upload",
+  //           formData,
+  //           {
+  //             headers: {
+  //               Authorization: `Bearer ${token}`,
+  //               "Content-Type": "multipart/form-data",
+  //             },
+  //           }
+  //         );
+
+
+  //         // Update local state with server response
+  //         if (response.data && response.data.trainees) {
+  //           const newTrainees = response.data.trainees.map((trainee) => ({
+  //             id: trainee._id,
+  //             fullName: trainee.fullName,
+  //             email: trainee.email,
+  //             role: "Trainee",
+  //           }));
+
+
+  //           setUsers((prevUsers) => [...prevUsers, ...newTrainees]);
+  //           setFeedbackMessage("CSV uploaded and processed successfully!");
+  //         } else {
+  //           setFeedbackMessage("CSV uploaded.");
+  //         }
+  //       } catch (error) {
+  //         console.error("Error uploading CSV file:", error);
+  //         setFeedbackMessage(
+  //           `Upload error: ${error.response?.data?.message || error.message}`
+  //         );
+  //       }
+  //     },
+  //     error: (error) => {
+  //       console.error("CSV parsing error:", error);
+  //       setFeedbackMessage(`CSV parsing error: ${error.message}`);
+  //     },
+  //   });
+  // };
+
+
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
-
+  
     const token = localStorage.getItem("authToken");
     if (!token) {
       setFeedbackMessage("No authorization token found. Please log in again.");
       return;
     }
 
+
     const formData = new FormData();
     formData.append("file", file);
 
     try {
       setFeedbackMessage("Uploading CSV file...");
+
+  
+    // Create FormData with the file
+    const formData = new FormData();
+    formData.append("file", file); // Must match 'file' field in uploadMiddleware
+  
+    try {
+      setFeedbackMessage("Uploading CSV file...");
+      
+      // Since the backend is using a streaming response, we need to handle it differently
+      // First, just make the initial request to start the upload
+
       const response = await axios.post(
         "https://timemanagementsystemserver.onrender.com/api/csv/csv-upload",
         formData,
@@ -152,12 +367,24 @@ const UserManagement = () => {
             Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
           },
+
           transformResponse: [(data) => data],
         }
       );
 
       if (response.status === 202) {
         console.error("response:", response.data);
+
+          // Don't parse the response as JSON yet
+          transformResponse: [(data) => data],
+        }
+      );
+      
+      // Check if we got a valid response
+      if (response.status === 202) {
+        console.error("response:", response.data)
+        // Try to parse the first chunk of the response
+
         try {
           const firstChunk = JSON.parse(response.data);
           setFeedbackMessage(`Processing ${firstChunk.totalTrainees || "unknown number of"} trainees from CSV...`);
@@ -165,10 +392,19 @@ const UserManagement = () => {
           setFeedbackMessage("Upload started, processing trainees...");
         }
 
+
         setTimeout(() => {
           setFeedbackMessage("Upload complete! Refreshing user list...");
           fetchData();
         }, 5000);
+
+        
+        // After a delay, check if the upload was successful by refreshing the user list
+        setTimeout(() => {
+          setFeedbackMessage("Upload complete! Refreshing user list...");
+          fetchData();
+        }, 5000); // Wait 5 seconds before refreshing the list
+
       }
     } catch (error) {
       console.error("Error uploading CSV file:", error);
@@ -178,10 +414,13 @@ const UserManagement = () => {
     }
   };
 
+
+
   const handleTakeAction = (user) => {
     setSelectedUser(user);
     setModalOpen(true);
   };
+
 
   const handleDeleteUser = () => {
     if (selectedUser) {
@@ -193,12 +432,14 @@ const UserManagement = () => {
     }
   };
 
+
   const exportTraineesCSV = async () => {
     const token = localStorage.getItem("authToken");
     if (!token) {
       setFeedbackMessage("No authorization token found. Please log in again.");
       return;
     }
+
 
     try {
       const response = await axios.get(
@@ -212,6 +453,8 @@ const UserManagement = () => {
         }
       );
 
+
+      // Create a link to download the CSV
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
@@ -219,8 +462,12 @@ const UserManagement = () => {
       document.body.appendChild(link);
       link.click();
 
+
+
+      // Clean up
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
+
 
       setFeedbackMessage("Trainees CSV exported successfully.");
     } catch (error) {
@@ -231,6 +478,7 @@ const UserManagement = () => {
     }
   };
 
+
   const filteredUsers = users.filter(
     (user) =>
       (user.fullName &&
@@ -239,6 +487,7 @@ const UserManagement = () => {
         user.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (user.role && user.role.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
 
   const filteredGuests = guests.filter(
     (guest) =>
@@ -266,6 +515,7 @@ const UserManagement = () => {
         user={selectedUser}
       />
 
+
       <div className="header">
         <div className="title-section">
           <h1>User Management</h1>
@@ -282,7 +532,11 @@ const UserManagement = () => {
         </button>
       </div>
 
+<<<<<<< HEAD
       {/* Table Section for Facilitators */}
+=======
+
+>>>>>>> ae19d5e257c25019ac24fa678ce8e1dfb18dd513
       <div className="table-section">
         <div className="table-header">
           <h2>
@@ -316,6 +570,7 @@ const UserManagement = () => {
           </table>
         </div>
       </div>
+
 
       {/* Table Section for Trainees */}
       <div className="table-section">
@@ -375,6 +630,7 @@ const UserManagement = () => {
       </div>
 
       {/* Table Section for Guests */}
+
       <div className="table-section">
         <div className="table-header">
           <h2>
@@ -436,5 +692,6 @@ const UserManagement = () => {
     </div>
   );
 };
+
 
 export default UserManagement;

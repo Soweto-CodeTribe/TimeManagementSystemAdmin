@@ -15,16 +15,29 @@ const SessionMonitoring = () => {
   const [reports, setReports] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [searchTerm, setSearchTerm] = useState("")
+  const [searchTerm, setSearchTerm] = useState("") // User input
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("") // Debounced search term
+  const [filterStatus, setFilterStatus] = useState("") // State for status filter
+  const [filterDate, setFilterDate] = useState("") // State for date filter
+  const [isFilterOpen, setIsFilterOpen] = useState(false) // State for filter visibility
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(10)
 
+  // Debounce logic
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm) // Update debounced search term after 500ms
+    }, 1400)
+
+    return () => clearTimeout(debounceTimer) // Clear timer on re-render
+  }, [searchTerm])
+
   useEffect(() => {
     fetchData(currentPage)
-  }, [token, currentPage, itemsPerPage])
+  }, [token, currentPage, itemsPerPage, debouncedSearchTerm, filterStatus, filterDate])
 
   const fetchData = async (page = 1) => {
     setIsLoading(true)
@@ -32,11 +45,14 @@ const SessionMonitoring = () => {
       const response = await axios.get(`${BASE_URL}api/super-admin/daily`, {
         params: {
           page: page,
-          limit: itemsPerPage
+          limit: itemsPerPage,
+          search: debouncedSearchTerm, // Use debounced search term
+          status: filterStatus || undefined,
+          date: filterDate || undefined,
         },
         headers: {
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       })
 
       const { summary = {}, reports: apiReports = [], currentPage: apiCurrentPage, totalPages: apiTotalPages } = response.data
@@ -61,12 +77,7 @@ const SessionMonitoring = () => {
 
   useEffect(() => {
     setCurrentPage(1)
-  }, [searchTerm])
-
-  const filteredReports = reports.filter(report => 
-    (report.name?.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (report.traineeId?.toString().includes(searchTerm))
-  )
+  }, [debouncedSearchTerm, filterStatus, filterDate])
 
   const formatTime = (timeString) => {
     if (!timeString) return "-"
@@ -148,10 +159,42 @@ const SessionMonitoring = () => {
             {summaryData && <span className="table-date"> - {renderDate()}</span>}
           </h2>
           <div className="table-actions">
-            <button className="btn filter-btn">
-              <Filter className="btn-icon" />
-              <span>Filter</span>
-            </button>
+            {/* Filter Button */}
+            <div className="filter-wrapper">
+              <button
+                className="btn filter-btn"
+                onClick={() => setIsFilterOpen(!isFilterOpen)}
+              >
+                <Filter className="btn-icon" />
+                <span>Filter</span>
+              </button>
+              {isFilterOpen && (
+                <div className="filter-dropdown">
+                  <div className="filter-group">
+                    <label>Status:</label>
+                    <select
+                      value={filterStatus}
+                      onChange={(e) => setFilterStatus(e.target.value)}
+                    >
+                      <option value="">All</option>
+                      <option value="present">Present</option>
+                      <option value="absent">Absent</option>
+                      <option value="late">Late</option>
+                    </select>
+                  </div>
+                  <div className="filter-group">
+                    <label>Date:</label>
+                    <input
+                      type="date"
+                      value={filterDate}
+                      onChange={(e) => setFilterDate(e.target.value)}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Search Input */}
             <div className="search-wrapper">
               <Search className="search-icon" />
               <input
@@ -177,7 +220,7 @@ const SessionMonitoring = () => {
           <div className="error-container">
             <p className="error-message">{error}</p>
           </div>
-        ) : filteredReports.length === 0 ? (
+        ) : reports.length === 0 ? (
           <div className="no-data-container">
             <Info size={48} />
             <h3>No Attendance Records</h3>
@@ -204,7 +247,7 @@ const SessionMonitoring = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredReports.map((report, index) => (
+                {reports.map((report, index) => (
                   <tr key={index}>
                     <td>{report.traineeId || "-"}</td>
                     <td>{report.name || "N/A"}</td>

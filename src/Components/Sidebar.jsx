@@ -17,6 +17,7 @@ import { logout } from '../Slices/authSlice'; // Adjust the import path as neede
 import Logo from '../assets/CodeTribeImage.png';
 import Navbar from './Navbar';
 import "./styling/Sidebar.css";
+import { VscFeedback } from "react-icons/vsc";
 
 // Set app element for accessibility
 Modal.setAppElement('#root');
@@ -58,6 +59,7 @@ const Sidebar = ({ activeScreen }) => {
     { name: 'Session Monitoring', icon: <FaClock style={{ fontSize: '20px' }} />, route: '/session' },
     { name: 'Reports', icon: <FaChartBar style={{ fontSize: '20px' }} />, route: '/reports' },
     {name:'Tickets', icon: <FaComment style={{ fontSize: '20px' }} />, route: '/tickets'},
+    {name:'Feedback', icon: <VscFeedback style={{ fontSize: '20px' }} />, route: '/feedback'},
     {name : 'Other', icon:null, route:null},
     { name: 'Settings', icon: <FaCogs style={{ fontSize: '20px' }} />, route: '/settings' },
   ];
