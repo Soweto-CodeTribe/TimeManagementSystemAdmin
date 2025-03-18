@@ -356,7 +356,6 @@ import fetchReports from "../utils/fetchReports"
 import DataLoader from "./dataLoader"
 import fetchSessions from "../utils/fetchSessions"
 import "./styling/Dashboard.css"
-// import "./styling/trainees-overview.css"
 
 // Pagination settings
 const ITEMS_PER_PAGE = 5
@@ -422,32 +421,33 @@ function Dashboard() {
   }
 
   // Fetch trainee overview data
-  useEffect(() => {
-    const fetchOverViews = async () => {
-      try {
-<<<<<<< HEAD
-        const overviewResponse = await axios.get('https://timemanagementsystemserver.onrender.com/api/trainees-overview', {
-=======
-        const overviewResponse = await axios.get(`${BASE_URL}/api/trainee-overview`, {
->>>>>>> ae19d5e257c25019ac24fa678ce8e1dfb18dd513
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        })
-        const { programStats } = overviewResponse.data
-        if (Array.isArray(programStats)) {
-          setOverview(programStats)
-        } else {
-          console.error("Program stats is not an array:", programStats)
-        }
-      } catch (error) {
-        console.error("Error fetching overview stats:", error)
+  const fetchOverViews = async () => {
+    try {
+      const overviewResponse = await axios.get(`${BASE_URL}/api/trainee-overview`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      })
+      const { programStats } = overviewResponse.data
+      if (Array.isArray(programStats)) {
+        setOverview(programStats)
+      } else {
+        console.error("Program stats is not an array:", programStats)
       }
+    } catch (error) {
+      console.error("Error fetching overview stats:", error)
     }
-    fetchOverViews()
-    fetchDashboardStats()
-  }, [])
+  }
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await fetchOverViews();
+      await fetchDashboardStats();
+    };
+
+    fetchData();
+  }, [token]); // Added token as a dependency for useEffect
 
   // Fetch all trainees
   const fetchTrainees = async () => {
@@ -541,23 +541,7 @@ function Dashboard() {
       // Refresh trainee data
       const trainees = await fetchTrainees()
       setAllTrainees(trainees)
-      const fetchOverViews = async () => {
-        try {
-          const overviewResponse = await axios.get(`${BASE_URL}/api/trainee-overview`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          })
-          const { programStats } = overviewResponse.data
-          if (Array.isArray(programStats)) {
-            setOverview(programStats)
-          }
-        } catch (error) {
-          console.error("Error fetching overview stats:", error)
-        }
-      }
-      fetchOverViews()
+      await fetchOverViews(); // Call function to refresh overview after suspension
     } catch (error) {
       console.error("Error suspending credentials:", error)
       alert("Failed to suspend credentials.")
@@ -579,23 +563,7 @@ function Dashboard() {
       alert("Trainee reinstated successfully!")
       const trainees = await fetchTrainees()
       setAllTrainees(trainees)
-      const fetchOverViews = async () => {
-        try {
-          const overviewResponse = await axios.get(`${BASE_URL}/api/trainee-overview`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          })
-          const { programStats } = overviewResponse.data
-          if (Array.isArray(programStats)) {
-            setOverview(programStats)
-          }
-        } catch (error) {
-          console.error("Error fetching overview stats:", error)
-        }
-      }
-      fetchOverViews()
+      await fetchOverViews(); // Call function to refresh overview after reinstatement
     } catch (error) {
       console.error("Error reinstating trainee:", error)
       alert("Failed to reinstate trainee.")
@@ -617,23 +585,7 @@ function Dashboard() {
       alert("Trainee access revoked successfully!")
       const trainees = await fetchTrainees()
       setAllTrainees(trainees)
-      const fetchOverViews = async () => {
-        try {
-          const overviewResponse = await axios.get(`${BASE_URL}/api/trainee-overview`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          })
-          const { programStats } = overviewResponse.data
-          if (Array.isArray(programStats)) {
-            setOverview(programStats)
-          }
-        } catch (error) {
-          console.error("Error fetching overview stats:", error)
-        }
-      }
-      fetchOverViews()
+      await fetchOverViews(); // Call function to refresh overview after revocation
     } catch (error) {
       console.error("Error revoking access:", error)
       alert("Failed to revoke access.")
@@ -655,23 +607,7 @@ function Dashboard() {
       alert("Trainee access restored successfully!")
       const trainees = await fetchTrainees()
       setAllTrainees(trainees)
-      const fetchOverViews = async () => {
-        try {
-          const overviewResponse = await axios.get(`${BASE_URL}/api/trainee-overview`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          })
-          const { programStats } = overviewResponse.data
-          if (Array.isArray(programStats)) {
-            setOverview(programStats)
-          }
-        } catch (error) {
-          console.error("Error fetching overview stats:", error)
-        }
-      }
-      fetchOverViews()
+      await fetchOverViews(); // Call function to refresh overview after restoration
     } catch (error) {
       console.error("Error restoring access:", error)
       alert("Failed to restore access.")
@@ -766,32 +702,6 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* Commented-out check-ins table */}
-        {/* {role !== 'facilitator' && (
-          <div className="chart-card">
-            <div className="card-header">
-              <h4>Check-ins for today</h4>
-            </div>
-            <div className="card-content">
-              <table className="check-ins-table">
-                <tbody>
-                  {superAdminCheckIns.map((index, checkIn) => (
-                    <tr key={index}>
-                      <td>{checkIn.name}</td>
-                      <td className="time">{checkIn.checkInTime}</td>
-                    </tr>
-                  ))}
-                  {facilitatorAdminCheckIns.map((checkIn) => (
-                    <tr key={checkIn.name}>
-                      <td>{checkIn.name}</td>
-                      <td className="time">{checkIn.checkInTime}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )} */}
       </div>
 
       {/* Trainee Management Overview Section */}

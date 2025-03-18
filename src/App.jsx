@@ -27,7 +27,7 @@ import NotificationDisplay from "./Components/NotificationDisplay";
 import { onMessage } from "firebase/messaging";
 import ManageTrainees from "./Components/ManageTrainees";
 import LocationManagement from "./Components/LocationManagement"; 
-import Profile from "./Components/AdminProfile";
+import AdminProfile from "./Components/AdminProfile"; // Changed this line
 import Feedback from "./Components/Feedback";
 
 function App() {
@@ -43,15 +43,11 @@ function App() {
   useEffect(() => {
     const verifyAuth = async () => {
       try {
-        // Get token from localStorage
         const token = localStorage.getItem("authToken");
-        
         if (token) {
-          // Only dispatch check if token exists
           await dispatch(checkAuthStatus());
         }
       } finally {
-        // Mark auth check as complete regardless of result
         setAuthChecked(true);
       }
     };
@@ -89,13 +85,11 @@ function App() {
       case "/settings":
         return "System Settings";
       case "/manage-trainees":
-        return "Manage Trainees"; // Corrected to match the route
-      case "/location-management": // Added case for Location Management
+        return "Manage Trainees";
+      case "/location-management":
         return "Location Management";
-      // case "/profile":
-      //   return "Profile";
       case "/AdminProfile":
-        return "AdminProfile";
+        return "Admin Profile";
       case "/alerts":
         return "Alerts";
       case "/audit-logs":
@@ -103,7 +97,7 @@ function App() {
       case "/Tickets":
         return "Tickets";
       case "/Feedback":
-        return "Feedback"
+        return "Feedback";
       default:
         return "";
     }
@@ -143,7 +137,7 @@ function App() {
                     <Route path="/session" element={<Session />} />
                     <Route path="/reports" element={<Reports />} />
                     <Route path="/settings" element={<SystemSettings />} />
-                    <Route path="/AdminProfile" element={<Profile />} />
+                    <Route path="/AdminProfile" element={<AdminProfile />} />
                     <Route path="/notifications" element={<Notifications />} />
                     <Route path="/alerts" element={<Alerts />} />
                     <Route path="/audit-logs" element={<AuditLogs />} />
@@ -151,7 +145,6 @@ function App() {
                     <Route path="/Feedback" element={<Feedback />} />
                     <Route path="/logout" element={<Logout />} />
                     <Route path="/add-user" element={<AddUserForm />} />
-                    {/* NotFound route that catches any undefined routes */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </div>

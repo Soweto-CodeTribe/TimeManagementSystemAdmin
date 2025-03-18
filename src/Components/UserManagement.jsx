@@ -289,6 +289,27 @@ const UserManagement = () => {
             Facilitators <span className="count">{filteredUsers.filter(user => user.role === 'Facilitator').length}</span>
           </h2>
         </div>
+
+        {/* Move Search and Filter Controls Above Facilitators */}
+        <div className="table-controls">
+          <div className="left-controls">
+            <button className="filter-btn">
+              <Filter size={14} />
+              <span>Filter</span>
+            </button>
+            <div className="search-container">
+              <Search size={14} className="search-icon" />
+              <input
+                type="text"
+                placeholder="Search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input"
+              />
+            </div>
+          </div>
+        </div>
+
         <div className="table-container">
           <table className="users-table">
             <thead>
@@ -380,24 +401,6 @@ const UserManagement = () => {
           <h2>
             Guests <span className="count">{filteredGuests.length}</span>
           </h2>
-        </div>
-        <div className="table-controls">
-          <div className="left-controls">
-            <button className="filter-btn">
-              <Filter size={14} />
-              <span>Filter</span>
-            </button>
-            <div className="search-container">
-              <Search size={14} className="search-icon" />
-              <input
-                type="text"
-                placeholder="Search"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input"
-              />
-            </div>
-          </div>
         </div>
         <div className="table-container">
           <table className="users-table">
