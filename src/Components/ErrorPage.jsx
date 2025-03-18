@@ -1,32 +1,33 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import './styling/NotFound.css';
+import './styling/NotFound.css'; // You can rename this to ErrorPage.css if you prefer
 
 const ErrorPage = ({ errorType = '404' }) => {
   const location = useLocation();
   
-  // Get error type from URL if present (e.g., /error/500)
-  const pathErrorType = location.pathname.split('/').pop();
+  // Check if error type is in the URL (e.g., /error/500)
+  const pathParts = location.pathname.split('/');
+  const pathErrorType = pathParts[pathParts.length - 1];
   
   // Use URL error type if it's valid, otherwise use the prop
   const currentErrorType = ['404', '500', '403'].includes(pathErrorType) 
     ? pathErrorType 
     : errorType;
 
-  // Define content for each error type
+  // Content configuration for different error types
   const errorContent = {
     '404': {
       code: '404',
       message: 'Page Not Found',
       reasons: [
         'The page you are looking for does not exist',
-        'You need to login to gain access',
-        'You do not have permission to view this page'
+        'The URL might have been changed',
+        'The page might have been removed'
       ],
       solutions: [
         'Check the URL and try again',
-        <>Try to <Link to="/login" className="login-link">LOGIN</Link> Again</>,
-        'Check your internet connection'
+        'Return to the previous page',
+        <Link to="/" className="login-link">Go to Dashboard</Link>
       ]
     },
     '500': {
@@ -35,7 +36,7 @@ const ErrorPage = ({ errorType = '404' }) => {
       reasons: [
         'The server encountered an unexpected error',
         'There might be a temporary issue with our systems',
-        'The service you\'re trying to access is currently unavailable'
+        'The service you\'re trying to access is unavailable'
       ],
       solutions: [
         'Try refreshing the page',
@@ -47,14 +48,14 @@ const ErrorPage = ({ errorType = '404' }) => {
       code: '403',
       message: 'Access Forbidden',
       reasons: [
-        'You do not have permission to access this resource',
-        'Your account might not have the necessary privileges',
-        'The content might be restricted to certain user roles'
+        'You need to login to gain access',
+        'You do not have permission to view this page',
+        'Your session might have expired'
       ],
       solutions: [
-        <>Try to <Link to="/login" className="login-link">LOGIN</Link> with different credentials</>,
-        'Contact your administrator for access',
-        'Return to the previous page'
+        <Link to="/login" className="login-link">LOGIN</Link>,
+        'Contact your administrator if you need access',
+        'Check your internet connection'
       ]
     }
   };
