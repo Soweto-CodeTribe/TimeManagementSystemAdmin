@@ -1,4 +1,4 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiJscUVpekswRlJWTWtqeGF6SDc0eWZRc2VJSzYyIiwiZW1haWwiOiJzdGF5d2lzZWhvdGVsc0BnbWFpbC5jb20iLCJsb2NhdGlvbiI6IlRlbWJpc2EiLCJyb2xlIjoiZmFjaWxpdGF0b3IiLCJpYXQiOjE3NDIxOTYyNDEsImV4cCI6MTc0MjIyODY0MX0.VkjCn3h7o3lQYivwI1UjFUH_q5usvxWwsFh87o0Xvc4
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiJ0MVNjcDdEdEVIYUtHbUF6RDVralNnRThoMEYyIiwiZW1haWwiOiJzdXBlcnBvc3RtYW5AZXhhbXBsZS5jb20iLCJpYXQiOjE3NDIyMTA3MzYsImV4cCI6MTc0MjI0MzEzNn0.P_M_pf1Ah5eKirCyT9TIU2PWm5VPnoto5sRXnXQETNQ
 
 ### Get Trainee Overview
 GET https://timemanagementsystemserver.onrender.com/api/trainee-overview
@@ -22,8 +22,8 @@ POST https://timemanagementsystemserver.onrender.com/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "staywisehotels@gmail.com",
-  "password": "Testing123"
+  "email": "superpostman@example.com",
+  "password": "temporaryPassword123"
 }
 
 ###
@@ -76,3 +76,20 @@ Content-Type: application/json
 GET https://timemanagementsystemserver.onrender.com/api/facilitator/daily
 Authorization: Bearer {{token}}
 Content-Type: application/json
+
+###
+
+GET https://timemanagementsystemserver.onrender.com/api/add-user/getFeedBackAuthorization
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+
+###
+
+POST https://timemanagementsystemserver.onrender.com/api/auth/loginT
+
+
+{
+  "email": "sphllzulu@gmail.com",
+  "password": "Muggle123!"
+}
