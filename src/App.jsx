@@ -16,12 +16,18 @@ import Logout from "./Components/Logout";
 import Login from "./Components/Login";
 import AddUserForm from "./Components/AddUserForm";
 import ForgotPassword from "./Components/ForgotPassword";
-import Profile from "./Components/Profile";
 import TwoFactorAuth from "./Components/TwoFactorAuth";
 import Tickets from "./Components/Tickets";
 import NotFound from "./Components/NotFound";
 import Loader from "./Components/Loader";
 import Notifications from "./Components/Notifications";
+import { messaging, requestFCMToken } from "./firebaseConfig";
+import NotificationManager from "./Components/NotificationManager";
+import NotificationDisplay from "./Components/NotificationDisplay";
+import { onMessage } from "firebase/messaging";
+import ManageTrainees from "./Components/ManageTrainees";
+import LocationManagement from "./Components/LocationManagement"; 
+import Profile from "./Components/AdminProfile";
 import Feedback from "./Components/Feedback";
 
 function App() {
@@ -82,8 +88,14 @@ function App() {
         return "Reports";
       case "/settings":
         return "System Settings";
-      case "/profile":
-        return "Profile";
+      case "/manage-trainees":
+        return "Manage Trainees"; // Corrected to match the route
+      case "/location-management": // Added case for Location Management
+        return "Location Management";
+      // case "/profile":
+      //   return "Profile";
+      case "/AdminProfile":
+        return "AdminProfile";
       case "/alerts":
         return "Alerts";
       case "/audit-logs":
@@ -131,7 +143,7 @@ function App() {
                     <Route path="/session" element={<Session />} />
                     <Route path="/reports" element={<Reports />} />
                     <Route path="/settings" element={<SystemSettings />} />
-                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/AdminProfile" element={<Profile />} />
                     <Route path="/notifications" element={<Notifications />} />
                     <Route path="/alerts" element={<Alerts />} />
                     <Route path="/audit-logs" element={<AuditLogs />} />
