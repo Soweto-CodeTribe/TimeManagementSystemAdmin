@@ -13,7 +13,7 @@ const Navbar = ({ activeScreen }) => {
 
   // Handle profile click
   const handleProfileClick = () => {
-    navigate("/profile"); // Navigate to the profile page
+    navigate("/AdminProfile"); // Navigate to the profile page
   };
 
   // Handle settings click
