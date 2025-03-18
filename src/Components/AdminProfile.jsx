@@ -165,7 +165,7 @@ const AdminProfile = () => {
           <input 
             type="text" 
             name="fullName"
-            value={userData.fullName} // Ensure you're referencing the correct value here
+            value={userData.name} // Ensure you're referencing the correct value here
             onChange={handleInputChange} 
           />
 
