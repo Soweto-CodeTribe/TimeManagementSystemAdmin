@@ -1,0 +1,112 @@
+/* NotFound.css - Compact White Theme */
+.not-found-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 70vh; /* Reduced height */
+    background-color: #ffffff;
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+    padding: 20px;
+    padding-top: 0;
+}
+
+.not-found-content {
+    max-width: 600px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    margin: 20px;
+    text-align: center;
+    animation: fadeIn 0.6s ease-in-out;
+}
+
+.error-code {
+    font-size: 4rem;
+    font-weight: 700;
+    color: #ff4757;
+    margin-bottom: 15px;
+    text-shadow: 0 0 10px rgba(255, 71, 87, 0.2);
+    animation: pulse 2s infinite;
+}
+
+.error-message {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 25px;
+}
+
+.reason-list, .solution-list {
+    list-style-type: none;
+    padding: 0;
+    text-align: left;
+    margin-bottom: 25px;
+}
+
+.reason-list li, .solution-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid #e0e0e0;
+    color: #666;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+.login-link
+{
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+
+.solution-list li {
+    border-bottom: 1px solid #55efc4;
+    color: #00b894;
+    cursor: pointer;
+}
+
+.solution-list li:hover {
+    color: #00b894;
+    border-bottom: 1px solid #00b894;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        text-shadow: 0 0 10px rgba(255, 71, 87, 0.2);
+    }
+    50% {
+        text-shadow: 0 0 20px rgba(255, 71, 87, 0.4);
+    }
+    100% {
+        text-shadow: 0 0 10px rgba(255, 71, 87, 0.2);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .not-found-content {
+        padding: 20px;
+        margin: 10px;
+    }
+
+    .error-code {
+        font-size: 3rem;
+    }
+
+    .error-message {
+        font-size: 1.5rem;
+    }
+}
