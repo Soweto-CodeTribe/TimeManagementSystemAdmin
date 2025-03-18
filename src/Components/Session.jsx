@@ -128,7 +128,7 @@ const SessionMonitoring = () => {
 
   return (
     <div className="session-container">
-      <h1>Session Monitoring</h1>
+      <h1 className="session-title">Session Monitoring</h1>
       <p className="session-description">
         Monitor check-ins, check-outs, and lunch breaks. Add time logs, update session attendance and activity.
       </p>

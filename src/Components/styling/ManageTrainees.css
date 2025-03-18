@@ -93,8 +93,8 @@
 
 .action-button {
   width: 100%; /* Full width of the button */
-  padding: 12px; /* Padding inside the button */
-  background-color: #2C5282; /* Dark blue background */
+  /* padding: 12px; Padding inside the button */
+  /* background-color: #2C5282; Dark blue background */
   color: white; /* White text color */
   border: none; /* No border */
   border-radius: 4px; /* Rounded corners for button */
@@ -104,9 +104,6 @@
   transition: background-color 0.3s; /* Smooth background color transition */
 }
 
-.action-button:hover {
-  background-color: #1E3A66; /* Darker blue on hover */
-}
 
 .button-disabled {
   background-color: #99B4D8; /* Light blue for disabled state */

@@ -77,7 +77,7 @@ const TraineeOverview = ({ token }) => {
                 <td>{trainee.traineeLocation}</td>
                 <td>{trainee.traineeEmail}</td>
                 <td>{trainee.traineePhoneNumber}</td>
-                <td>{trainee.attendancePercentage}%</td>
+                <td>{trainee.attendancePercentage}</td>
                 {/* <td>{trainee.attendanceLevel}</td> */}
                 <td>
                   {/* Take Action Button with Dropdown */}
