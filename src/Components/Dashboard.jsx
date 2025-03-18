@@ -240,7 +240,7 @@ function Dashboard() {
 
         <div className="stat-card">
           <div className="stat-header">
-            <h4>Missed Check-Ins</h4>
+            <h4>Absent</h4>
             <AlertCircle className="stat-icon" />
           </div>
           <div className="stat-content">
