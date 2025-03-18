@@ -16,12 +16,18 @@ import Logout from "./Components/Logout";
 import Login from "./Components/Login";
 import AddUserForm from "./Components/AddUserForm";
 import ForgotPassword from "./Components/ForgotPassword";
-import Profile from "./Components/Profile";
 import TwoFactorAuth from "./Components/TwoFactorAuth";
 import Tickets from "./Components/Tickets";
 import NotFound from "./Components/NotFound";
 import Loader from "./Components/Loader";
 import Notifications from "./Components/Notifications";
+import { messaging, requestFCMToken } from "./firebaseConfig";
+import NotificationManager from "./Components/NotificationManager";
+import NotificationDisplay from "./Components/NotificationDisplay";
+import { onMessage } from "firebase/messaging";
+import ManageTrainees from "./Components/ManageTrainees";
+import LocationManagement from "./Components/LocationManagement"; 
+import AdminProfile from "./Components/AdminProfile"; // Changed this line
 import Feedback from "./Components/Feedback";
 
 function App() {
@@ -37,15 +43,11 @@ function App() {
   useEffect(() => {
     const verifyAuth = async () => {
       try {
-        // Get token from localStorage
         const token = localStorage.getItem("authToken");
-        
         if (token) {
-          // Only dispatch check if token exists
           await dispatch(checkAuthStatus());
         }
       } finally {
-        // Mark auth check as complete regardless of result
         setAuthChecked(true);
       }
     };
@@ -82,8 +84,12 @@ function App() {
         return "Reports";
       case "/settings":
         return "System Settings";
-      case "/profile":
-        return "Profile";
+      case "/manage-trainees":
+        return "Manage Trainees";
+      case "/location-management":
+        return "Location Management";
+      case "/AdminProfile":
+        return "Admin Profile";
       case "/alerts":
         return "Alerts";
       case "/audit-logs":
@@ -91,7 +97,7 @@ function App() {
       case "/Tickets":
         return "Tickets";
       case "/Feedback":
-        return "Feedback"
+        return "Feedback";
       default:
         return "";
     }
@@ -131,7 +137,7 @@ function App() {
                     <Route path="/session" element={<Session />} />
                     <Route path="/reports" element={<Reports />} />
                     <Route path="/settings" element={<SystemSettings />} />
-                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/AdminProfile" element={<AdminProfile />} />
                     <Route path="/notifications" element={<Notifications />} />
                     <Route path="/alerts" element={<Alerts />} />
                     <Route path="/audit-logs" element={<AuditLogs />} />
@@ -139,7 +145,6 @@ function App() {
                     <Route path="/Feedback" element={<Feedback />} />
                     <Route path="/logout" element={<Logout />} />
                     <Route path="/add-user" element={<AddUserForm />} />
-                    {/* NotFound route that catches any undefined routes */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </div>
