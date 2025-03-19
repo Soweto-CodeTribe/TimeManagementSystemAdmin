@@ -21,6 +21,9 @@ const UserManagement = () => {
 
   const fetchData = async () => {
     const token = localStorage.getItem("authToken")
+    const userRole = localStorage.getItem("userRole") // Fetch user role from localStorage
+    const userLocation = localStorage.getItem("userLocation"); // Assuming you also store location
+
     if (!token) {
       setFeedbackMessage("No authorization token found. Please log in again.")
       return
@@ -28,22 +31,30 @@ const UserManagement = () => {
 
     try {
       const headers = { Authorization: `Bearer ${token}` }
+      
+      // Make API calls based on user role
+      let traineesResponse;
+      if (userRole === 'Facilitator' && userLocation) {
+        traineesResponse = await axios.get(`https://timemanagementsystemserver.onrender.com/api/trainees/location?location=${userLocation}`, {
+          headers,
+        });
+      } else {
+        traineesResponse = await axios.get("https://timemanagementsystemserver.onrender.com/api/trainees", {
+          headers,
+        });
+      }
 
-      // Make API calls
-      const traineesResponse = await axios.get("https://timemanagementsystemserver.onrender.com/api/trainees", {
-        headers,
-      })
       const facilitatorsResponse = await axios.get("https://timemanagementsystemserver.onrender.com/api/facilitators", {
         headers,
-      })
+      });
       const stakeholdersResponse = await axios.get(
         "https://timemanagementsystemserver.onrender.com/api/stakeholder/all",
         { headers },
-      )
+      );
 
-      const traineesArray = traineesResponse.data.trainees || []
-      const facilitatorsArray = facilitatorsResponse.data.facilitators || facilitatorsResponse.data || []
-      const stakeholdersArray = stakeholdersResponse.data || []
+      const traineesArray = traineesResponse.data.trainees || [];
+      const facilitatorsArray = facilitatorsResponse.data.facilitators || facilitatorsResponse.data || [];
+      const stakeholdersArray = stakeholdersResponse.data || [];
 
       const trainees = traineesArray.map((user) => ({
         id: user._id || user.id || `trainee-${Date.now()}-${Math.random()}`,
@@ -51,7 +62,7 @@ const UserManagement = () => {
         email: user.email,
         role: "Trainee",
         status: user.status || "active", // Default status to active if not provided
-      }))
+      }));
 
       const facilitators = Array.isArray(facilitatorsArray)
         ? facilitatorsArray.map((user) => ({
@@ -60,7 +71,7 @@ const UserManagement = () => {
             email: user.email,
             role: "Facilitator",
           }))
-        : []
+        : [];
 
       const stakeholders = Array.isArray(stakeholdersArray)
         ? stakeholdersArray.map((user) => ({
@@ -69,7 +80,7 @@ const UserManagement = () => {
             email: user.email,
             role: "Stakeholder",
           }))
-        : []
+        : [];
 
       const allUsers = [...stakeholders, ...trainees, ...facilitators]
 
@@ -501,6 +512,5 @@ const UserManagement = () => {
 }
 
 export default UserManagement
-
 
 
