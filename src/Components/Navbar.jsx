@@ -1,15 +1,16 @@
 import React from "react";
-import { IoMdNotificationsOutline } from "react-icons/io"; // Notification icon
 import { FiSettings } from "react-icons/fi"; // Settings icon
-import { useNavigate } from "react-router-dom"; // To handle navigation
+import { useNavigate, Link } from "react-router-dom"; // To handle navigation
 import { Avatar } from '@mui/material'; // Importing MUI Avatar component
+import { Bell } from "lucide-react"; // For notification bell icon
+import { useSelector } from "react-redux"; // To access unread count
 import "./styling/Navbar.css";
 import imgAvater from '../assets/hacker.png'; // Avatar image
-import NotificationManager from "./NotificationManager";
-import NotificationDisplay from "./NotificationDisplay";
 
 const Navbar = ({ activeScreen }) => {
   const navigate = useNavigate();
+  // Get unread count from redux store
+  const { unreadCount } = useSelector((state) => state.notifications);
 
   // Handle profile click
   const handleProfileClick = () => {
@@ -19,11 +20,6 @@ const Navbar = ({ activeScreen }) => {
   // Handle settings click
   const handleSettingsClick = () => {
     navigate("/settings"); // Navigate to the settings page
-  };
-
-  // Handle notifications click
-  const handleNotificationsClick = () => {
-    navigate("/notifications"); // Navigate to the settings page
   };
 
   return (
@@ -36,20 +32,19 @@ const Navbar = ({ activeScreen }) => {
 
         {/* Right: Icons */}
         <div className="navicon-container">
-          <NotificationDisplay
-            size={30}  // Set size to 30px to match the Avatar size
-            className="icon"
-            onClick={handleNotificationsClick} // Notification icon click
-          /> 
-          {/* <NotificationManager /> */}
-          {/* <NotificationDisplay />          */}
+          {/* Notification Indicator - links to notifications page */}
+          <Link to="/notifications" className="notification-indicator">
+            <Bell className="bell-icon" />
+            {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
+          </Link>
+          
           {/* Avatar for Profile */}
           <Avatar
             alt="Profile Avatar"
             src={imgAvater} // Using the image for the avatar
             sx={{
-              width: 24,  // Set size to 30px to match the icons
-              height: 24, // Set size to 30px to match the icons
+              width: 24,  // Set size to 24px
+              height: 24, // Set size to 24px
               cursor: 'pointer',
             }}
             onClick={handleProfileClick} // Profile icon click
