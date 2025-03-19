@@ -359,16 +359,25 @@ import ErrorPage from "./Components/ErrorPage"; // Renamed from NotFound to Erro
 import Loader from "./Components/Loader";
 import Notifications from "./Components/Notifications";
 import Feedback from "./Components/Feedback";
+import { generateFCMToken, setupFCMListener } from './Slices/notificationsSlice';
+import NotificationsPage from "./Components/Notifications"
 
 function App() {
   const location = useLocation();
   const dispatch = useDispatch();
   const { isAuthenticated, isLoading } = useSelector((state) => state.auth);
   const [authChecked, setAuthChecked] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(
-    localStorage.getItem("sidebarState") === "true"
-  );
-
+  const [isSidebarOpen, setIsSidebarOpen] = useState(localStorage.getItem("sidebarState") === "true");
+  const { user } = useSelector(state => state.auth);
+  
+  useEffect(() => {
+    if (user?.id) {
+      // Initialize FCM
+      dispatch(generateFCMToken());
+      dispatch(setupFCMListener());
+    }
+  }, [dispatch, user]);
+  
   // Initial auth check on app load
   useEffect(() => {
     const verifyAuth = async () => {
@@ -424,6 +433,8 @@ function App() {
         return "Tickets";
       case "/Feedback":
         return "Feedback";
+      case "/CombinedNotifications":
+        return "CombinedNotifications";
       default:
         return "";
     }
@@ -476,10 +487,10 @@ function App() {
                     <Route path="/reports" element={<Reports />} />
                     <Route path="/settings" element={<SystemSettings />} />
                     <Route path="/AdminProfile" element={<AdminProfile />} />
-                    <Route path="/notifications" element={<Notifications />} />
                     <Route path="/alerts" element={<Alerts />} />
                     <Route path="/audit-logs" element={<AuditLogs />} />
                     <Route path="/Tickets" element={<Tickets />} />
+                    <Route path="/notifications" element={<NotificationsPage />} />
                     <Route path="/Feedback" element={<Feedback />} />
                     <Route path="/logout" element={<Logout />} />
                     <Route path="/add-user" element={<AddUserForm />} />
