@@ -1,4 +1,4 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiJscUVpekswRlJWTWtqeGF6SDc0eWZRc2VJSzYyIiwiZW1haWwiOiJzdGF5d2lzZWhvdGVsc0BnbWFpbC5jb20iLCJsb2NhdGlvbiI6IlNvd2V0byIsInJvbGUiOiJmYWNpbGl0YXRvciIsImlhdCI6MTc0MjI4Nzc5MSwiZXhwIjoxNzQyMzIwMTkxfQ.q-lk4FOFgvnrVke4ERjm3IEAPKVukOOP2tVneXXTsYc
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiJscUVpekswRlJWTWtqeGF6SDc0eWZRc2VJSzYyIiwiZW1haWwiOiJzdGF5d2lzZWhvdGVsc0BnbWFpbC5jb20iLCJsb2NhdGlvbiI6IlNvd2V0byIsInJvbGUiOiJmYWNpbGl0YXRvciIsImlhdCI6MTc0MjMwNTkwNSwiZXhwIjoxNzQyMzM4MzA1fQ.m-hYjAekjDwr6fLRjZKtn-dNfY4Nv3RFxa0z9DC4KWo
 
 ### Get Trainee Overview
 GET https://timemanagementsystemserver.onrender.com/api/trainee-overview
@@ -87,6 +87,17 @@ Content-Type: application/json
 ###
 
 GET https://timemanagementsystemserver.onrender.com/api/facilitators
+
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+
+###
+
+###
+
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiJscUVpekswRlJWTWtqeGF6SDc0eWZRc2VJSzYyIiwiZW1haWwiOiJzdGF5d2lzZWhvdGVsc0BnbWFpbC5jb20iLCJsb2NhdGlvbiI6IlNvd2V0byIsInJvbGUiOiJmYWNpbGl0YXRvciIsImlhdCI6MTc0MjMwNTkwNSwiZXhwIjoxNzQyMzM4MzA1fQ.m-hYjAekjDwr6fLRjZKtn-dNfY4Nv3RFxa0z9DC4KWo
+GET https://timemanagementsystemserver.onrender.com/api/facilitators/my-trainees
 
 Authorization: Bearer {{token}}
 Content-Type: application/json

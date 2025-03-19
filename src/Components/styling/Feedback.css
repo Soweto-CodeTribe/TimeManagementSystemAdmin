@@ -1,150 +1,228 @@
-/* Main container */
+/* Feedback.css - Modernized styling for the Feedback component */
+
+/* Base container and layout */
 .feedback-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  color: #333;
+  width: auto;
+  border-radius: 12px;
+}
+
+/* Page title */
+.feedback-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #1a202c;
+  letter-spacing: -0.025em;
+  text-align: left;
+}
+
+/* Feedback submission form */
+.feedback-form {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 10px;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease;
+}
+
+.feedback-form:hover {
+  transform: translateY(-2px);
+}
+
+.feedback-form textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  resize: vertical;
+  font-family: inherit;
+  transition: border-color 0.2s ease;
+}
+
+.feedback-form textarea:focus {
+  outline: none;
+  border-color: #3182ce;
+  box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.2);
+}
+
+.feedback-form button {
+  background-color: #3182ce;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.feedback-form button:hover {
+  background-color: #2c5282;
+}
+
+.feedback-form button:active {
+  transform: scale(0.98);
+}
+
+/* Feedback header area */
+.feedback-header-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.feedback-badge {
+  background-color: #ebf8ff;
+  color: #3182ce;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* Feedback grid layout */
+.feedback-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Feedback card styling */
+.feedback-card {
+  background-color: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.feedback-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+}
+
+.feedback-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.anonymous-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.anonymous-badge {
+  background-color: #edf2f7;
+  color: #4a5568;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.feedback-date {
+  font-size: 0.75rem;
+  color: #718096;
+  margin: 0;
+}
+
+.feedback-content {
+  margin-top: 0.5rem;
+}
+
+.feedback-comment {
+  line-height: 1.5;
+  font-size: 0.9375rem;
+  color: #4a5568;
+  margin: 0;
+}
+
+/* Empty state styling */
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: #718096;
+  font-style: italic;
+  grid-column: 1 / -1;
+}
+
+/* Error state styling */
+.error-state {
+  background-color: #fff5f5;
+  border-left: 4px solid #e53e3e;
+  padding: 1rem;
+  color: #c53030;
+  font-weight: 500;
+  grid-column: 1 / -1;
+}
+
+.error-message {
+  margin: 0;
+}
+
+/* Loading skeleton styling */
+.skeleton {
+  animation: pulse 1.5s infinite;
+}
+
+.skeleton-info {
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.skeleton-line {
+  height: 12px;
+  width: 100%;
+  background-color: #edf2f7;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.skeleton-line.medium {
+  width: 60%;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .feedback-container {
+    padding: 1.5rem;
+    border-radius: 0;
   }
   
-  /* Header styles */
+  .feedback-grid {
+    grid-template-columns: 1fr;
+  }
+  
   .feedback-title {
-    font-size: 24px;
-    font-weight: 700;
-    margin: 0 0 20px 0;
+    font-size: 1.5rem;
   }
   
   .feedback-header-main {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-  }
-  
-  .feedback-badge {
-    background-color: #f3f4f6;
-    border: 1px solid #e5e7eb;
-    border-radius: 9999px;
-    padding: 4px 12px;
-    font-size: 14px;
-    color: #6b7280;
-  }
-  
-  /* Grid layout */
-  .feedback-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-  
-  @media (min-width: 768px) {
-    .feedback-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-  
-  /* Card styles */
-  .feedback-card {
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e5e7eb;
-    overflow: hidden;
-    margin-bottom: 16px;
-  }
-  
-  .feedback-header {
-    padding: 16px 16px 8px 16px;
-    display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: flex-start;
+    gap: 0.5rem;
   }
-  
-  .feedback-content {
-    padding: 0 16px 16px 16px;
-  }
-  
-  .feedback-content.empty-state {
-    text-align: center;
-    color: #6b7280;
-    padding: 32px 16px;
-  }
-  
-  .feedback-content.error-state {
-    background-color: #fef2f2;
-    border-color: #fee2e2;
-    padding: 24px 16px;
-    text-align: center;
-  }
-  
-  .error-message {
-    color: #ef4444;
-    font-size: 16px;
-  }
-  
-  /* Anonymous info styles */
-  .anonymous-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  
-  .anonymous-badge {
-    font-size: 14px;
-    font-weight: 600;
-    color: #6b7280;
-    background-color: #f3f4f6;
-    padding: 4px 8px;
-    border-radius: 4px;
-    display: inline-block;
-  }
-  
-  .feedback-date {
-    font-size: 14px;
-    color: #6b7280;
-    margin: 4px 0 0 0;
-  }
-  
-  /* Comment styles */
-  .feedback-comment {
-    font-size: 14px;
-    line-height: 1.5;
-    color: #4b5563;
-    margin: 0;
-  }
-  
-  /* Loading skeleton styles */
-  .skeleton {
-    animation: pulse 1.5s infinite ease-in-out;
-  }
-  
-  .skeleton-info {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .skeleton-line {
-    height: 16px;
-    width: 120px;
-    background-color: #e5e7eb;
-    border-radius: 4px;
-  }
-  
-  .skeleton-line.short {
-    width: 80px;
-  }
-  
-  .skeleton-line.medium {
-    width: 75%;
-  }
-  
-  @keyframes pulse {
-    0% {
-      opacity: 0.6;
-    }
-    50% {
-      opacity: 1;
-    }
-    100% {
-      opacity: 0.6;
-    }
-  }
+}

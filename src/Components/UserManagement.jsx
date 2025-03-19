@@ -33,7 +33,7 @@ const UserManagement = () => {
         "https://timemanagementsystemserver.onrender.com/api/trainees",
         { headers }
       );
-      const facilitatorsResponse = await axios.get(
+       const facilitatorsResponse = await axios.get(
         "https://timemanagementsystemserver.onrender.com/api/facilitators",
         { headers }
       );
