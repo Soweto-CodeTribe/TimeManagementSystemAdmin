@@ -80,14 +80,14 @@ function FeedbackPage() {
 
   return (
     <div className="feedback-container">
-      <h2 className="feedback-title">Anonymous Feedback</h2>
+      {/* <h2 className="feedback-title">Feedback</h2> */}
 
       {/* Feedback Submission Form */}
       <form onSubmit={handleSubmitFeedback} className="feedback-form">
         <textarea
           value={newFeedback}
           onChange={(e) => setNewFeedback(e.target.value)}
-          placeholder="Share your feedback anonymously..."
+          placeholder="Share your feedback..."
           required
         />
         <button type="submit">Submit Feedback</button>
@@ -125,7 +125,7 @@ function FeedbackPage() {
 
 const LoadingSkeleton = () => (
   <div className="feedback-container">
-    <h2 className="feedback-title">Anonymous Feedback</h2>
+    <h2 className="feedback-title">Feedback</h2>
     {Array(3)
       .fill(0)
       .map((_, i) => (
@@ -144,6 +144,7 @@ const LoadingSkeleton = () => (
   </div>
 );
 
+// eslint-disable-next-line react/prop-types
 const ErrorState = ({ error }) => (
   <div className="feedback-card error-state">
     <p className="error-message">{error}</p>

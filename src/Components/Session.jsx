@@ -24,7 +24,7 @@ const SessionMonitoring = () => {
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
-  const [itemsPerPage, setItemsPerPage] = useState(10)
+  const [itemsPerPage] = useState(10)
 
   // Debounce logic
   useEffect(() => {
@@ -37,6 +37,7 @@ const SessionMonitoring = () => {
 
   useEffect(() => {
     fetchData(currentPage)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, currentPage, itemsPerPage, debouncedSearchTerm, filterStatus, filterDate])
 
   const fetchData = async (page = 1) => {

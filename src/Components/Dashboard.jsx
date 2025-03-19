@@ -34,6 +34,8 @@ function Dashboard() {
     missedCheckInsPercentage: "0%",
   });
   const [attendanceData, setAttendanceData] = useState([]);
+  const [facilitatorStats, setFacilitatorStats] = useState([]);
+  const [absentCount, setAbsentCount] = useState(0);
 
   // API configuration
   const BASE_URL = "https://timemanagementsystemserver.onrender.com";
@@ -42,44 +44,78 @@ function Dashboard() {
   // Fetch facilitator check-ins
   const fetchFacilitatorCheckIns = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/api/facilitator/daily`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      // Handle 404 or empty response
-      if (response.status === 404 || !response.data) {
-        console.error("Check-ins endpoint not found or returned no data");
-        setCheckIns([]);
-        return;
+      if(role === 'facilitator'){
+        const response = await axios.get(`${BASE_URL}/api/facilitator/daily`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+  
+        // Handle 404 or empty response
+        if (response.status === 404 || !response.data) {
+          console.error("Check-ins endpoint not found or returned no data");
+          setCheckIns([]);
+          return;
+        }
+  
+        // Extract the reports array from response data
+        const checkInsArray = response.data.reports || [];
+  
+        // Process the check-ins data
+        const processedCheckIns = checkInsArray
+          .filter((checkIn) => checkIn.checkInTime) // Only include entries with checkInTime
+          .map((checkIn) => {
+            return {
+              id: checkIn.traineeId,
+              name: checkIn.name,
+              checkInTime: checkIn.checkInTime,
+              date: checkIn.date,
+              status: checkIn.status,
+            };
+          })
+          .filter((checkIn) => checkIn.name !== "Unknown");
+  
+        // console.log("Processed Check-ins:", processedCheckIns);
+  
+        // Update the state with processed data
+        setCheckIns(processedCheckIns);
       }
-
-      // Extract the reports array from response data
-      const checkInsArray = response.data.reports || [];
-
-      // Process the check-ins data
-      const processedCheckIns = checkInsArray
-        .filter((checkIn) => checkIn.checkInTime) // Only include entries with checkInTime
-        .map((checkIn) => {
-          return {
-            id: checkIn.traineeId || "N/A",
-            name: checkIn.name || "Unknown",
-            checkInTime: checkIn.checkInTime || "N/A",
-            date: checkIn.date || "N/A",
-            status: checkIn.status || "N/A",
-          };
-        })
-        .filter((checkIn) => checkIn.name !== "Unknown");
-
-      console.log("Processed Check-ins:", processedCheckIns);
-
-      // Update the state with processed data
-      setCheckIns(processedCheckIns);
     } catch (error) {
       console.error("Error fetching check-ins:", error);
       setCheckIns([]);
+    }
+  };
+
+  const fetchFacilitators = async () => {
+    try {
+      const token = localStorage.getItem("authToken"); // Ensure the token is retrieved
+      if (!token) {
+        console.error("No authorization token found.");
+        return;
+      }
+  
+      const response = await axios.get(
+        "https://timemanagementsystemserver.onrender.com/api/facilitators",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
+      // Extract facilitators array from the response
+      const facilitatorsArray = response.data.facilitators || response.data || [];
+  
+      // Calculate the total number of facilitators
+      const totalFacilitators = Array.isArray(facilitatorsArray) ? facilitatorsArray.length : 0;
+  
+      // console.log("Total Facilitators:", totalFacilitators); // Log the count for debugging
+       setFacilitatorStats(totalFacilitators) 
+    } catch (error) {
+      console.error("Error fetching facilitators:", error);
+      return 0; // Return 0 in case of an error
     }
   };
 
@@ -100,7 +136,7 @@ function Dashboard() {
           value: parseFloat(day.attendanceRate || 0), // Convert attendance rate to number, default to 0
         }));
         
-        console.log("Processed Attendance Data:", processedData);
+        // console.log("Processed Attendance Data:", processedData);
         setAttendanceData(processedData);
       } else {
         console.error("Invalid response format for attendance data");
@@ -108,7 +144,7 @@ function Dashboard() {
       }
     } catch (error) {
       console.error("Error fetching weekly attendance data:", error);
-      setAttendanceData([]); // Set empty array on error
+      setAttendanceData([]); 
     }
   };
 
@@ -122,10 +158,10 @@ function Dashboard() {
 
         // Update dashboard stats
         setDashboardStats({
-          totalTrainees: summaryData.totalTrainees || 0,
-          totalFacilitators: summaryData.totalFacilitators || 0,
-          attendancePercentage: summaryData.attendancePercentage || "0%",
-          missedCheckInsPercentage: summaryData.missedCheckInsPercentage || "0%",
+          totalTrainees: summaryData.totalTrainees,
+          totalFacilitators: summaryData.totalFacilitators,
+          attendancePercentage: summaryData.attendancePercentage,
+          missedCheckInsPercentage: summaryData.missedCheckInsPercentage,
         });
       }
     } catch (error) {
@@ -137,6 +173,32 @@ function Dashboard() {
         attendancePercentage: "0%",
         missedCheckInsPercentage: "0%",
       });
+    }
+  };
+
+  const fetchAbsentData = async () => {
+    try {
+      const response = await axios.get(
+        `${BASE_URL}/api/session/daily-report?pages=2&limit=4`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data && response.data.summary) {
+        const { absentCount } = response.data.summary;
+        // console.log("Fetched Absent Count:", absentCount);
+        setAbsentCount(absentCount);
+      } else {
+        console.error("Invalid response format for absent data");
+        setAbsentCount(0);
+      }
+    } catch (error) {
+      console.error("Error fetching absent data:", error);
+      setAbsentCount(0);
     }
   };
 
@@ -162,7 +224,9 @@ function Dashboard() {
         await Promise.all([
           fetchDashboardStats(),
           fetchFacilitatorCheckIns(),
-          fetchGraphData()
+          fetchGraphData(),
+          fetchFacilitators(),
+          fetchAbsentData(),
         ]);
       } catch (error) {
         console.error("Error loading dashboard data:", error);
@@ -174,6 +238,7 @@ function Dashboard() {
     if (token) {
       loadData();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, role]);
 
   // Show loader while data is being fetched
@@ -189,13 +254,14 @@ function Dashboard() {
     attendanceData.length > 0
       ? attendanceData
       : [
-          { name: "Mon", value: 0 },
+          { name: "Mon", value: 100 },
           { name: "Tue", value: 0 },
-          { name: "Wed", value: 0 },
+          { name: "Wed", value: 100 },
           { name: "Thu", value: 0 },
-          { name: "Fri", value: 0 },
+          { name: "Fri", value: 100 },
         ];
 
+        
   return (
     <div className="dashboard">
       {/* Header Section */}
@@ -223,7 +289,7 @@ function Dashboard() {
               <UserCheck className="stat-icon" />
             </div>
             <div className="stat-content">
-              <div className="stat-value">{dashboardStats.totalFacilitators}</div>
+              <div className="stat-value">{facilitatorStats}</div>
             </div>
           </div>
         )}
@@ -244,7 +310,7 @@ function Dashboard() {
             <AlertCircle className="stat-icon" />
           </div>
           <div className="stat-content">
-            <div className="stat-value">{dashboardStats.missedCheckInsPercentage}</div>
+            <div className="stat-value">{absentCount}</div>
           </div>
         </div>
       </div>
@@ -290,7 +356,7 @@ function Dashboard() {
         </div>
 
         {role !== "super_admin" && checkIns.length > 0 && (
-          <div className="chart-card">
+          <div className="check-ins-card-content">
             <div className="card-header">
               <h4>Check-ins for today</h4>
             </div>
