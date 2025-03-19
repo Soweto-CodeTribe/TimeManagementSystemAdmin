@@ -77,12 +77,16 @@ export const fetchNotifications = createAsyncThunk(
         `${BASE_URL}/messages/trainee/${traineeId}`,
         getHeaders(getState)
       );
+      
+      console.log('Fetched Notifications:', response.data); // Log notification data
+      
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || { message: 'Failed to fetch notifications' });
     }
   }
 );
+
 
 export const fetchUnreadCount = createAsyncThunk(
   'notifications/unreadCount',
