@@ -359,8 +359,9 @@ import ErrorPage from "./Components/ErrorPage"; // Renamed from NotFound to Erro
 import Loader from "./Components/Loader";
 import Notifications from "./Components/Notifications";
 import Feedback from "./Components/Feedback";
-import { generateFCMToken, setupFCMListener } from './Slices/notificationsSlice';
-import NotificationsPage from "./Components/Notifications"
+import LocationManagement from "./Components/LocationManagement"; // Added import
+import ManageTrainees from "./Components/ManageTrainees"; // Added import
+import TimeManagement from "./Components/TimeManagement"; // Added import
 
 function App() {
   const location = useLocation();
@@ -407,7 +408,7 @@ function App() {
       </div>
     );
   }
-  
+
   // Determine current screen name for Navbar
   const getScreenName = (path) => {
     switch (path) {
@@ -433,8 +434,12 @@ function App() {
         return "Tickets";
       case "/Feedback":
         return "Feedback";
-      case "/CombinedNotifications":
-        return "CombinedNotifications";
+      case "/location-management": // New case for Location Management
+        return "Location Management"; // New screen name
+      case "/manage-trainees": // New case for Manage Trainees
+        return "Manage Trainees"; // New screen name
+      case "/time-management": // New case for Time Management
+        return "Time Management"; // New screen name
       default:
         return "";
     }
@@ -487,11 +492,15 @@ function App() {
                     <Route path="/reports" element={<Reports />} />
                     <Route path="/settings" element={<SystemSettings />} />
                     <Route path="/AdminProfile" element={<AdminProfile />} />
+                    <Route path="/notifications" element={<Notifications />} />
                     <Route path="/alerts" element={<Alerts />} />
                     <Route path="/audit-logs" element={<AuditLogs />} />
                     <Route path="/Tickets" element={<Tickets />} />
                     <Route path="/notifications" element={<NotificationsPage />} />
                     <Route path="/Feedback" element={<Feedback />} />
+                    <Route path="/location-management" element={<LocationManagement />} /> {/* New route */}
+                    <Route path="/manage-trainees" element={<ManageTrainees />} /> {/* New route */}
+                    <Route path="/time-management" element={<TimeManagement />} /> {/* New route for Time Management */}
                     <Route path="/logout" element={<Logout />} />
                     <Route path="/add-user" element={<AddUserForm />} />
                     
