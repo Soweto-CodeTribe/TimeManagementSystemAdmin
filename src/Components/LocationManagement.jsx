@@ -1,22 +1,26 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
 import './styling/LocationManagement.css';
+
 const LocationManagement = () => {
+  const navigate = useNavigate(); // Initialize navigate
   const [locations, setLocations] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     latitude: '',
     longitude: '',
     radius: '',
-    description: '',
     active: true
   });
   const [editingId, setEditingId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
+
   // Fetch all locations when component mounts
   useEffect(() => {
     fetchLocations();
   }, []);
+
   const fetchLocations = async () => {
     setIsLoading(true);
     try {
@@ -30,6 +34,7 @@ const LocationManagement = () => {
       setIsLoading(false);
     }
   };
+
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -37,17 +42,18 @@ const LocationManagement = () => {
       [name]: type === 'checkbox' ? checked : value
     });
   };
+
   const resetForm = () => {
     setFormData({
       name: '',
       latitude: '',
       longitude: '',
       radius: '',
-      description: '',
       active: true
     });
     setEditingId(null);
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -79,17 +85,18 @@ const LocationManagement = () => {
       setIsLoading(false);
     }
   };
+
   const handleEdit = (location) => {
     setFormData({
       name: location.name,
       latitude: location.latitude,
       longitude: location.longitude,
       radius: location.radius,
-      description: location.description || '',
       active: location.active !== false
     });
     setEditingId(location.id);
   };
+
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this location?')) return;
     setIsLoading(true);
@@ -106,6 +113,7 @@ const LocationManagement = () => {
       setIsLoading(false);
     }
   };
+
   const handleGetCurrentLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -131,8 +139,13 @@ const LocationManagement = () => {
       });
     }
   };
+
   return (
     <div className="location-management">
+      <button className="back-arrow" onClick={() => navigate('/settings')}>
+        ← {/* This can be replaced by a back arrow icon */}
+      </button>
+
       {message.text && (
         <div className={`message ${message.type}`}>
           {message.text}
@@ -207,17 +220,6 @@ const LocationManagement = () => {
               placeholder="Enter radius in meters (e.g. 500)"
             />
           </div>
-          <div className="form-group">
-            <label htmlFor="description">Description</label>
-            <textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              placeholder="Enter location description"
-              rows="3"
-            />
-          </div>
           <div className="form-group checkbox-group">
             <label>
               <input
@@ -268,10 +270,7 @@ const LocationManagement = () => {
             <tbody>
               {locations.map((location) => (
                 <tr key={location.id} className={location.active ? '' : 'inactive'}>
-                  <td>
-                    {location.name}
-                    {location.description && <div className="description-hint">{location.description}</div>}
-                  </td>
+                  <td>{location.name}</td>
                   <td>
                     {location.latitude.toFixed(6)}, {location.longitude.toFixed(6)}
                   </td>
@@ -306,4 +305,5 @@ const LocationManagement = () => {
     </div>
   );
 };
+
 export default LocationManagement;

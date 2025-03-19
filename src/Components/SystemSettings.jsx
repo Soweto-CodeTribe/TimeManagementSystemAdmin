@@ -1,260 +1,196 @@
 "use client"
 
 import { useState } from "react"
-import { Save, User, Bell, Shield, Palette, Database, Mail, FileText, HelpCircle } from "lucide-react"
-import ProfileSettings from "./settings/settingsUI/profile-settings"
-import NotificationSettings from "./settings/settingsUI/notification-settings"
-import SecuritySettings from "./settings/settingsUI/security-settings"
-import AppearanceSettings from "./settings/settingsUI/appearance-settings"
-import ApiSettings from "./settings/settingsUI/api-settings"
-import EmailSettings from "./settings/settingsUI/email-settings"
-import ContentSettings from "./settings/settingsUI/content-settings"
-import HelpSettings from "./settings/settingsUI/help-settings"
-import './styling/Settings.css'
+import { useNavigate } from "react-router-dom" // Import useNavigate
+import "./styling/SystemSettings.css" // Ensure to have .css extension
+import { FiSettings, FiX, FiClock, FiMapPin } from "react-icons/fi" // Importing icons, added FiMapPin for location
 
 function SystemSettings() {
-  // State management
-  const [activeTab, setActiveTab] = useState("security")
-  const [isSaving, setIsSaving] = useState(false)
-  const [saveSuccess, setSaveSuccess] = useState(false)
-  const [isDarkMode, setIsDarkMode] = useState(false)
-  const [emailNotifications, setEmailNotifications] = useState(true)
-  const [showModal, setShowModal] = useState(false)
+  const navigate = useNavigate() // Get the navigate function for navigation
+  const [isDarkMode, setIsDarkMode] = useState(false) // State for dark mode
+  const [emailNotifications, setEmailNotifications] = useState(true) // State for email notifications
+  const [showModal, setShowModal] = useState(false) // State to control modal visibility
 
-  // Theme and color state from AppearanceSettings
-  const [theme, setTheme] = useState("light")
-  const [primaryColor, setPrimaryColor] = useState("#2563eb")
-
-  // Event handlers
   const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode)
-    setTheme(isDarkMode ? "light" : "dark")
+    setIsDarkMode(!isDarkMode) // Toggle the dark mode state
   }
 
   const toggleEmailNotifications = () => {
-    setEmailNotifications(!emailNotifications)
+    setEmailNotifications(!emailNotifications) // Toggle email notifications
   }
 
   const openModal = () => {
-    setShowModal(true)
+    setShowModal(true) // Show the modal
   }
 
   const closeModal = () => {
-    setShowModal(false)
+    setShowModal(false) // Hide the modal
   }
 
   const handleManageTrainees = () => {
-    closeModal()
-    // Navigate to manage trainees (using client-side navigation)
-    window.location.href = '/manage-trainees'
+    closeModal() // Close the modal
+    navigate("/manage-trainees") // Navigate to ManageTrainees
   }
 
   const handleLocationManagement = () => {
-    closeModal()
-    // Navigate to location management (using client-side navigation)
-    window.location.href = '/location-management'
+    closeModal() // Close the modal
+    navigate("/location-management") // Navigate to LocationManagement
   }
 
-  const handleSave = () => {
-    setIsSaving(true)
-    // Simulate API call
-    setTimeout(() => {
-      setIsSaving(false)
-      setSaveSuccess(true)
-      setTimeout(() => setSaveSuccess(false), 3000)
-    }, 1000)
+  const handleTimeManagement = () => {
+    closeModal() // Close the modal
+    navigate("/time-management") // Navigate to Time Management
   }
 
   return (
-    <div className={`settings-container ${isDarkMode ? 'dark' : 'light'}`}>
-      <div className="settings-sidebar">
-        <h2 className="settings-sidebar-title">Settings</h2>
-        <nav className="settings-nav">
-          <button 
-            className={`settings-nav-item ${activeTab === "general" ? "active" : ""}`}
-            onClick={() => {
-              setActiveTab("general")
-              openModal()
-            }}
-          >
-            {/* <Settings size={18} /> */}
-            <span>General</span>
-          </button>
-          {/* <button 
-            className={`settings-nav-item ${activeTab === "profile" ? "active" : ""}`}
-            onClick={() => setActiveTab("profile")}
-          >
-            <User size={18} />
-            <span>Profile</span>
-          </button>
-          <button 
-            className={`settings-nav-item ${activeTab === "notifications" ? "active" : ""}`}
-            onClick={() => setActiveTab("notifications")}
-          >
-            <Bell size={18} />
-            <span>Notifications</span>
-          </button> */}
-          <button 
-            className={`settings-nav-item ${activeTab === "security" ? "active" : ""}`}
-            onClick={() => setActiveTab("security")}
-          >
-            <Shield size={18} />
-            <span>Security</span>
-          </button>
-          <button 
-            className={`settings-nav-item ${activeTab === "appearance" ? "active" : ""}`}
-            onClick={() => setActiveTab("appearance")}
-          >
-            <Palette size={18} />
-            <span>Appearance</span>
-          </button>
-          <button 
-            className={`settings-nav-item ${activeTab === "api" ? "active" : ""}`}
-            onClick={() => setActiveTab("api")}
-          >
-            <Database size={18} />
-            <span>API</span>
-          </button>
-          <button 
-            className={`settings-nav-item ${activeTab === "email" ? "active" : ""}`}
-            onClick={() => setActiveTab("email")}
-          >
-            <Mail size={18} />
-            <span>Email</span>
-          </button>
-          <button 
-            className={`settings-nav-item ${activeTab === "content" ? "active" : ""}`}
-            onClick={() => setActiveTab("content")}
-          >
-            <FileText size={18} />
-            <span>Content</span>
-          </button>
-          <button 
-            className={`settings-nav-item ${activeTab === "help" ? "active" : ""}`}
-            onClick={() => setActiveTab("help")}
-          >
-            <HelpCircle size={18} />
-            <span>Help & Support</span>
-          </button>
-        </nav>
-      </div>
-      <div className="settings-content">
-        <div className="settings-header">
-          <h1 className="settings-title">
-            {activeTab === "general" && "General Settings"}
-            {activeTab === "profile" && "Profile Settings"}
-            {activeTab === "notifications" && "Notification Preferences"}
-            {activeTab === "security" && "Security Settings"}
-            {activeTab === "appearance" && "Appearance Settings"}
-            {activeTab === "api" && "API Configuration"}
-            {activeTab === "email" && "Email Settings"}
-            {activeTab === "content" && "Content Management"}
-            {activeTab === "help" && "Help & Support"}
-          </h1>
-          <div className="settings-actions">
-            {saveSuccess && (
-              <div className="settings-save-success">
-                Settings saved successfully!
-              </div>
-            )}
-            <button 
-              className="settings-save-button"
-              onClick={handleSave}
-              disabled={isSaving}
-            >
-              {isSaving ? (
-                <>
-                  <div className="settings-spinner"></div>
-                  <span>Saving...</span>
-                </>
-              ) : (
-                <>
-                  <Save size={16} />
-                  <span>Save Changes</span>
-                </>
-              )}
-            </button>
+    <div className={`settings-container ${isDarkMode ? "dark" : "light"}`}>
+      <header className={isDarkMode ? "dark" : ""}>
+        <h1 style={{ color: isDarkMode ? "white" : "black", fontWeight: "bold" }}>Settings</h1>
+        <p style={{ color: isDarkMode ? "white" : "black", fontWeight: "bold" }}>
+          Manage system preferences, user roles, and security settings.
+        </p>
+      </header>
+
+      <main className={`settings-content ${isDarkMode ? "dark" : ""}`}>
+        <nav className={`settings-nav ${isDarkMode ? "dark" : ""}`}>
+          <div className="nav-item" onClick={handleTimeManagement}>
+            {" "}
+            {/* Time Management Item */}
+            <FiClock className="nav-icon" />
+            <span style={{ color: isDarkMode ? "white" : "black", fontWeight: "bold" }}>Time Management</span>
           </div>
-        </div>
-        
-        <div className="settings-body">
-          {activeTab === "general" && (
-            <div className="settings-section">
-              <h3 className="settings-section-title">General Settings</h3>
-              <div className="settings-form-group">
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div>
-                    <label className="settings-label">Email and Push Notifications</label>
-                    <p className="settings-help-text">Receive email and push notifications for important updates</p>
-                  </div>
-                  <label className="settings-toggle">
-                    <input 
-                      type="checkbox" 
-                      checked={emailNotifications} 
-                      onChange={toggleEmailNotifications} 
-                    />
-                    <span className="settings-toggle-slider"></span>
-                  </label>
-                </div>
-              </div>
-              <div className="settings-form-group">
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div>
-                    <label className="settings-label">Dark Mode</label>
-                    <p className="settings-help-text">Switch between light and dark theme</p>
-                  </div>
-                  <label className="settings-toggle">
-                    <input 
-                      type="checkbox" 
-                      checked={isDarkMode} 
-                      onChange={toggleDarkMode} 
-                    />
-                    <span className="settings-toggle-slider"></span>
-                  </label>
-                </div>
-              </div>
-              <div className="settings-form-group">
-                <button 
-                  className="settings-button"
-                  onClick={handleManageTrainees}
-                >
+          <div className="nav-item" onClick={handleLocationManagement}>
+            {" "}
+            {/* Location Item */}
+            <FiMapPin className="nav-icon" />
+            <span style={{ color: isDarkMode ? "white" : "black", fontWeight: "bold" }}>Location</span>
+          </div>
+          <div className="nav-item active" onClick={openModal}>
+            <FiSettings className="nav-icon" />
+            <span style={{ color: isDarkMode ? "white" : "black", fontWeight: "bold" }}>General</span>
+          </div>
+        </nav>
+
+        <section className={`settings-panel ${isDarkMode ? "dark" : ""}`}>
+          <div className="setting-row">
+            <label htmlFor="emailNotifications" style={{ color: isDarkMode ? "white" : "black", fontWeight: "bold" }}>
+              Email and Push notification
+            </label>
+            <Toggle id="emailNotifications" checked={emailNotifications} onChange={toggleEmailNotifications} />
+          </div>
+        </section>
+
+        {/* Modal Component */}
+        {showModal && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <button className="close-button" onClick={closeModal}>
+                <FiX />
+              </button>
+              <h2 style={{ color: isDarkMode ? "white" : "black" }}>Manage Options</h2>
+              <div className="modal-button-container">
+                <button className="modal-button" onClick={handleManageTrainees}>
                   Manage Trainees
                 </button>
               </div>
-              <div className="settings-form-group">
-                <button 
-                  className="settings-button"
-                  onClick={handleLocationManagement}
-                >
-                  Location Management
-                </button>
-              </div>
             </div>
-          )}
-          {activeTab === "profile" && <ProfileSettings />}
-          {activeTab === "notifications" && <NotificationSettings />}
-          {activeTab === "security" && <SecuritySettings />}
-          {activeTab === "appearance" && <AppearanceSettings />}
-          {activeTab === "api" && <ApiSettings />}
-          {activeTab === "email" && <EmailSettings />}
-          {activeTab === "content" && <ContentSettings />}
-          {activeTab === "help" && <HelpSettings />}
-        </div>
-      </div>
-
-      {/* Modal Component */}
-      {showModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h2>Manage Options</h2>
-            <button onClick={handleManageTrainees}>Manage Trainees</button>
-            <button onClick={handleLocationManagement}>Location Management</button>
-            <button onClick={closeModal}>Close</button>
           </div>
-        </div>
-      )}
+        )}
+      </main>
+
+      {/* Modal Styles */}
+      <style jsx>{`
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+        }
+
+        .modal-content {
+          background: ${isDarkMode ? "#333" : "#fff"};
+          padding: 20px;
+          border-radius: 8px;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+          text-align: center;
+          position: relative;
+          width: 90%;
+          max-width: 400px;
+        }
+
+        .modal-content h2 {
+          margin-bottom: 20px;
+          color: ${isDarkMode ? "white" : "black"};
+        }
+
+        .modal-button-container {
+          display: flex;
+          flex-direction: column; /* Ensure buttons stack vertically */
+          gap: 10px; /* Space between buttons */
+        }
+
+        .modal-button {
+          margin: 10px 0;
+          padding: 10px 20px;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          background-color: green; /* Button color */
+          color: white; /* Button text color */
+          font-weight: bold; /* Bold text */
+          transition: background 0.3s;
+        }
+
+        .modal-button:hover {
+          background: #005500; /* Darker green on hover */
+        }
+
+        .close-button {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          background: none;
+          border: none;
+          cursor: pointer;
+          color: #888;
+          font-size: 24px;
+        }
+
+        .close-button:hover {
+          color: #f00; /* Change color on hover */
+        }
+
+        .dark {
+          background-color: #121212; /* Dark mode background */
+          color: white; /* Default text color in dark mode */
+        }
+
+        .light {
+          background-color: #f0f0f0; /* Light mode background */
+          color: black; /* Default text color in light mode */
+        }
+
+      `}</style>
     </div>
   )
 }
 
+const Toggle = ({ id, checked, onChange }) => {
+  return (
+    <label className="switch">
+      <input type="checkbox" id={id} checked={checked} onChange={onChange} />
+      <span className="slider round"></span>
+    </label>
+  )
+}
+
 export default SystemSettings
+
+
+
