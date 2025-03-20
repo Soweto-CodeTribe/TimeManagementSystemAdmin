@@ -359,8 +359,10 @@ import ErrorPage from "./Components/ErrorPage"; // Renamed from NotFound to Erro
 import Loader from "./Components/Loader";
 import Notifications from "./Components/Notifications";
 import Feedback from "./Components/Feedback";
-import { generateFCMToken, setupFCMListener } from './Slices/notificationsSlice';
+import { generateFCMToken, setupFCMListener,fetchNotifications } from './Slices/notificationsSlice';
 import NotificationsPage from "./Components/Notifications"
+import EventManagement from "./Components/EventManagement"
+
 
 function App() {
   const location = useLocation();
@@ -370,11 +372,30 @@ function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(localStorage.getItem("sidebarState") === "true");
   const { user } = useSelector(state => state.auth);
   
+  // Get traineeId from localStorage
+  const traineeId = localStorage.getItem('userId');
+
+  // Fetch notifications when app starts
+  useEffect(() => {
+    if (isAuthenticated && traineeId) {
+      dispatch(fetchNotifications(traineeId));
+    }
+  }, [dispatch, isAuthenticated, traineeId]);
+  
+
+
+   // Fetch notifications count  
   useEffect(() => {
     if (user?.id) {
       // Initialize FCM
       dispatch(generateFCMToken());
       dispatch(setupFCMListener());
+
+      // Fetch notifications count
+      const userId = user.id || localStorage.getItem('userId');
+      if (userId) {
+        dispatch(fetchNotifications(userId));
+      }
     }
   }, [dispatch, user]);
   
@@ -404,7 +425,7 @@ function App() {
     return (
       <div className="loading-overlay">
         <Loader />
-      </div>
+      </div> 
     );
   }
   
@@ -435,6 +456,8 @@ function App() {
         return "Feedback";
       case "/CombinedNotifications":
         return "CombinedNotifications";
+      case "/EventManagement":
+        return "EventManagement";
       default:
         return "";
     }
@@ -492,6 +515,7 @@ function App() {
                     <Route path="/Tickets" element={<Tickets />} />
                     <Route path="/notifications" element={<NotificationsPage />} />
                     <Route path="/Feedback" element={<Feedback />} />
+                    <Route path="/EventManagement" element={<EventManagement/>} />
                     <Route path="/logout" element={<Logout />} />
                     <Route path="/add-user" element={<AddUserForm />} />
                     
