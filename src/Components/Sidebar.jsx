@@ -11,6 +11,7 @@ import {
   FaTimes,
   FaComment 
 } from 'react-icons/fa';
+import { MdEvent } from "react-icons/md";
 import Modal from 'react-modal';
 import { useDispatch } from 'react-redux';
 import { logout } from '../Slices/authSlice'; // Adjust the import path as needed
@@ -29,7 +30,8 @@ const Sidebar = ({ activeScreen }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
-  
+  const [activeItem, setActiveItem] = useState("");
+
   const openLogoutModal = () => setIsLogoutModalOpen(true);
   const closeLogoutModal = () => setIsLogoutModalOpen(false);
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -48,7 +50,9 @@ const Sidebar = ({ activeScreen }) => {
   const navigateTo = (route) => {
     navigate(route);
   };
-
+  const handleItemClick = (item) => {
+    setActiveItem(item);
+  };
   const getClassNames = (route) => {
     return location.pathname === route ? 'active' : '';
   };
@@ -57,6 +61,7 @@ const Sidebar = ({ activeScreen }) => {
     { name: 'Dashboard', icon: <FaTachometerAlt style={{ fontSize: '20px', color: "gray"}} />, route: '/' },
     { name: 'User Management', icon: <FaUsers style={{ fontSize: '20px' }} />, route: '/user-management' },
     { name: 'Session Monitoring', icon: <FaClock style={{ fontSize: '20px' }} />, route: '/session' },
+    {name:'Event Management', icon: <MdEvent style={{ fontSize: '20px' }} />, route:'/EventManagement'},
     { name: 'Reports', icon: <FaChartBar style={{ fontSize: '20px' }} />, route: '/reports' },
     {name:'Tickets', icon: <FaComment style={{ fontSize: '20px' }} />, route: '/tickets'},
     {name:'Feedback', icon: <VscFeedback style={{ fontSize: '20px' }} />, route: '/feedback'},
