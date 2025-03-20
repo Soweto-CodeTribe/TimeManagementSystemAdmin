@@ -496,7 +496,7 @@ function App() {
                     <Route path="/alerts" element={<Alerts />} />
                     <Route path="/audit-logs" element={<AuditLogs />} />
                     <Route path="/Tickets" element={<Tickets />} />
-                    <Route path="/notifications" element={<NotificationsPage />} />
+                    {/* <Route path="/notifications" element={<NotificationsPage />} /> */}
                     <Route path="/Feedback" element={<Feedback />} />
                     <Route path="/location-management" element={<LocationManagement />} /> {/* New route */}
                     <Route path="/manage-trainees" element={<ManageTrainees />} /> {/* New route */}

@@ -17,6 +17,7 @@ import fetchSessions from "../utils/fetchSessions";
 import TraineeOverview from "./ui/TraineeOverview";
 import "./styling/Dashboard.css";
 import useFacilitatorCount from "../utils/fetchFacilitators";
+import useAbsenceCount from "./hooks/useAbsenceCount";
 
 function Dashboard() {
   // Get user details from localStorage
@@ -35,7 +36,6 @@ function Dashboard() {
   });
   const [attendanceData, setAttendanceData] = useState([]);
   const [facilitatorStats, setFacilitatorStats] = useState([]);
-  const [absentCount, setAbsentCount] = useState(0);
 
   // API configuration
   const BASE_URL = "https://timemanagementsystemserver.onrender.com";
@@ -176,35 +176,37 @@ function Dashboard() {
     }
   };
 
-  const fetchAbsentData = async () => {
-    try {
-      const response = await axios.get(
-        `${BASE_URL}/api/session/daily-report?pages=2&limit=4`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+  // const fetchAbsentData = async () => {
+  //   try {
+  //     const response = await axios.get(
+  //       `${BASE_URL}/api/session/daily-report?pages=2&limit=4`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //           "Content-Type": "application/json",
+  //         },
+  //       }
+  //     );
 
-      if (response.data && response.data.summary) {
-        const { absentCount } = response.data.summary;
-        // console.log("Fetched Absent Count:", absentCount);
-        setAbsentCount(absentCount);
-      } else {
-        console.error("Invalid response format for absent data");
-        setAbsentCount(0);
-      }
-    } catch (error) {
-      console.error("Error fetching absent data:", error);
-      setAbsentCount(0);
-    }
-  };
+  //     if (response.data && response.data.summary) {
+  //       const { absentCount } = response.data.summary;
+  //       // console.log("Fetched Absent Count:", absentCount);
+  //       setAbsentCount(absentCount);
+  //     } else {
+  //       console.error("Invalid response format for absent data");
+  //       setAbsentCount(0);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching absent data:", error);
+  //     setAbsentCount(0);
+  //   }
+  // };
 
   // Use the useFacilitatorCount hook
   const { facilitatorCount, loading: facilitatorsLoading, error: facilitatorsError } =
     useFacilitatorCount();
+
+    const { absentCount } = useAbsenceCount();
 
   // Update dashboardStats with facilitator count
   useEffect(() => {
@@ -226,7 +228,6 @@ function Dashboard() {
           fetchFacilitatorCheckIns(),
           fetchGraphData(),
           fetchFacilitators(),
-          fetchAbsentData(),
         ]);
       } catch (error) {
         console.error("Error loading dashboard data:", error);
@@ -255,9 +256,9 @@ function Dashboard() {
       ? attendanceData
       : [
           { name: "Mon", value: 100 },
-          { name: "Tue", value: 0 },
+          { name: "Tue", value: 10 },
           { name: "Wed", value: 100 },
-          { name: "Thu", value: 0 },
+          { name: "Thu", value: 20 },
           { name: "Fri", value: 100 },
         ];
 
@@ -356,11 +357,11 @@ function Dashboard() {
         </div>
 
         {role !== "super_admin" && checkIns.length > 0 && (
-          <div className="check-ins-card-content">
+          <div className="check-ins-card-contents">
             <div className="card-header">
               <h4>Check-ins for today</h4>
             </div>
-            <div className="card-content">
+            <div className="checkIns-card-content">
               <table className="check-ins-table">
                 <tbody>
                   {checkIns.map((checkIn, index) => (

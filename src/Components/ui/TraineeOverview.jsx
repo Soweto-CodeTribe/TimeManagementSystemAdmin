@@ -3,6 +3,7 @@ import axios from "axios";
 
 const ITEMS_PER_PAGE = 5;
 
+// eslint-disable-next-line react/prop-types
 const TraineeOverview = ({ token }) => {
   const [overviewData, setOverviewData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -47,6 +48,7 @@ const TraineeOverview = ({ token }) => {
   // Fetch data on component mount
   React.useEffect(() => {
     fetchOverviewData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // If loading, show loader
@@ -66,7 +68,6 @@ const TraineeOverview = ({ token }) => {
               <th>Email</th>
               <th>Phone</th>
               <th>Attendance Rate</th>
-              {/* <th>Level</th> */}
               <th>Actions</th>
             </tr>
           </thead>
@@ -78,7 +79,6 @@ const TraineeOverview = ({ token }) => {
                 <td>{trainee.traineeEmail}</td>
                 <td>{trainee.traineePhoneNumber}</td>
                 <td>{trainee.attendancePercentage}</td>
-                {/* <td>{trainee.attendanceLevel}</td> */}
                 <td>
                   {/* Take Action Button with Dropdown */}
                   <div className="action-dropdown">

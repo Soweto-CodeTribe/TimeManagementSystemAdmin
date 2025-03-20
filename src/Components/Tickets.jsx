@@ -102,6 +102,8 @@ const Tickets = () => {
     }
   };
 
+  console.log('tickets data:', tickets)
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setUpdatedTicketData(prev => ({
@@ -230,28 +232,27 @@ const Tickets = () => {
                     <h4>Update Ticket</h4>
                     <div className="tickets-form-group">
                       <label>Status:</label>
-                      <select
+                      <p
                         name="status"
                         value={updatedTicketData.status}
                         onChange={handleInputChange}
                       >
-                        <option value="open">Open</option>
-                        <option value="in_progress">In Progress</option>
-                        <option value="resolved">Resolved</option>
-                        <option value="closed">Closed</option>
-                      </select>
+                        {updatedTicketData.status}
+                      </p>
                     </div>
                     <div className="tickets-form-group">
                       <label>Priority:</label>
-                      <select
+                      <p
                         name="priority"
                         value={updatedTicketData.priority}
                         onChange={handleInputChange}
                       >
-                        <option value="low">Low</option>
-                        <option value="medium">Medium</option>
-                        <option value="high">High</option>
-                      </select>
+                        {updatedTicketData.priority}
+                      </p>
+                      <div className="ticketsResponse">
+                        <textarea name="" id=""></textarea>
+                        <button>Submit</button>
+                      </div>
                     </div>
                     <div className="tickets-form-actions">
                       <button onClick={() => setUpdateMode(false)} className="tickets-cancel-button">
@@ -345,7 +346,8 @@ const Tickets = () => {
           <table className="tickets-attendance-table">
             <thead>
               <tr>
-                <th>ID</th>
+                {/* <th>ID</th> */}
+                <th>Name</th>
                 <th>Title</th>
                 <th>Status</th>
                 <th>Priority</th>
@@ -361,7 +363,8 @@ const Tickets = () => {
                   onClick={() => handleRowClick(ticket)}
                   className="tickets-clickable-row"
                 >
-                  <td>{ticket.id?.substring(0, 8)}...</td>
+                  {/* <td>{ticket.id?.substring(0, 8)}...</td> */}
+                  <td>{ticket.traineeName}</td>
                   <td>{ticket.title}</td>
                   <td>
                     <span

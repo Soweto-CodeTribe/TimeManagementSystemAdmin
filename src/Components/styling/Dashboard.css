@@ -83,6 +83,12 @@
 .card-content {
   padding: 15px;
 }
+.checkIns-card-content {
+  padding: 15px;
+  height: 230px;
+  overflow-y: scroll;
+}
+
 
 .check-ins-table {
   width: 100%;

@@ -18,11 +18,13 @@ const UserManagement = () => {
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState(null)
   const [feedbackMessage, setFeedbackMessage] = useState("")
+  const token = localStorage.getItem("authToken")
+  const userRole = localStorage.getItem("role") // Fetch user role from localStorage
+  const userLocation = localStorage.getItem("userLocation"); // Assuming you also store location
+
+ 
 
   const fetchData = async () => {
-    const token = localStorage.getItem("authToken")
-    const userRole = localStorage.getItem("userRole") // Fetch user role from localStorage
-    const userLocation = localStorage.getItem("userLocation"); // Assuming you also store location
 
     if (!token) {
       setFeedbackMessage("No authorization token found. Please log in again.")
@@ -34,14 +36,15 @@ const UserManagement = () => {
       
       // Make API calls based on user role
       let traineesResponse;
-      if (userRole === 'Facilitator' && userLocation) {
+      if (userRole === 'facilitator' && userLocation) {
         traineesResponse = await axios.get(`https://timemanagementsystemserver.onrender.com/api/trainees/location?location=${userLocation}`, {
           headers,
         });
       } else {
-        traineesResponse = await axios.get("https://timemanagementsystemserver.onrender.com/api/trainees", {
+        traineesResponse = await axios.get("https://timemanagementsystemserver.onrender.com/api/my-trainees", {
           headers,
         });
+        console.log('traineesResponse', traineesResponse.data.allTrainees)
       }
 
       const facilitatorsResponse = await axios.get("https://timemanagementsystemserver.onrender.com/api/facilitators", {
@@ -69,7 +72,7 @@ const UserManagement = () => {
             id: user._id || user.id || `facilitator-${Date.now()}-${Math.random()}`,
             fullName: user.fullName || user.name || `${user.name || ""} ${user.surname || ""}`.trim(),
             email: user.email,
-            role: "Facilitator",
+            role: "facilitator",
           }))
         : [];
 
@@ -259,6 +262,7 @@ const UserManagement = () => {
       (guest.phoneNumber && guest.phoneNumber.toLowerCase().includes(searchTerm.toLowerCase())),
   )
 
+
   return (
     <div className="user-management-container">
       <Modal
@@ -284,7 +288,10 @@ const UserManagement = () => {
       </div>
 
       {/* Table Section for Facilitators */}
-      <div className="table-section">
+ 
+
+    {userRole === 'super_admin' && (
+           <div className="table-section">
         <div className="table-header">
           <h2>
             Facilitators{" "}
@@ -341,6 +348,7 @@ const UserManagement = () => {
           </table>
         </div>
       </div>
+    )}
 
       {/* Table Section for Trainees */}
       <div className="table-section">
@@ -406,43 +414,46 @@ const UserManagement = () => {
       </div>
 
       {/* Table Section for Stakeholders */}
-      <div className="table-section">
-        <div className="table-header">
-          <h2>
-            Stakeholders{" "}
-            <span className="count">{filteredUsers.filter((user) => user.role === "Stakeholder").length}</span>
-          </h2>
-        </div>
 
-        <div className="table-container">
-          <table className="users-table">
-            <thead>
-              <tr>
-                <th>Full Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredUsers
-                .filter((user) => user.role === "Stakeholder")
-                .map((user) => (
-                  <tr key={user.id || user.email || `user-${Math.random()}`}>
-                    <td>{user.fullName}</td>
-                    <td>{user.email}</td>
-                    <td>{user.role}</td>
-                    <td>
-                      <button className="action-btn" onClick={() => handleTakeAction(user)}>
-                        <span>Take action</span>
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {userRole === 'super_admin' && (
+              <div className="table-section">
+              <div className="table-header">
+                <h2>
+                  Stakeholders{" "}
+                  <span className="count">{filteredUsers.filter((user) => user.role === "Stakeholder").length}</span>
+                </h2>
+              </div>
+      
+              <div className="table-container">
+                <table className="users-table">
+                  <thead>
+                    <tr>
+                      <th>Full Name</th>
+                      <th>Email</th>
+                      <th>Role</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredUsers
+                      .filter((user) => user.role === "Stakeholder")
+                      .map((user) => (
+                        <tr key={user.id || user.email || `user-${Math.random()}`}>
+                          <td>{user.fullName}</td>
+                          <td>{user.email}</td>
+                          <td>{user.role}</td>
+                          <td>
+                            <button className="action-btn" onClick={() => handleTakeAction(user)}>
+                              <span>Take action</span>
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+      )}
 
       {/* Table Section for Guests */}
       <div className="table-section">
