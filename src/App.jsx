@@ -359,9 +359,10 @@ import ErrorPage from "./Components/ErrorPage"; // Renamed from NotFound to Erro
 import Loader from "./Components/Loader";
 import Notifications from "./Components/Notifications";
 import Feedback from "./Components/Feedback";
-import LocationManagement from "./Components/LocationManagement"; // Added import
-import ManageTrainees from "./Components/ManageTrainees"; // Added import
-import TimeManagement from "./Components/TimeManagement"; // Added import
+import { generateFCMToken, setupFCMListener,fetchNotifications } from './Slices/notificationsSlice';
+import NotificationsPage from "./Components/Notifications"
+import EventManagement from "./Components/EventManagement"
+
 
 function App() {
   const location = useLocation();
@@ -371,11 +372,30 @@ function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(localStorage.getItem("sidebarState") === "true");
   const { user } = useSelector(state => state.auth);
   
+  // Get traineeId from localStorage
+  const traineeId = localStorage.getItem('userId');
+
+  // Fetch notifications when app starts
+  useEffect(() => {
+    if (isAuthenticated && traineeId) {
+      dispatch(fetchNotifications(traineeId));
+    }
+  }, [dispatch, isAuthenticated, traineeId]);
+  
+
+
+   // Fetch notifications count  
   useEffect(() => {
     if (user?.id) {
       // Initialize FCM
       dispatch(generateFCMToken());
       dispatch(setupFCMListener());
+
+      // Fetch notifications count
+      const userId = user.id || localStorage.getItem('userId');
+      if (userId) {
+        dispatch(fetchNotifications(userId));
+      }
     }
   }, [dispatch, user]);
   
@@ -405,7 +425,7 @@ function App() {
     return (
       <div className="loading-overlay">
         <Loader />
-      </div>
+      </div> 
     );
   }
 
@@ -434,12 +454,10 @@ function App() {
         return "Tickets";
       case "/Feedback":
         return "Feedback";
-      case "/location-management": // New case for Location Management
-        return "Location Management"; // New screen name
-      case "/manage-trainees": // New case for Manage Trainees
-        return "Manage Trainees"; // New screen name
-      case "/time-management": // New case for Time Management
-        return "Time Management"; // New screen name
+      case "/CombinedNotifications":
+        return "CombinedNotifications";
+      case "/EventManagement":
+        return "EventManagement";
       default:
         return "";
     }
@@ -498,9 +516,7 @@ function App() {
                     <Route path="/Tickets" element={<Tickets />} />
                     {/* <Route path="/notifications" element={<NotificationsPage />} /> */}
                     <Route path="/Feedback" element={<Feedback />} />
-                    <Route path="/location-management" element={<LocationManagement />} /> {/* New route */}
-                    <Route path="/manage-trainees" element={<ManageTrainees />} /> {/* New route */}
-                    <Route path="/time-management" element={<TimeManagement />} /> {/* New route for Time Management */}
+                    <Route path="/EventManagement" element={<EventManagement/>} />
                     <Route path="/logout" element={<Logout />} />
                     <Route path="/add-user" element={<AddUserForm />} />
                     

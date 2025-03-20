@@ -82,6 +82,13 @@
   font-size: 14px;
 }
 
+.sidebar ul li.active {
+  background-color: #d0d0d0; /* Change to your preferred active color */
+  color: #000;
+  font-weight: bold;
+}
+
+
 .sidebar ul li:hover {
   background-color: #e0e0e0;
   color: #000;
