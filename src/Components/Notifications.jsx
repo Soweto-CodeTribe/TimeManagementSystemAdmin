@@ -5,7 +5,7 @@ import './styling/Notifications.css';
 const Notifications = () => {
   const dispatch = useDispatch();
   const { notifications, loading, error } = useSelector((state) => state.notifications);
-  const traineeId = 'lqEizK0FRVMkjxazH74yfQseIK62'; // Use dynamic ID, just for now using hardcoded value
+  const traineeId = localStorage.getItem('userId')
   useEffect(() => {
     dispatch(fetchNotifications(traineeId));
   }, [dispatch, traineeId]);
