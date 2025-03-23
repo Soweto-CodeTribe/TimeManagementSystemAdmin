@@ -1,5 +1,4 @@
-// TraineeReportModal.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import DataLoader from "../dataLoader";
@@ -26,6 +25,12 @@ const STATUS_COLORS = {
   Absent: "#FF4842",
 };
 
+const UPLOAD_STATUS_COLORS = {
+  pending: "#FFBB28",
+  approved: "#00C49F",
+  rejected: "#FF4842",
+};
+
 const RADIAN = Math.PI / 180;
 const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name }) => {
   const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
@@ -46,7 +51,15 @@ const TraineeReportModal = ({ selectedTrainee, onClose }) => {
   const [tabValue, setTabValue] = useState(0);
   const [selectedMonth, setSelectedMonth] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
-
+  
+  // New state for absenteeism uploads
+  const [uploadsData, setUploadsData] = useState([]);
+  const [uploadsLoading, setUploadsLoading] = useState(false);
+  const [uploadsError, setUploadsError] = useState(null);
+  const [selectedUpload, setSelectedUpload] = useState(null);
+  const [reviewNotes, setReviewNotes] = useState("");
+  
+  // Fetch trainee attendance report
   const fetchTraineeReport = async (traineeId) => {
     setReportLoading(true);
     setReportError(null);
@@ -62,6 +75,51 @@ const TraineeReportModal = ({ selectedTrainee, onClose }) => {
       setReportError(err.message);
     } finally {
       setReportLoading(false);
+    }
+  };
+
+  // New function to fetch trainee's absenteeism proofs
+  const fetchTraineeUploads = async (traineeId) => {
+    setUploadsLoading(true);
+    setUploadsError(null);
+    try {
+      const response = await axios.get(
+        `https://timemanagementsystemserver.onrender.com/api/trainee/${traineeId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setUploadsData(response.data);
+    } catch (err) {
+      setUploadsError(err.message);
+    } finally {
+      setUploadsLoading(false);
+    }
+  };
+
+  // New function to update upload status
+  const updateUploadStatus = async (uploadId, status) => {
+    try {
+      await axios.put(
+        `https://timemanagementsystemserver.onrender.com/api/update-uploads/${uploadId}/status`,
+        {
+          status,
+          reviewNotes
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      // Update local state to reflect changes
+      setUploadsData(prev => 
+        prev.map(upload => 
+          upload.id === uploadId ? { ...upload, status, reviewNotes } : upload
+        )
+      );
+      
+      // Close detail view
+      setSelectedUpload(null);
+      setReviewNotes("");
+      
+    } catch (err) {
+      alert(`Error updating status: ${err.message}`);
     }
   };
 
@@ -99,11 +157,35 @@ const TraineeReportModal = ({ selectedTrainee, onClose }) => {
     }));
   };
 
-  React.useEffect(() => {
+  // Load both reports and uploads when trainee is selected or filters change
+  useEffect(() => {
     if (selectedTrainee) {
       fetchTraineeReport(selectedTrainee.traineeId);
+      fetchTraineeUploads(selectedTrainee.traineeId);
     }
   }, [selectedTrainee, selectedMonth, selectedYear]);
+
+  // Format date helper
+  const formatDate = (dateString) => {
+    if (!dateString) return "-";
+    try {
+      return new Date(dateString).toLocaleDateString();
+    } catch (err) {
+      console.error("Error formatting date:", err);
+      return "-";
+    }
+  };
+
+  // View specific upload
+  const handleViewUpload = (upload) => {
+    setSelectedUpload(upload);
+  };
+
+  // Close upload details
+  const handleCloseUploadDetails = () => {
+    setSelectedUpload(null);
+    setReviewNotes("");
+  };
 
   return (
     <div className="modal-overlay">
@@ -112,9 +194,9 @@ const TraineeReportModal = ({ selectedTrainee, onClose }) => {
         <button className="close-modal" onClick={onClose}>
           Close
         </button>
-        {reportLoading ? (
+        {(reportLoading || uploadsLoading) && tabValue !== 4 ? (
           <DataLoader />
-        ) : reportError ? (
+        ) : reportError && tabValue !== 4 ? (
           <div className="error-message">Error loading report: {reportError}</div>
         ) : reportData ? (
           <>
@@ -150,7 +232,10 @@ const TraineeReportModal = ({ selectedTrainee, onClose }) => {
               </div>
               <button
                 className="apply-filters"
-                onClick={() => fetchTraineeReport(selectedTrainee.traineeId)}
+                onClick={() => {
+                  fetchTraineeReport(selectedTrainee.traineeId);
+                  fetchTraineeUploads(selectedTrainee.traineeId);
+                }}
               >
                 Apply
               </button>
@@ -198,6 +283,12 @@ const TraineeReportModal = ({ selectedTrainee, onClose }) => {
                 onClick={() => setTabValue(3)}
               >
                 Attendance Records
+              </button>
+              <button
+                className={`tab-button ${tabValue === 4 ? "active" : ""}`}
+                onClick={() => setTabValue(4)}
+              >
+                Absenteeism Proofs
               </button>
             </div>
             {tabValue === 0 && (
@@ -278,6 +369,139 @@ const TraineeReportModal = ({ selectedTrainee, onClose }) => {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            )}
+            {tabValue === 4 && (
+              <div className="absenteeism-container">
+                {uploadsLoading ? (
+                  <DataLoader />
+                ) : uploadsError ? (
+                  <div className="error-message">Error loading uploads: {uploadsError}</div>
+                ) : selectedUpload ? (
+                  <div className="upload-details">
+                    <div className="upload-details-header">
+                      <h3>Absenteeism Proof Details</h3>
+                      <button className="back-button" onClick={handleCloseUploadDetails}>
+                        Back to List
+                      </button>
+                    </div>
+                    <div className="upload-details-content">
+                      <div className="detail-row">
+                        <span className="detail-label">Date:</span>
+                        <span className="detail-value">{formatDate(selectedUpload.date)}</span>
+                      </div>
+                      <div className="detail-row">
+                        <span className="detail-label">Reason:</span>
+                        <span className="detail-value">{selectedUpload.reason}</span>
+                      </div>
+                      <div className="detail-row">
+                        <span className="detail-label">Status:</span>
+                        <span className={`detail-value status-${selectedUpload.status}`}>
+                          {selectedUpload.status}
+                        </span>
+                      </div>
+                      <div className="detail-row">
+                        <span className="detail-label">Submitted:</span>
+                        <span className="detail-value">{formatDate(selectedUpload.createdAt)}</span>
+                      </div>
+                      {selectedUpload.reviewedAt && (
+                        <div className="detail-row">
+                          <span className="detail-label">Reviewed:</span>
+                          <span className="detail-value">{formatDate(selectedUpload.reviewedAt)}</span>
+                        </div>
+                      )}
+                      {selectedUpload.reviewNotes && (
+                        <div className="detail-row">
+                          <span className="detail-label">Review Notes:</span>
+                          <span className="detail-value">{selectedUpload.reviewNotes}</span>
+                        </div>
+                      )}
+                      <div className="document-preview">
+                        <h4>Document</h4>
+                        <a href={selectedUpload.documentUrl} target="_blank" rel="noopener noreferrer" className="document-link">
+                          View Document
+                        </a>
+                      </div>
+                      <div className="update-status">
+                        <h4>Update Status</h4>
+                        <div className="status-form">
+                          <div className="form-group">
+                            <label>Review Notes:</label>
+                            <textarea
+                              value={reviewNotes}
+                              onChange={(e) => setReviewNotes(e.target.value)}
+                              placeholder="Enter review notes..."
+                              rows={4}
+                            />
+                          </div>
+                          <div className="status-buttons">
+                            <button
+                              className="status-button approve"
+                              onClick={() => updateUploadStatus(selectedUpload.id, "approved")}
+                            >
+                              Approve
+                            </button>
+                            <button
+                              className="status-button reject"
+                              onClick={() => updateUploadStatus(selectedUpload.id, "rejected")}
+                            >
+                              Reject
+                            </button>
+                            <button
+                              className="status-button pending"
+                              onClick={() => updateUploadStatus(selectedUpload.id, "pending")}
+                            >
+                              Mark as Pending
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <h3>Absenteeism Proofs</h3>
+                    {uploadsData.length === 0 ? (
+                      <div className="no-uploads">
+                        <p>No absenteeism proofs found for this trainee.</p>
+                      </div>
+                    ) : (
+                      <table className="data-table uploads-table">
+                        <thead>
+                          <tr>
+                            <th>Date</th>
+                            <th>Reason</th>
+                            <th>Status</th>
+                            <th>Submitted</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {uploadsData.map((upload) => (
+                            <tr key={upload.id} className={upload.status}>
+                              <td>{formatDate(upload.date)}</td>
+                              <td>{upload.reason}</td>
+                              <td>
+                                <span className={`status-badge ${upload.status}`}>
+                                  {upload.status}
+                                </span>
+                              </td>
+                              <td>{formatDate(upload.createdAt)}</td>
+                              <td>
+                                <button
+                                  className="view-button"
+                                  onClick={() => handleViewUpload(upload)}
+                                >
+                                  View & Review
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </>
+                )}
               </div>
             )}
           </>
