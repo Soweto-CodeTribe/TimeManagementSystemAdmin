@@ -8,6 +8,7 @@ const BASE_URL = 'https://timemanagementsystemserver.onrender.com/api';
 // Initial State
 const initialState = {
   notifications: [],
+  unreadNotifications: [], // Added for storing unread notifications
   unreadCount: 0,
   loading: false,
   error: null,
@@ -62,6 +63,7 @@ export const setupFCMListener = createAsyncThunk(
         if (traineeId) {
           dispatch(fetchNotifications(traineeId));
           dispatch(fetchUnreadCount(traineeId));
+          dispatch(fetchUnreadNotifications(traineeId)); // Added to also refresh unread notifications
         }
       }
     });
@@ -78,15 +80,31 @@ export const fetchNotifications = createAsyncThunk(
         getHeaders(getState)
       );
 
-      if(response.data.ok)
-        {
-          console.log("Fetched Notifications:", response.data);
-        }
+      if(response.data.ok) {
+        console.log("Fetched Notifications:", response.data);
+      }
       return response.data;
-
-      
     } catch (error) {
       return rejectWithValue(error.response?.data || { message: 'Failed to fetch notifications' });
+    }
+  }
+);
+
+// New thunk for fetching only unread notifications
+export const fetchUnreadNotifications = createAsyncThunk(
+  'notifications/fetchUnread',
+  async (traineeId, { getState, rejectWithValue }) => {
+    try {
+      const response = await axios.get(
+        `${BASE_URL}/messages/trainee/${traineeId}`,
+        getHeaders(getState)
+      );
+      
+      // Filter only unread notifications from the response
+      const unreadNotifications = response.data.filter(notification => !notification.read);
+      return unreadNotifications;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || { message: 'Failed to fetch unread notifications' });
     }
   }
 );
@@ -110,25 +128,24 @@ export const markAsRead = createAsyncThunk(
   'notifications/markAsRead',
   async ({ notificationId, traineeId }, { getState, rejectWithValue, dispatch }) => {
     try {
+      // First, optimistically update the UI by decrementing the unread count
+      dispatch(decrementUnreadCount());
+      
+      // Then make the API call to update the server
       const response = await axios.put(
         `${BASE_URL}/messages/${notificationId}/read`,
         { traineeId },
         getHeaders(getState)
       );
       
-      // If the notification was successfully marked as read, update the unread count
-      if (response.data) {
-        dispatch(fetchUnreadCount(traineeId));
-        
-      }
-      
-      return response.data;
+      return { ...response.data, id: notificationId }; // Ensure id is returned
     } catch (error) {
+      // If the API call fails, we should restore the unread count
+      // You could add another action to increment the count back
       return rejectWithValue(error.response?.data || { message: 'Failed to mark notification as read' });
     }
   }
 );
-
 
 export const createNotification = createAsyncThunk(
   'notifications/create',
@@ -177,6 +194,10 @@ const notificationsSlice = createSlice({
         state.unreadCount -= 1;
       }
     },
+    // Add an increment action in case we need to restore the count after a failed API call
+    incrementUnreadCount: (state) => {
+      state.unreadCount += 1;
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -197,48 +218,82 @@ const notificationsSlice = createSlice({
       .addCase(fetchNotifications.fulfilled, (state, action) => {
         state.loading = false;
         state.notifications = action.payload;
-        state.unreadCount = action.payload.filter(n => !n.read).length;
+        // Only update unread count if we don't have specific unread count from API
+        if (!state.unreadCount) {
+          state.unreadCount = action.payload.filter(n => !n.read).length;
+        }
       })
       .addCase(fetchNotifications.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Failed to fetch notifications';
       })
+      // Handle the new fetchUnreadNotifications thunk
+      .addCase(fetchUnreadNotifications.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchUnreadNotifications.fulfilled, (state, action) => {
+        state.loading = false;
+        state.unreadNotifications = action.payload;
+        // Update unread count based on the length of unread notifications
+        state.unreadCount = action.payload.length;
+      })
+      .addCase(fetchUnreadNotifications.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Failed to fetch unread notifications';
+      })
       .addCase(fetchUnreadCount.fulfilled, (state, action) => {
         state.unreadCount = action.payload;
       })
       .addCase(markAsRead.fulfilled, (state, action) => {
-  // Find the notification and update its read status
-  const notification = state.notifications.find(n => n.id === action.payload.id);
-  if (notification) {
-    notification.read = true;
-  }
-  
-  // Update the notifications array to reflect the change
-  state.notifications = state.notifications.map(n => 
-    n.id === action.payload.id ? { ...n, read: true } : n
-  );
-  
-  // Recalculate the unread count
-  state.unreadCount = state.notifications.filter(n => !n.read).length;
-})
-
-.addCase(markAsRead.pending, (state) => {
-  state.loading = true;
-})
-.addCase(markAsRead.rejected, (state, action) => {
-  state.loading = false;
-  state.error = action.payload || 'Failed to mark notification as read';
-})
+        // Find the notification and update its read status
+        const notification = state.notifications.find(n => n.id === action.payload.id);
+        if (notification) {
+          notification.read = true;
+        }
+        
+        // Update the notifications array to reflect the change
+        state.notifications = state.notifications.map(n => 
+          n.id === action.payload.id ? { ...n, read: true } : n
+        );
+        
+        // Also remove from unreadNotifications array
+        state.unreadNotifications = state.unreadNotifications.filter(
+          n => n.id !== action.payload.id
+        );
+        
+        // Note: We don't need to recalculate unreadCount here since we've already
+        // decremented it optimistically in the decrementUnreadCount action
+      })
+      .addCase(markAsRead.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Failed to mark notification as read';
+        // You could increment the count back here if the API call fails
+        // But this would require tracking which notification failed
+      })
       .addCase(createNotification.fulfilled, (state, action) => {
         state.notifications.unshift(action.payload);
+        // If the new notification is unread, add it to unreadNotifications as well
+        if (!action.payload.read) {
+          state.unreadNotifications.unshift(action.payload);
+          state.unreadCount += 1;
+        }
       })
       .addCase(deleteNotification.fulfilled, (state, action) => {
+        // Check if the deleted notification was unread before removing
+        const deletedNotification = state.notifications.find(n => n.id === action.payload);
+        const wasUnread = deletedNotification && !deletedNotification.read;
+        
+        // Remove the notification from both arrays
         state.notifications = state.notifications.filter(n => n.id !== action.payload);
-        state.unreadCount = state.notifications.filter(n => !n.read).length;
+        state.unreadNotifications = state.unreadNotifications.filter(n => n.id !== action.payload);
+        
+        // Decrement unread count if the deleted notification was unread
+        if (wasUnread && state.unreadCount > 0) {
+          state.unreadCount -= 1;
+        }
       });
   },
 });
 
-export const { clearNotificationsError, toggleFCMEnabled } = notificationsSlice.actions;
-export const { decrementUnreadCount } = notificationsSlice.actions;
+export const { clearNotificationsError, toggleFCMEnabled, decrementUnreadCount, incrementUnreadCount } = notificationsSlice.actions;
 export default notificationsSlice.reducer;
