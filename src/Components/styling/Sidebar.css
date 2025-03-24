@@ -1,0 +1,375 @@
+/* Sidebar Base Styles */
+.sidebar {
+  width: 230px; /* Slightly smaller sidebar */
+  height: 100%;
+  background-color: #ffffff;
+  color: rgba(0, 0, 0, 0.5);
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-right: 1px solid rgba(0, 0, 0, 0.2);
+  font-family: Poppins, sans-serif;
+  font-size: 14px; /* Smaller font size */
+  font-weight: 400;
+  position: fixed;
+  left: 50;
+  top: 0;
+  z-index: 1000;
+  transition: transform 0.3s ease;
+}
+
+/* Mobile Toggle Button */
+.mobile-toggle {
+  display: none;
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  z-index: 1100;
+  font-size: 24px;
+  cursor: pointer;
+  color: #333;
+  width: 40px;
+  height: 40px;
+  /* border-radius: 50%; */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Logo Container at the Top */
+.logo-container {
+  display: flex;
+  position: absolute;
+  top: 1%;
+  padding: 20px 0;
+  justify-content: center;
+  z-index: 2000;
+  align-items: center;
+  margin-bottom: 20px; /* Adds spacing between logo and sidebar items */
+  width: 100%; /* Ensures logo takes up full width */
+}
+
+/* Logo Styling */
+.logo {
+  width: 120px; /* Adjust the logo size */
+  height: auto;
+}
+
+/* Sidebar List */
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  width: 100%;
+  margin-top: 30px; /* Add space for the logo */
+}
+
+/* General Section Header */
+.general-header {
+  font-size: 17.94px;
+  color: rgba(0, 0, 0, 0.3); /* 30% opacity */
+}
+
+/* Sidebar List Item Styling */
+.sidebar ul li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.sidebar ul li.active {
+  background-color: #d0d0d0; /* Change to your preferred active color */
+  color: #000;
+  font-weight: bold;
+}
+
+
+.sidebar ul li:hover {
+  background-color: #e0e0e0;
+  color: #000;
+}
+
+/* Icon Styling */
+.icon {
+  width: 24px;
+  height: 24px;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+/* Logout Button */
+.logout-btn {
+  width: 100%;
+  color: #000;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  padding: 8px 12px;
+  margin-top: 8px;
+  background-color: transparent;
+  border: none;
+  align-items: center;
+  gap: 8px;
+}
+
+/* For Non-clickable "Other" Item */
+.other-item {
+  color: rgba(0, 0, 0, 0.3); /* 30% opacity */
+  cursor: default; /* Prevent pointer cursor */
+  pointer-events: none; /* Disables hover and clicking */
+  font-size: 17.94px; /* Similar styling as other items */
+}
+
+.general-header {
+  font-size: 17.94px;
+  color: rgba(0, 0, 0, 0.3); /* 30% opacity */
+  cursor: default; /* Prevent pointer cursor */
+  pointer-events: none; /* Disables hover and clicking */
+  font-weight: 500; /* Make it stand out */
+}
+
+/* For Non-clickable "Other" Item */
+.other-item {
+  color: rgba(0, 0, 0, 0.3); /* 30% opacity */
+  cursor: default; /* Prevent pointer cursor */
+  pointer-events: none; /* Disables hover and clicking */
+  font-size: 17.94px; /* Similar styling as other items */
+  font-weight: 500; /* Make it stand out */
+}
+
+.logout-btn:hover {
+  background-color: #ddd;
+}
+
+/* Navbar Base Styles */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 230px; /* Match sidebar width */
+  width: calc(100% - 230px); /* Adjusted width to fit properly */
+  height: 60px;
+  background-color: #ffffff;
+  color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 20px;
+  font-size: 24px;
+  /* box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); */
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+  z-index: 900;
+  transition: left 0.3s ease, width 0.3s ease;
+}
+
+/* Sidebar Container */
+.sidebar-container {
+  display: flex;
+  height: 100vh;
+  position: relative;
+}
+
+/* Content area adjustment */
+.content {
+  margin-left: 230px;
+  width: calc(100% - 230px);
+  transition: margin-left 0.3s ease, width 0.3s ease;
+}
+
+/* Modal Styles */
+.modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border-radius: 8px;
+  max-width: 300px;
+  width: 100%;
+  font-weight: lighter;
+  font-family: Poppings;
+  font-weight: 500;
+  font-style: normal;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+}
+
+.modal-actions {
+  display: flex;
+  /* justify-content: canter; */
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.confirm-btn, .cancel-btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
+
+.confirm-btn {
+  background-color: #f44336;
+  color: white;
+}
+
+.cancel-btn {
+  background-color: #e0e0e0;
+  color: #333;
+}
+.modal h2 {
+  font-size: 1rem; /* Adjust size as needed */
+  font-weight:500;
+  color: #333; /* Darker text for better readability */
+  text-align: center;
+  margin-bottom: 1rem; /* Add space below the heading */
+  line-height: normal;
+}
+
+
+
+/* Responsive Styles */
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 200px;
+  }
+  
+  .navbar {
+    left: 200px;
+    width: calc(100% - 200px);
+  }
+  
+  .content {
+    margin-left: 200px;
+    width: calc(100% - 200px);
+  }
+  
+  .logo {
+    width: 100px;
+  }
+}
+@media (min-width: 769px) {
+  .mobile-toggle {
+    display: none !important;
+  }
+}
+@media (max-width: 768px) {
+  .mobile-toggle {
+    display: flex;
+  }
+  
+  .sidebar {
+    transform: translateX(-100%);
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+  
+  .navbar {
+    left: 0;
+    width: 100%;
+  }
+  
+  .content {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    width: 80%;
+    max-width: 280px;
+  }
+  
+  .logo {
+    width: 80px;
+  }
+  
+  .sidebar ul li, .logout-btn {
+    font-size: 13px;
+  }
+  
+  .general-header, .other-item {
+    font-size: 15px;
+  }
+}
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .modal {
+    padding: 12px 8px; /* Slightly smaller padding on medium screens */
+    width: 100px;
+  }
+  .modal h2 {
+    font-size: .6rem; /* Adjust size as needed */
+    font-weight:500;
+    color: #333; /* Darker text for better readability */
+    text-align: center;
+    margin-bottom: 1rem; /* Add space below the heading */
+    line-height: normal;
+  }
+  
+}
+
+@media (max-width: 768px) {
+  .modal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    border-radius: 8px;
+    max-width: 200px;
+    /* width: 100%;
+     */
+     width: 200px;
+    font-weight: lighter;
+    font-family: Poppings;
+    font-weight: 500;
+    font-style: normal;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  .confirm-btn, .cancel-btn {
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+  }
+  .confirm-btn, .cancel-btn {
+    padding: 4px 16px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal {
+    padding: 8px 10px; /* Minimal padding on very small screens */
+    width: 90%;
+  }
+  .confirm-btn, .cancel-btn {
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+  }
+}
