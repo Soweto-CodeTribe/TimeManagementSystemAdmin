@@ -70,7 +70,11 @@ const TraineeOverview = ({ token }) => {
     try {
       await axios.post(
         `${API_BASE_URL}/api/trainee-actions/suspend`,
-        { traineeId: selectedTrainee.id, days: suspensionData.days },
+        { 
+          traineeId: selectedTrainee.id, 
+          days: suspensionData.days,
+          message: suspensionData.reason // Include the reason as message
+        },
         { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
       );
       toast.success("Trainee suspended successfully!");
@@ -81,13 +85,17 @@ const TraineeOverview = ({ token }) => {
       handleAxiosError(error, "Failed to suspend trainee");
     }
   };
-
-  const reinstateTrainee = async (traineeId) => {
+  
+  const reinstateTrainee = async (traineeId, notes = "") => {
     if (!confirm("Are you sure you want to reinstate this trainee?")) return;
+    
+    // Optionally collect notes dynamically or use a default if not provided
+    const reinstatementNotes = notes || "Reinstated by administrator";
+    
     try {
       await axios.post(
         `${API_BASE_URL}/api/trainee-actions/reinstate`,
-        { traineeId, notes: "Reinstated by administrator" },
+        { traineeId, notes: reinstatementNotes },
         { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
       );
       toast.success("Trainee reinstated successfully!");
@@ -96,22 +104,40 @@ const TraineeOverview = ({ token }) => {
       handleAxiosError(error, "Failed to reinstate trainee");
     }
   };
-
+  
   const sendNotification = async () => {
-    if (!notification.message.trim()) {
+    // More thorough validation
+    if (!notification.message?.trim()) {
       toast.error("Notification message cannot be empty.");
       return;
     }
+    
+    if (!selectedTrainee?.id) {
+      toast.error("No trainee selected. Please select a trainee first.");
+      return;
+    }
+    
+    // For debugging
+    console.log("Sending notification with data:", {
+      traineeId: selectedTrainee.id,
+      message: notification.message
+    });
+    
     try {
       await axios.post(
         `${API_BASE_URL}/api/trainee-actions/notify`,
-        { traineeId: selectedTrainee.id, message: notification.message },
+        { 
+          traineeId: selectedTrainee.id, 
+          message: notification.message
+        },
         { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
       );
       toast.success("Notification sent successfully!");
       setShowNotificationModal(false);
       setNotification({ message: "" });
     } catch (error) {
+      // Enhanced error handling to see what's going wrong
+      console.error("Notification error details:", error.response?.data);
       handleAxiosError(error, "Failed to send notification");
     }
   };

@@ -1312,10 +1312,10 @@ const getTabData = (tabName) => {
 
         <div className="table-controls">
           <div className="left-controls">
-            <button className="filter-btn">
+            {/* <button className="filter-btn">
               <Filter size={14} />
               <span>Filter</span>
-            </button>
+            </button> */}
             <div className="search-container">
               <Search className="search-icon" />
               <input
