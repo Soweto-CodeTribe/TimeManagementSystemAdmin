@@ -163,17 +163,22 @@ export const createNotification = createAsyncThunk(
   }
 );
 
+
+
 export const deleteNotification = createAsyncThunk(
   'notifications/delete',
-  async (notificationId, { getState, rejectWithValue }) => {
+  async ({ notificationId, traineeId }, { getState, rejectWithValue }) => { // Accept traineeId
     try {
       await axios.delete(
-        `${BASE_URL}/messages/${notificationId}`,
-        getHeaders(getState)
+        `${BASE_URL}/messages/${notificationId}`, // URL is correct
+        {
+          headers: getHeaders(getState),
+          data: { traineeId } // Include traineeId in the request body
+        }
       );
       return notificationId;
     } catch (error) {
-      return rejectWithValue(error.response?.data || { message: 'Failed to delete notification' });
+      return rejectWithValue(error.response?.data || 'Failed to delete notification');
     }
   }
 );

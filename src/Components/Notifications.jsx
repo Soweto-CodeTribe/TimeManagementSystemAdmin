@@ -15,6 +15,7 @@ const NotificationsPanel = () => {
   const [activeTab, setActiveTab] = useState('all'); // Default to showing all notifications
   const [localNotifications, setLocalNotifications] = useState([]);
   const [readHistory, setReadHistory] = useState([]); // Track which notifications were read
+  const [confirmDelete, setConfirmDelete] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -136,25 +137,38 @@ const NotificationsPanel = () => {
     setMenuOpen(null);
   };
 
-  const handleDeleteNotification = (notificationId, event) => {
+  // New function to start the deletion process
+  const initiateDelete = (notificationId, event) => {
     event.stopPropagation(); // Prevent notification click
-    
-    // Dispatch delete action
-    dispatch(deleteNotification({ 
-      notificationId, 
-      traineeId 
-    }));
-    
-    // Update local state to remove the notification
-    setLocalNotifications(prevNotifications => 
-      prevNotifications.filter(item => item.id !== notificationId)
-    );
-    
-    // Close the menu and notification popup if it was selected
-    setMenuOpen(null);
-    if (selectedNotification && selectedNotification.id === notificationId) {
-      setSelectedNotification(null);
+    setConfirmDelete(notificationId); // Set the ID of notification to be deleted
+    setMenuOpen(null); // Close the menu
+  };
+
+  // Function to confirm deletion
+  const confirmDeleteNotification = () => {
+    if (confirmDelete) {
+      dispatch(deleteNotification({ 
+        notificationId: confirmDelete,
+        traineeId: localStorage.getItem('userId') // ✅ Correct
+      }));
+      // Update local state to remove the notification
+      setLocalNotifications(prevNotifications => 
+        prevNotifications.filter(item => item.id !== confirmDelete)
+      );
+      
+      // Close the notification popup if it was selected
+      if (selectedNotification && selectedNotification.id === confirmDelete) {
+        setSelectedNotification(null);
+      }
+      
+      // Reset confirmation state
+      setConfirmDelete(null);
     }
+  };
+
+  // Function to cancel deletion
+  const cancelDelete = () => {
+    setConfirmDelete(null);
   };
 
   const clearSearch = () => {
@@ -279,12 +293,6 @@ const NotificationsPanel = () => {
                           Mark as Read
                         </button>
                       )}
-                      <button 
-                        onClick={(e) => handleDeleteNotification(notification.id, e)}
-                        className="delete-action"
-                      >
-                        Delete
-                      </button>
                     </div>
                   )}
                 </div>
@@ -296,26 +304,26 @@ const NotificationsPanel = () => {
 
       {selectedNotification && (
         <div className="notification-popup">
-        <div className="popup-content">
-          {/* Header */}
-          <div className="popup-header">
-            <h3>{selectedNotification.title}</h3>
-            <button onClick={handleClosePopup} className="popup-close">
-              <FiX size={20} />
-            </button>
-          </div>
-      
-          {/* Meta Information */}
-          <div className="popup-meta">
-            From: {selectedNotification.senderName || 'System'} • {formatTime(selectedNotification.createdAt)}
-          </div>
-      
-          {/* Notification Body */}
-          <div className="popup-body">
-            <p>{selectedNotification.content}</p>
+          <div className="popup-content">
+            {/* Header */}
+            <div className="popup-header">
+              <h3>{selectedNotification.title}</h3>
+              <button onClick={handleClosePopup} className="popup-close">
+                <FiX size={20} />
+              </button>
+            </div>
+        
+            {/* Meta Information */}
+            <div className="popup-meta">
+              From: {selectedNotification.senderName || 'System'} • {formatTime(selectedNotification.createdAt)}
+            </div>
+        
+            {/* Notification Body */}
+            <div className="popup-body">
+              <p>{selectedNotification.content}</p>
+            </div>
           </div>
         </div>
-      </div>
       )}
     </div>
   );
