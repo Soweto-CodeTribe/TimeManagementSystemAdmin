@@ -359,7 +359,7 @@ import ErrorPage from "./Components/ErrorPage"; // Renamed from NotFound to Erro
 import Loader from "./Components/Loader";
 import Notifications from "./Components/Notifications";
 import Feedback from "./Components/Feedback";
-import { generateFCMToken, setupFCMListener,fetchNotifications } from './Slices/notificationsSlice';
+import { generateFCMToken, setupFCMListener,fetchNotifications, fetchUnreadCount } from './Slices/notificationsSlice';
 import NotificationsPage from "./Components/Notifications"
 import EventManagement from "./Components/EventManagement"
 
@@ -375,30 +375,33 @@ function App() {
   // Get traineeId from localStorage
   const traineeId = localStorage.getItem('userId');
 
-  // Fetch notifications when app starts
-  useEffect(() => {
-    if (isAuthenticated && traineeId) {
-      dispatch(fetchNotifications(traineeId));
+/// First useEffect
+useEffect(() => {
+  if (isAuthenticated && traineeId) {
+    // Only fetch the unread count
+    dispatch(fetchUnreadCount(traineeId))
+      .catch((error) => {
+        console.error("Error fetching unread count:", error);
+      });
+  }
+}, [dispatch, isAuthenticated, traineeId]);
+
+// Second useEffect
+useEffect(() => {
+  if (user?.id) {
+    // Initialize FCM
+    dispatch(generateFCMToken());
+    dispatch(setupFCMListener());
+
+    // Only fetch the unread count
+    const userId = user.id || localStorage.getItem('userId');
+    if (userId) {
+      dispatch(fetchUnreadCount(userId));
     }
-  }, [dispatch, isAuthenticated, traineeId]);
-  
+  }
+}, [dispatch, user]);
 
 
-   // Fetch notifications count  
-  useEffect(() => {
-    if (user?.id) {
-      // Initialize FCM
-      dispatch(generateFCMToken());
-      dispatch(setupFCMListener());
-
-      // Fetch notifications count
-      const userId = user.id || localStorage.getItem('userId');
-      if (userId) {
-        dispatch(fetchNotifications(userId));
-      }
-    }
-  }, [dispatch, user]);
-  
   // Initial auth check on app load
   useEffect(() => {
     const verifyAuth = async () => {
