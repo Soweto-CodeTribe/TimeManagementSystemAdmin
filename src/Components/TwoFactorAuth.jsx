@@ -108,6 +108,12 @@ const TwoFactorAuth = () => {
             </button>
           </form>
         </div>
+
+        <div className="progress-dotsAuth">
+              <span className="dot"></span>
+              <span className="dot active"></span>
+            </div>
+
       </div>
       <div className="login-right">
         <div className="right-content">
