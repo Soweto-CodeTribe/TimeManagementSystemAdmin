@@ -7,7 +7,7 @@ function FeedbackPage() {
   const [feedback, setFeedback] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [newFeedback, setNewFeedback] = useState("");
+  // const [newFeedback, setNewFeedback] = useState("");
   const token = useSelector((state) => state.auth.token);
 
   useEffect(() => {

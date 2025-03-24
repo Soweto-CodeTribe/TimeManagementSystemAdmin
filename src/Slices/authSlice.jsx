@@ -289,7 +289,7 @@ export const loginFacilitator = createAsyncThunk(
   'auth/loginFacilitator',
   async ({ email, password }, { rejectWithValue }) => {
     try {
-      const response = await fetch('https://timemanagementsystemserver.onrender.com/api/auth/login', {
+      const response = await fetch('https://timemanagemefntsystemserver.onrender.com/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

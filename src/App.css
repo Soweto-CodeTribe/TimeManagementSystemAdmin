@@ -16,8 +16,12 @@ html, body, #root {
   color:#f2f2f8;
 }
 ::-webkit-scrollbar-thumb {
-  background: #000;
+  background: #eee;
   border-radius: 10px;
+  transition: all .4s linear
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #bbb;
 }
 ::-webkit-scrollbar {
   width: 10px;

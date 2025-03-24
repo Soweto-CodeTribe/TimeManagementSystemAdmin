@@ -222,7 +222,7 @@ const SessionMonitoring = () => {
             <p className="error-message">{error}</p>
           </div>
         ) : reports.length === 0 ? (
-          <div className="no-data-container">
+          <div className="noDataContainer">
             <Info size={48} />
             <h3>No Attendance Records</h3>
             <p>

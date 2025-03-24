@@ -1,8 +1,8 @@
-// In your app initialization file (e.g., index.js or App.js)
-import { initializeApp } from "firebase/app";
-import { getMessaging, getToken, onMessage } from "firebase/messaging";
+/* eslint-disable no-undef */
+// public/firebase-messaging-sw.js
+importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js');
+importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js');
 
-// Firebase config (same as in your service worker)
 const firebaseConfig = {
   apiKey: "AIzaSyCltEFK2aUwxWcIndfvq7UBaS90S_MaQso",
   authDomain: "backend-120a2.firebaseapp.com",
@@ -14,30 +14,15 @@ const firebaseConfig = {
   databaseURL: "https://backend-120a2-default-rtdb.firebaseio.com",
 };
 
-const app = initializeApp(firebaseConfig);
-const messaging = getMessaging(app);
-
-// Request permission and get token
-export const requestNotificationPermission = async () => {
-  try {
-    const permission = await Notification.requestPermission();
-    if (permission === "granted") {
-      // Get token and save it (you might want to store this in your backend)
-      const token = await getToken(messaging, {
-        vapidKey: "YOUR_VAPID_KEY_HERE" // Get this from Firebase console
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    try {
+      const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
+        scope: '/',
       });
-      console.log("Notification token:", token);
-      return token;
+      console.log('Service Worker Registered:', registration);
+    } catch (error) {
+      console.error('Failed to register service worker:', error);
     }
-  } catch (error) {
-    console.error("Notification permission error:", error);
-  }
-};
-
-// Handle foreground messages
-export const setupForegroundNotifications = (callback) => {
-  return onMessage(messaging, (payload) => {
-    console.log("Foreground message received:", payload);
-    callback(payload);
   });
-};
+}

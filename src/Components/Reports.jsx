@@ -29,13 +29,11 @@ const ReportsScreen = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [itemsPerPage] = useState(10);
 
-  // State for selected trainee (Fixes the ReferenceError)
+  // State for selected trainee
   const [selectedTrainee, setSelectedTrainee] = useState(null);
 
-  // Dummy Stats Fallback
-  const dummyStats = {
-    
-  };
+  // Computed statistics from all reports (not just paginated ones)
+  const [allReports, setAllReports] = useState([]);
 
   // Debounce Logic
   useEffect(() => {
@@ -48,7 +46,56 @@ const ReportsScreen = () => {
   // Fetch Data from API
   useEffect(() => {
     fetchData(currentPage);
+    // Fetch all reports for accurate statistics once on component mount
+    if (allReports.length === 0) {
+      fetchAllReportsForStats();
+    }
   }, [token, currentPage, itemsPerPage, debouncedSearchTerm, filterStatus, filterDate]);
+
+  // Function to fetch all reports for accurate statistics calculation
+  const fetchAllReportsForStats = async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}api/super-admin/daily`, {
+        params: {
+          limit: 1000, // Fetch a large number to get most/all reports
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      if (response.data && response.data.reports) {
+        setAllReports(response.data.reports);
+      }
+    } catch (err) {
+      console.error("Error fetching all reports for stats:", err);
+      // This is a silent failure - we'll still try to calculate stats from paginated data
+    }
+  };
+
+  // Calculate metrics dynamically based on available reports
+  const calculateMetrics = () => {
+    // Use all reports if available, otherwise use current page reports
+    const dataSource = allReports.length > 0 ? allReports : reports;
+    
+    // If we have API-provided summary, use it
+    if (summaryData && Object.keys(summaryData).length > 0) {
+      return {
+        totalReports: summaryData.totalReports || dataSource.length,
+        resolvedReports: summaryData.resolvedReports || dataSource.filter(r => r.status?.toLowerCase() === 'resolved').length,
+        pendingReports: summaryData.pendingReports || dataSource.filter(r => r.status?.toLowerCase() === 'pending').length,
+        rejectedReports: summaryData.rejectedReports || dataSource.filter(r => r.status?.toLowerCase() === 'rejected').length
+      };
+    }
+    
+    // Otherwise calculate from available data
+    return {
+      totalReports: dataSource.length,
+      resolvedReports: dataSource.filter(r => r.status?.toLowerCase() === 'resolved').length,
+      pendingReports: dataSource.filter(r => r.status?.toLowerCase() === 'pending').length,
+      rejectedReports: dataSource.filter(r => r.status?.toLowerCase() === 'rejected').length
+    };
+  };
 
   const fetchData = async (page = 1) => {
     setIsLoading(true);
@@ -125,6 +172,9 @@ const ReportsScreen = () => {
     return pageNumbers;
   };
 
+  // Get current metrics
+  const metrics = calculateMetrics();
+
   // Loading State
   if (isLoading) return <DataLoader />;
 
@@ -139,10 +189,10 @@ const ReportsScreen = () => {
       {/* Metrics Grid */}
       <div className="metrics-grid">
         {[
-          { label: "Total Reports", value: summaryData?.totalReports || dummyStats.totalReports, color: "blue" },
-          { label: "Resolved", value: summaryData?.resolvedReports || dummyStats.resolvedReports, color: "green" },
-          { label: "Pending", value: summaryData?.pendingReports || dummyStats.pendingReports, color: "yellow" },
-          { label: "Rejected", value: summaryData?.rejectedReports || dummyStats.rejectedReports, color: "red" },
+          { label: "Total Reports", value: metrics.totalReports, color: "blue" },
+          { label: "Resolved", value: metrics.resolvedReports, color: "green" },
+          { label: "Pending", value: metrics.pendingReports, color: "yellow" },
+          { label: "Rejected", value: metrics.rejectedReports, color: "red" },
         ].map((metric, index) => (
           <div className={`metric-card ${metric.color}`} key={index}>
             <div className="metric-header">
@@ -151,7 +201,7 @@ const ReportsScreen = () => {
               </div>
               <span className="metric-label">{metric.label}</span>
             </div>
-            <div className={`metric-value ${metric.color}`}>{metric.value || 0}</div>
+            <div className={`metric-value ${metric.color}`}>{metric.value}</div>
           </div>
         ))}
       </div>

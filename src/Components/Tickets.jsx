@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import DataLoader from './dataLoader';
 import './styling/Tickets.css'; // Updated CSS file with prefixed class names
 import axios from 'axios';
+import { Search, RotateCcw  } from 'lucide-react'
 
 const Tickets = () => {
   const [tickets, setTickets] = useState([]);
@@ -505,7 +506,7 @@ const Tickets = () => {
           <h3 className="tickets-table-title">Support Tickets</h3>
           <div className="tickets-table-actions">
             <div className="tickets-search-wrapper">
-              <span className="tickets-search-icon">🔍</span>
+            <Search className="search-icon" />
               <input
                 type="text"
                 className="tickets-search-input"
@@ -514,10 +515,10 @@ const Tickets = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <button className="tickets-btn" onClick={() => fetchTickets()}>
-              <span className="tickets-btn-icon">🔄</span>
+            {/* <button className="tickets-btn" onClick={() => fetchTickets()}>
+              <RotateCcw />
               Refresh
-            </button>
+            </button> */}
           </div>
         </div>
         <div className="tickets-table-wrapper">

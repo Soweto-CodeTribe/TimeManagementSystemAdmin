@@ -1,4 +1,4 @@
-import React from 'react';
+/* eslint-disable react/prop-types */
 import { AiOutlineClose } from 'react-icons/ai'; // Close icon
 import { BiExport } from 'react-icons/bi'; // Export icon
 import { MdDelete, MdVisibility } from 'react-icons/md'; // View and delete icons
@@ -22,7 +22,7 @@ const Modal = ({
 
     return (
         <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modalContent" onClick={(e) => e.stopPropagation()}>
                 <button className="close-button" onClick={onClose}>
                     <AiOutlineClose />
                 </button>

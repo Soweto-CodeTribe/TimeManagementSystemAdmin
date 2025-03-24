@@ -11,7 +11,7 @@
     z-index: 1000; /* Ensure modal is above other content */
 }
 
-.modal-content {
+.modalContent {
     background: white;
     padding: 20px;
     border-radius: 8px;

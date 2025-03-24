@@ -25,7 +25,6 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  margin-bottom: 32px;
 }
 
 @media (max-width: 768px) {
@@ -386,4 +385,10 @@ border-color: #000000;
   font-size: 14px;
   border: 1px solid #ddd;
   border-radius: 4px;
+}
+.noDataContainer{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
