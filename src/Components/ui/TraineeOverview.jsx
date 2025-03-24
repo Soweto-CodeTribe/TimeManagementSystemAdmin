@@ -1,26 +1,50 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { initializeSocket, subscribeToNotifications, subscribeToStatusChanges } from "../../utils/socketClient";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import '../styling/TraineeOverview.css'
 
 const ITEMS_PER_PAGE = 5;
+const API_BASE_URL = "https://timemanagementsystemserver.onrender.com";
+// const API_BASE_URL2 = "http://localhost:6070";
 
 const TraineeOverview = ({ token }) => {
   const [overviewData, setOverviewData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [selectedTrainee, setSelectedTrainee] = useState(null);
+  const [notification, setNotification] = useState({ message: "" });
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [showSuspendModal, setShowSuspendModal] = useState(false);
+  const [suspensionData, setSuspensionData] = useState({ days: 7, reason: "" });
 
-  // Fetch trainee overview data
+  useEffect(() => {
+    if (token) {
+      initializeSocket(token);
+
+      const unsubscribeNotifications = subscribeToNotifications((data) => {
+        toast.info(`New Notification: ${data.message}`);
+      });
+
+      const unsubscribeStatusChanges = subscribeToStatusChanges((data) => {
+        toast.info(`Status Change: ${data.message}`);
+        fetchOverviewData();
+      });
+
+      return () => {
+        unsubscribeNotifications();
+        unsubscribeStatusChanges();
+      };
+    }
+  }, [token]);
+
   const fetchOverviewData = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(
-        "https://timemanagementsystemserver.onrender.com/api/trainee-overview",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await axios.get(`${API_BASE_URL}/api/trainee-overview?page=${currentPage}&limit=${ITEMS_PER_PAGE}`, {
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      });
       const { programStats } = response.data;
       if (Array.isArray(programStats)) {
         setOverviewData(programStats);
@@ -34,7 +58,64 @@ const TraineeOverview = ({ token }) => {
     }
   };
 
-  // Pagination logic
+  const handleAxiosError = (error, defaultMessage) => {
+    if (error.response && error.response.data && error.response.data.msg) {
+      toast.error(error.response.data.msg);
+    } else {
+      toast.error(defaultMessage);
+    }
+  };
+
+  const suspendTrainee = async () => {
+    try {
+      await axios.post(
+        `${API_BASE_URL}/api/trainee-actions/suspend`,
+        { traineeId: selectedTrainee.id, days: suspensionData.days },
+        { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
+      );
+      toast.success("Trainee suspended successfully!");
+      setShowSuspendModal(false);
+      setSuspensionData({ days: 7, reason: "" });
+      fetchOverviewData();
+    } catch (error) {
+      handleAxiosError(error, "Failed to suspend trainee");
+    }
+  };
+
+  const reinstateTrainee = async (traineeId) => {
+    if (!confirm("Are you sure you want to reinstate this trainee?")) return;
+    try {
+      await axios.post(
+        `${API_BASE_URL}/api/trainee-actions/reinstate`,
+        { traineeId, notes: "Reinstated by administrator" },
+        { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
+      );
+      toast.success("Trainee reinstated successfully!");
+      fetchOverviewData();
+    } catch (error) {
+      handleAxiosError(error, "Failed to reinstate trainee");
+    }
+  };
+
+  const sendNotification = async () => {
+    if (!notification.message.trim()) {
+      toast.error("Notification message cannot be empty.");
+      return;
+    }
+    try {
+      await axios.post(
+        `${API_BASE_URL}/api/trainee-actions/notify`,
+        { traineeId: selectedTrainee.id, message: notification.message },
+        { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
+      );
+      toast.success("Notification sent successfully!");
+      setShowNotificationModal(false);
+      setNotification({ message: "" });
+    } catch (error) {
+      handleAxiosError(error, "Failed to send notification");
+    }
+  };
+
   const indexOfLastItem = currentPage * ITEMS_PER_PAGE;
   const indexOfFirstItem = indexOfLastItem - ITEMS_PER_PAGE;
   const currentItems = overviewData.slice(indexOfFirstItem, indexOfLastItem);
@@ -44,16 +125,15 @@ const TraineeOverview = ({ token }) => {
     setCurrentPage(pageNumber);
   };
 
-  // Fetch data on component mount
-  React.useEffect(() => {
+  useEffect(() => {
     fetchOverviewData();
-  }, []);
+  }, [currentPage]);
 
-  // If loading, show loader
   if (loading) return <div>Loading trainee overview...</div>;
 
   return (
     <div className="overview-card">
+      <ToastContainer style={{zIndex: '99999'}} />
       <div className="card-header">
         <h4>Trainee Management Overview</h4>
       </div>
@@ -66,7 +146,7 @@ const TraineeOverview = ({ token }) => {
               <th>Email</th>
               <th>Phone</th>
               <th>Attendance Rate</th>
-              {/* <th>Level</th> */}
+              {/* <th>Status</th> */}
               <th>Actions</th>
             </tr>
           </thead>
@@ -77,23 +157,32 @@ const TraineeOverview = ({ token }) => {
                 <td>{trainee.traineeLocation}</td>
                 <td>{trainee.traineeEmail}</td>
                 <td>{trainee.traineePhoneNumber}</td>
-                <td>{trainee.attendancePercentage}</td>
-                {/* <td>{trainee.attendanceLevel}</td> */}
+                <td>{trainee.attendancePercentage}%</td>
+                {/* <td>{trainee.status}</td> */}
                 <td>
-                  {/* Take Action Button with Dropdown */}
                   <div className="action-dropdown">
-                    <button className="action-button">Take Action</button>
+                    <button className="action-btn">Take Action</button>
                     <div className="dropdown-content">
-                      {/* Example actions */}
-                      <button onClick={() => alert("Send Notification")}>
+                      <button
+                        onClick={() => {
+                          setSelectedTrainee(trainee);
+                          setShowNotificationModal(true);
+                        }}
+                      >
                         Send Notification
                       </button>
-                      <button onClick={() => alert("Suspend for 7 Days")}>
-                        Suspend for 7 Days
-                      </button>
-                      <button onClick={() => alert("Reinstate Trainee")}>
-                        Reinstate Trainee
-                      </button>
+                      {trainee.status !== "suspended" ? (
+                        <button
+                          onClick={() => {
+                            setSelectedTrainee(trainee);
+                            setShowSuspendModal(true);
+                          }}
+                        >
+                          Suspend Trainee
+                        </button>
+                      ) : (
+                        <button onClick={() => reinstateTrainee(trainee.id)}>Reinstate Trainee</button>
+                      )}
                     </div>
                   </div>
                 </td>
@@ -101,7 +190,6 @@ const TraineeOverview = ({ token }) => {
             ))}
           </tbody>
         </table>
-        {/* Pagination Controls */}
         <div className="pagination">
           {Array.from({ length: totalPages }, (_, index) => (
             <button
@@ -114,6 +202,63 @@ const TraineeOverview = ({ token }) => {
           ))}
         </div>
       </div>
+      {showNotificationModal && (
+        <div className="action-modal">
+          <div className="action-modal-content">
+            <h3>Send Notification to {selectedTrainee?.traineeName}</h3>
+            <textarea
+              value={notification.message}
+              onChange={(e) => setNotification({ ...notification, message: e.target.value })}
+              placeholder="Enter notification message"
+              rows={5}
+              cols={56}
+              className="action-textarea"
+            />
+            <div className="action-modal-actions">
+              <button onClick={() => setShowNotificationModal(false)}>Cancel</button>
+              <button onClick={sendNotification}>Send</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showSuspendModal && (
+        <div className="action-modal">
+          <div className="action-modal-content">
+            <h3>Suspend {selectedTrainee?.traineeName}</h3>
+            <div className="form-field">
+              <label>Days:</label>
+              <input
+                type="number"
+                value={suspensionData.days}
+                onChange={(e) => {
+                  const days = parseInt(e.target.value, 10);
+                  if (days >= 1 && days <= 30) {
+                    setSuspensionData({ ...suspensionData, days });
+                  } else {
+                    toast.error("Days must be between 1 and 30.");
+                  }
+                }}
+                min={1}
+                max={30}
+              />
+            </div>
+            <div className="form-field">
+              <label>Reason:</label>
+              <textarea
+                value={suspensionData.reason}
+                onChange={(e) => setSuspensionData({ ...suspensionData, reason: e.target.value })}
+                placeholder="Enter reason for suspension"
+                rows={3}
+                className='action-textarea'
+              />
+            </div>
+            <div className="action-modal-actions">
+              <button onClick={() => setShowSuspendModal(false)}>Cancel</button>
+              <button onClick={suspendTrainee}>Suspend</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

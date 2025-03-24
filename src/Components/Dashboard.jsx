@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Users, UserCheck, BarChart2, AlertCircle } from "lucide-react";
+import { Users, UserCheck, BarChart2, AlertCircle, Info, GraduationCap, TriangleAlert, ChartColumnBig } from "lucide-react";
 import {
   Area,
   AreaChart,
@@ -17,6 +17,7 @@ import fetchSessions from "../utils/fetchSessions";
 import TraineeOverview from "./ui/TraineeOverview";
 import "./styling/Dashboard.css";
 import useFacilitatorCount from "../utils/fetchFacilitators";
+import useAbsenceCount from "./hooks/useAbsenceCount";
 
 function Dashboard() {
   // Get user details from localStorage
@@ -35,7 +36,6 @@ function Dashboard() {
   });
   const [attendanceData, setAttendanceData] = useState([]);
   const [facilitatorStats, setFacilitatorStats] = useState([]);
-  const [absentCount, setAbsentCount] = useState(0);
 
   // API configuration
   const BASE_URL = "https://timemanagementsystemserver.onrender.com";
@@ -176,35 +176,37 @@ function Dashboard() {
     }
   };
 
-  const fetchAbsentData = async () => {
-    try {
-      const response = await axios.get(
-        `${BASE_URL}/api/session/daily-report?pages=2&limit=4`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+  // const fetchAbsentData = async () => {
+  //   try {
+  //     const response = await axios.get(
+  //       `${BASE_URL}/api/session/daily-report?pages=2&limit=4`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //           "Content-Type": "application/json",
+  //         },
+  //       }
+  //     );
 
-      if (response.data && response.data.summary) {
-        const { absentCount } = response.data.summary;
-        // console.log("Fetched Absent Count:", absentCount);
-        setAbsentCount(absentCount);
-      } else {
-        console.error("Invalid response format for absent data");
-        setAbsentCount(0);
-      }
-    } catch (error) {
-      console.error("Error fetching absent data:", error);
-      setAbsentCount(0);
-    }
-  };
+  //     if (response.data && response.data.summary) {
+  //       const { absentCount } = response.data.summary;
+  //       // console.log("Fetched Absent Count:", absentCount);
+  //       setAbsentCount(absentCount);
+  //     } else {
+  //       console.error("Invalid response format for absent data");
+  //       setAbsentCount(0);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching absent data:", error);
+  //     setAbsentCount(0);
+  //   }
+  // };
 
   // Use the useFacilitatorCount hook
   const { facilitatorCount, loading: facilitatorsLoading, error: facilitatorsError } =
     useFacilitatorCount();
+
+    const { absentCount } = useAbsenceCount();
 
   // Update dashboardStats with facilitator count
   useEffect(() => {
@@ -226,7 +228,6 @@ function Dashboard() {
           fetchFacilitatorCheckIns(),
           fetchGraphData(),
           fetchFacilitators(),
-          fetchAbsentData(),
         ]);
       } catch (error) {
         console.error("Error loading dashboard data:", error);
@@ -255,9 +256,9 @@ function Dashboard() {
       ? attendanceData
       : [
           { name: "Mon", value: 100 },
-          { name: "Tue", value: 0 },
+          { name: "Tue", value: 10 },
           { name: "Wed", value: 100 },
-          { name: "Thu", value: 0 },
+          { name: "Thu", value: 20 },
           { name: "Fri", value: 100 },
         ];
 
@@ -274,8 +275,12 @@ function Dashboard() {
       <div className="stats-container">
         <div className="stat-card">
           <div className="stat-header">
+            
+            <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
+            <Users className="stat-icon" style={{color: '#3A86FF', background: '#3A86FF33', padding: '4px', borderRadius: '50%', height: '30px', width: '30px'}} />
             <h4>Total Trainees</h4>
-            <Users className="stat-icon" />
+            </div>
+            <AlertCircle className="stat-icon" style={{color: '#ccc'}}/>
           </div>
           <div className="stat-content">
             <div className="stat-value">{dashboardStats.totalTrainees}</div>
@@ -283,18 +288,31 @@ function Dashboard() {
         </div>
 
         {role === "super_admin" && (
-          <div className="stat-card">
-            <div className="stat-header">
-              <h4>Total Facilitators</h4>
-              <UserCheck className="stat-icon" />
-            </div>
-            <div className="stat-content">
-              <div className="stat-value">{facilitatorStats}</div>
-            </div>
-          </div>
+          // <div className="stat-card">
+          //   <div className="stat-header">
+          //     <h4>Total Facilitators</h4>
+          //     <UserCheck className="stat-icon" />
+          //   </div>
+          //   <div className="stat-content">
+          //     <div className="stat-value">{facilitatorStats}</div>
+          //   </div>
+          // </div>
+                  <div className="stat-card">
+                  <div className="stat-header">
+                    
+                    <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
+                    <GraduationCap  className="stat-icon" style={{color: '#72FF3A', background: '#72FF3A33', padding: '4px', borderRadius: '50%', height: '30px', width: '30px'}} />
+                    <h4>Total Facilitators</h4>
+                    </div>
+                    <AlertCircle className="stat-icon" style={{color: '#ccc'}}/>
+                  </div>
+                  <div className="stat-content">
+                  <div className="stat-value">{facilitatorStats}</div>
+                  </div>
+                </div>
         )}
 
-        <div className="stat-card">
+        {/* <div className="stat-card">
           <div className="stat-header">
             <h4>Daily Attendance Rate</h4>
             <BarChart2 className="stat-icon" />
@@ -302,18 +320,49 @@ function Dashboard() {
           <div className="stat-content">
             <div className="stat-value">{dashboardStats.attendancePercentage}</div>
           </div>
-        </div>
+        </div> */}
+
+        <div className="stat-card">
+                  <div className="stat-header">
+                    
+                    <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
+                    <ChartColumnBig  className="stat-icon" style={{color: '#494FBF', background: '#494FBF33', padding: '4px', borderRadius: '50%', height: '30px', width: '30px'}} />
+                    <h4>Daily Attendance Rate</h4>
+                    </div>
+                    <AlertCircle className="stat-icon" style={{color: '#ccc'}}/>
+                  </div>
+                  <div className="stat-content">
+                  <div className="stat-value">{dashboardStats.attendancePercentage}</div>
+                  </div>
+                </div>
 
         <div className="stat-card">
           <div className="stat-header">
-            <h4>Absent</h4>
-            <AlertCircle className="stat-icon" />
+          <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
+          <TriangleAlert  className="stat-icon" style={{color: '#FFC300', background: '#FFC30033', padding: '4px', borderRadius: '50%', height: '30px', width: '30px'}} />
+          <h4>Absent Trainees</h4>
+          </div>
+          <AlertCircle className="stat-icon" style={{color: '#ccc'}}/>
           </div>
           <div className="stat-content">
             <div className="stat-value">{absentCount}</div>
           </div>
         </div>
       </div>
+
+      {/* <div className="stat-card">
+                  <div className="stat-header">
+                    
+                    <div style={{display: 'flex', gap: '10px'}}>
+                    <Users className="stat-icon" style={{color: '#3A86FF', background: '#3A86FF33', padding: '4px', borderRadius: '50%', height: '30px', width: '30px'}} />
+                    <h4>Daily Attendance Rate</h4>
+                    </div>
+                    <AlertCircle className="stat-icon" style={{color: '#ccc'}}/>
+                  </div>
+                  <div className="stat-content">
+                  <div className="stat-value">{dashboardStats.attendancePercentage}</div>
+                  </div>
+                </div> */}
 
       {/* Charts Section */}
       <div className="chart-grid">
@@ -356,11 +405,11 @@ function Dashboard() {
         </div>
 
         {role !== "super_admin" && checkIns.length > 0 && (
-          <div className="check-ins-card-content">
+          <div className="check-ins-card-contents">
             <div className="card-header">
               <h4>Check-ins for today</h4>
             </div>
-            <div className="card-content">
+            <div className="checkIns-card-content">
               <table className="check-ins-table">
                 <tbody>
                   {checkIns.map((checkIn, index) => (
@@ -381,6 +430,7 @@ function Dashboard() {
               <h4>Check-ins for today</h4>
             </div>
             <div className="card-content">
+              <Info size={48} />
               <p className="no-data">No check-ins recorded for today</p>
             </div>
           </div>

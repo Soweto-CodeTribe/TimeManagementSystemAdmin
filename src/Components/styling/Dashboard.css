@@ -28,7 +28,8 @@
   background-color: #fff;
   padding: 15px;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ddd;
+  /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
 }
 
 .stat-header {
@@ -39,15 +40,15 @@
 }
 
 .stat-header h4 {
-  font-size: 16px;
+  font-size: 13px;
   color: #555;
 }
 
-.stat-icon {
+/* .stat-icon {
   width: 24px;
   height: 24px;
-  color: #82cd47;
-}
+  color: #3A86FF33;
+} */
 
 .stat-content {
   text-align: center;
@@ -83,6 +84,12 @@
 .card-content {
   padding: 15px;
 }
+.checkIns-card-content {
+  padding: 15px;
+  height: 230px;
+  overflow-y: scroll;
+}
+
 
 .check-ins-table {
   width: 100%;
@@ -214,16 +221,13 @@
 /* Enhanced Trainee Overview Styling */
 .overview-card {
   background-color: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  /* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); */
   margin-bottom: 24px;
   overflow: hidden;
   transition: all 0.3s ease;
 }
 
-.overview-card:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-}
 
 .overview-card .card-header {
   background-color: #f8f9fa;
@@ -377,3 +381,6 @@
   color: white;
 }
  */
+
+
+ 

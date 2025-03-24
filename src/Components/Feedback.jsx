@@ -7,7 +7,7 @@ function FeedbackPage() {
   const [feedback, setFeedback] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [newFeedback, setNewFeedback] = useState("");
+  // const [newFeedback, setNewFeedback] = useState("");
   const token = useSelector((state) => state.auth.token);
 
   useEffect(() => {
@@ -47,34 +47,6 @@ function FeedbackPage() {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
-  const handleSubmitFeedback = async (e) => {
-    e.preventDefault();
-    if (!newFeedback.trim()) return;
-
-    try {
-      const response = await axios.post(
-        'https://timemanagementsystemserver.onrender.com/api/add-user/addFeedBack',
-        { feedbackText: newFeedback },
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (response.data.success) {
-        setFeedback([response.data.feedback, ...feedback]);
-        setNewFeedback("");
-      } else {
-        throw new Error("Failed to submit feedback");
-      }
-    } catch (err) {
-      alert("Error submitting feedback. Please try again later.");
-      console.error("API Error:", err.message);
-    }
-  };
-
   if (isLoading) return <LoadingSkeleton />;
   if (error) return <ErrorState error={error} />;
 
@@ -83,15 +55,6 @@ function FeedbackPage() {
       {/* <h2 className="feedback-title">Feedback</h2> */}
 
       {/* Feedback Submission Form */}
-      <form onSubmit={handleSubmitFeedback} className="feedback-form">
-        <textarea
-          value={newFeedback}
-          onChange={(e) => setNewFeedback(e.target.value)}
-          placeholder="Share your feedback..."
-          required
-        />
-        <button type="submit">Submit Feedback</button>
-      </form>
 
       {/* Feedback Header */}
       <div className="feedback-header-main">
@@ -104,11 +67,11 @@ function FeedbackPage() {
         <EmptyState />
       ) : (
         <div className="feedback-grid">
-          {feedback.map((item, index) => (
+          {feedback.map((item) => (
             <div key={item.id} className="feedback-card">
               <div className="feedback-header">
                 <div className="anonymous-info">
-                  <div className="anonymous-badge">Anonymous #{index + 1}</div>
+                  <div className="anonymous-badge">{item.fullName}</div>
                   <p className="feedback-date">{formatDate(item.createdAt)}</p>
                 </div>
               </div>

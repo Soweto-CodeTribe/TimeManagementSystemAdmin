@@ -82,10 +82,15 @@ const saveTokenToDatabase = async (token) => {
     // Example: Save to Firestore under current user
     const user = auth.currentUser;
     if (user) {
-      await setDoc(doc(db, "deviceTokens", user.uid), {
-        fcmToken: token,
-        tokenLastUpdated: serverTimestamp()
-      }, { merge: true });
+      const traineeRef = doc(db, "trainees", user.uid); // Assuming user.uid matches trainee ID
+      await setDoc(
+        traineeRef,
+        {
+          fcmTokens: admin.firestore.FieldValue.arrayUnion(token),
+          tokenLastUpdated: serverTimestamp(),
+        },
+        { merge: true }
+      );
     }
   } catch (error) {
     console.error(":x: Error saving token:", error);
@@ -96,7 +101,6 @@ const saveTokenToDatabase = async (token) => {
 * @returns {Promise} Resolves with the message payload
 */
 export const onForegroundMessage = () => {
-  // eslint-disable-next-line no-async-promise-executor
   return new Promise(async (resolve) => {
     try {
       // Ensure messaging is initialized
@@ -106,6 +110,7 @@ export const onForegroundMessage = () => {
       // Set up message handler
       onMessage(messagingInstance, (payload) => {
         console.log(":envelope_with_arrow: Foreground Message Received:", payload);
+        alert(`Push Notification: ${payload.notification.title}\n${payload.notification.body}`);
         resolve(payload);
       });
     } catch (error) {
@@ -115,11 +120,15 @@ export const onForegroundMessage = () => {
 };
 // Initialize Firebase Messaging on module load
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    initializeMessaging().then(() => {
-      console.log(":rocket: Firebase messaging ready");
-      requestFCMToken();
-    });
+  window.addEventListener('load', async () => {
+    try {
+      const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
+        scope: '/',
+      });
+      console.log('Service Worker Registered:', registration);
+    } catch (error) {
+      console.error('Failed to register service worker:', error);
+    }
   });
 }
 // Export Firebase Timestamp

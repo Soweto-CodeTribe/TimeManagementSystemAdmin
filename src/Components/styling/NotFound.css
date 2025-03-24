@@ -31,13 +31,12 @@
   }
   
   .error-code {
-    font-size: 4rem;
+    /* font-size: 4rem; */
     color: #dc3545;
     margin-bottom: 0;
   }
   
   .error-message {
-    font-size: 1.5rem;
     color: #343a40;
     margin-bottom: 20px;
   }

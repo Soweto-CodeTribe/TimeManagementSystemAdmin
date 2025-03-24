@@ -431,7 +431,7 @@ useEffect(() => {
       </div> 
     );
   }
-  
+
   // Determine current screen name for Navbar
   const getScreenName = (path) => {
     switch (path) {
@@ -513,10 +513,11 @@ useEffect(() => {
                     <Route path="/reports" element={<Reports />} />
                     <Route path="/settings" element={<SystemSettings />} />
                     <Route path="/AdminProfile" element={<AdminProfile />} />
+                    <Route path="/notifications" element={<Notifications />} />
                     <Route path="/alerts" element={<Alerts />} />
                     <Route path="/audit-logs" element={<AuditLogs />} />
                     <Route path="/Tickets" element={<Tickets />} />
-                    <Route path="/notifications" element={<NotificationsPage />} />
+                    {/* <Route path="/notifications" element={<NotificationsPage />} /> */}
                     <Route path="/Feedback" element={<Feedback />} />
                     <Route path="/EventManagement" element={<EventManagement/>} />
                     <Route path="/logout" element={<Logout />} />

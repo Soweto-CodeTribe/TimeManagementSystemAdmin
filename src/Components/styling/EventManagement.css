@@ -1,0 +1,599 @@
+/* Main container styles */
+.event-table-container {
+  width: 100%;
+  margin: 0 auto;
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+  position: relative;
+}
+
+.event-table-header {
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.event-table-header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.87);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.event-icon {
+  display: inline-block;
+}
+
+/* Add Event Button */
+.add-event-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #8CC63F;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s linear;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.add-event-button:hover {
+  background-color: #8CC63Fae;
+}
+
+.add-event-button:active {
+  background-color: #0d47a1;
+}
+
+/* Accordion container */
+.accordion {
+  width: 100%;
+  /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); */
+  /* background-color: #fb1d1d; */
+  overflow: hidden;
+}
+
+/* Accordion item */
+.accordion-item {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+
+.accordion-item:last-child {
+  border-bottom: none;
+}
+
+/* Accordion header */
+.accordion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  user-select: none;
+  position: relative;
+}
+
+.accordion-header:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.accordion-header-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.accordion-title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.87);
+  margin-right: 16px;
+}
+
+.accordion-subtitle {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 0.7rem;
+  margin-top: 4px;
+}
+
+/* Event actions */
+.event-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.action-button {
+  background: none;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.action-button:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.edit-button:hover {
+  color: #1976d2;
+}
+
+.delete-button:hover {
+  color: #d32f2f;
+}
+
+/* Accordion icon */
+.accordion-icon {
+  color: rgba(0, 0, 0, 0.54);
+  transition: transform 0.3s ease;
+  margin-left: 8px;
+}
+
+.accordion-item.expanded .accordion-icon {
+  transform: rotate(180deg);
+}
+
+/* Accordion details */
+.accordion-details {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+  opacity: 0;
+}
+
+.accordion-item.expanded .accordion-details {
+  max-height: 2000px; /* Adjust based on your content */
+  padding: 8px 24px 24px;
+  opacity: 1;
+  transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.3s ease 0.1s;
+}
+
+.accordion-content {
+  color: rgba(0, 0, 0, 0.7);
+  font-size: 0.7rem;
+  line-height: 1.5;
+}
+
+/* Event details section */
+.event-details {
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.event-detail {
+  margin-bottom: 8px;
+}
+
+.event-detail:last-child {
+  margin-bottom: 0;
+}
+
+.guest-list-title {
+  font-weight: 500;
+  margin: 16px 0;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+/* Guest table styles */
+.guest-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  margin-top: 8px;
+}
+
+.guest-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.guest-table th {
+  background-color: #f5f5f5;
+  color: rgba(0, 0, 0, 0.7);
+  font-weight: 500;
+  text-align: left;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.guest-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  white-space: nowrap;
+}
+
+.guest-table tr:last-child td {
+  border-bottom: none;
+}
+
+.guest-table tr:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.no-guests {
+  padding: 24px;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.6);
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-content {
+  background-color: white;
+  border-radius: 4px;
+  width: 100%;
+  /* max-width: 500px; */
+  height: 100%;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  animation: slideIn 0.3s ease;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.modal-header h2 {
+  margin: 0;
+  /* font-size: 1.25rem; */
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.modal-close-button {
+  background: none;
+  border: none;
+  color: rgba(0, 0, 0, 0.54);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.modal-close-button:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.modal-form {
+  padding: 24px;
+}
+
+.form-field {
+  margin-bottom: 16px;
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.form-field input,
+.form-field textarea {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: .8rem;
+  outline: none;
+  border: 1px solid rgba(0, 0, 0, 0.23);
+  border-radius: 4px;
+  background-color: transparent;
+  transition: border-color 0.2s ease;
+}
+
+.form-field input:focus,
+.form-field textarea:focus {
+  outline: none;
+  border-color: #8CC63F;
+  box-shadow: 0 0 0 2px #8CC63F33;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.button-primary,
+.button-secondary,
+.button-danger {
+  padding: 8px 16px;
+  font-size: 0.75em;
+  font-weight: 500;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.button-primary {
+  background-color: #1976d2;
+  color: white;
+  border: none;
+}
+
+.button-primary:hover {
+  background-color: #1565c0;
+}
+
+.button-secondary {
+  background-color: transparent;
+  color: #1976d2;
+  border: 1px solid rgba(25, 118, 210, 0.5);
+}
+
+.button-secondary:hover {
+  background-color: rgba(25, 118, 210, 0.04);
+  border-color: #1976d2;
+}
+
+.button-danger {
+  background-color: #d32f2f;
+  color: white;
+  border: none;
+}
+
+.button-danger:hover {
+  background-color: #c62828;
+}
+
+/* Alert dialog */
+.alert-dialog {
+  background-color: white;
+  border-radius: 4px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  animation: slideIn 0.3s ease;
+}
+
+.alert-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.alert-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.alert-content {
+  padding: 24px;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.alert-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+/* Toast notification */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  min-width: 300px;
+  max-width: 400px;
+  background-color: #323232;
+  color: white;
+  border-radius: 4px;
+  padding: 0;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 1100;
+  animation: slideInToast 0.3s ease;
+}
+
+.toast.success {
+  background-color: #43a047;
+}
+
+.toast.error {
+  background-color: #d32f2f;
+}
+
+.toast-content {
+  padding: 14px 16px;
+  flex: 1;
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  color: white;
+  padding: 14px 16px;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.toast-close:hover {
+  opacity: 1;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInToast {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Loading and error states */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  color: rgba(0, 0, 0, 0.6);
+  font-weight: 500;
+}
+
+.loading:before {
+  content: "";
+  width: 24px;
+  height: 24px;
+  margin-right: 12px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-top-color: #1976d2;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.error,
+.error-message {
+  padding: 16px;
+  background-color: #ffebee;
+  color: #d32f2f;
+  border-radius: 4px;
+  margin: 16px 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .event-table-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .add-event-button {
+    align-self: flex-start;
+  }
+
+  .accordion-header {
+    padding: 12px 16px;
+  }
+
+  .accordion-item.expanded .accordion-details {
+    padding: 8px 16px 16px;
+  }
+
+  .guest-table th,
+  .guest-table td {
+    padding: 8px 12px;
+  }
+
+  .modal-content,
+  .alert-dialog {
+    width: 90%;
+  }
+
+  .toast {
+    min-width: auto;
+    max-width: 90%;
+    left: 5%;
+    right: 5%;
+  }
+}
+
+@media (max-width: 600px) {
+  .accordion-header-content {
+    width: 70%;
+  }
+
+  .event-actions {
+    position: relative;
+    z-index: 2;
+  }
+
+  .accordion-title {
+    width: 100%;
+  }
+
+  .modal-actions,
+  .alert-actions {
+    flex-direction: column;
+  }
+
+  .button-primary,
+  .button-secondary,
+  .button-danger {
+    width: 100%;
+    padding: 12px;
+  }
+}
+

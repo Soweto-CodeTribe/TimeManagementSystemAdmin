@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
 import axios from 'axios';
 import './styling/ManageTrainees.css';
 
 const ManageTrainees = () => {
+  const navigate = useNavigate(); // Initialize navigate
   const [trainees, setTrainees] = useState([]);
-  const [filteredTrainees, setFilteredTrainees] = useState([]);
   const [loading, setLoading] = useState(false);
   const [programStartDate, setProgramStartDate] = useState('');
   const [programEndDate, setProgramEndDate] = useState('');
   const [selectedTrainees, setSelectedTrainees] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [message, setMessage] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
   const API_BASE_URL = 'https://timemanagementsystemserver.onrender.com/api/trainees';
 
   // Fetch all trainees when component mounts
@@ -19,28 +19,13 @@ const ManageTrainees = () => {
     fetchTrainees();
   }, []);
 
-  // Filter trainees based on search term
-  useEffect(() => {
-    if (searchTerm.trim() === '') {
-      setFilteredTrainees(trainees);
-    } else {
-      const filtered = trainees.filter(trainee =>
-        trainee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        trainee.surname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (trainee.traineeId && trainee.traineeId.toString().includes(searchTerm)) ||
-        trainee.id.toString().includes(searchTerm)
-      );
-      setFilteredTrainees(filtered);
-    }
-  }, [searchTerm, trainees]);
-
   const fetchTrainees = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("authToken"); // Changed to exactly your requirement
+      const token = localStorage.getItem("authToken");
 
       // Log the token for debugging
-      console.log("Authorization Token:", token); // Log the token for debugging
+      console.log("Authorization Token:", token);
 
       if (!token) {
         setMessage('Access Denied: No token found. Please log in again.');
@@ -55,17 +40,17 @@ const ManageTrainees = () => {
       });
 
       // Log the fetched trainees data
-      console.log("Trainees Data:", response.data); // Log the trainees data being received
+      console.log("Trainees Data:", response.data);
 
       setTrainees(response.data);
-      setFilteredTrainees(response.data);
+      console.log("Trainees state after fetch:", response.data); // Display the data set to state
     } catch (error) {
+      console.error("Error fetching trainees:", error);
       if (error.response && error.response.status === 401) {
         setMessage('Unauthorized: Please check your credentials and login again.');
       } else {
         setMessage('Failed to fetch trainees: ' + (error.response?.data?.message || error.message));
       }
-      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -74,7 +59,7 @@ const ManageTrainees = () => {
   const handleSelectAll = (e) => {
     const isChecked = e.target.checked;
     setSelectAll(isChecked);
-    setSelectedTrainees(isChecked ? filteredTrainees.map(trainee => trainee.id) : []);
+    setSelectedTrainees(isChecked ? trainees.map(trainee => trainee.id) : []);
   };
 
   const handleTraineeSelect = (traineeId) => {
@@ -83,9 +68,10 @@ const ManageTrainees = () => {
         ? prev.filter(id => id !== traineeId)
         : [...prev, traineeId]
     );
+
     if (selectedTrainees.includes(traineeId)) {
       setSelectAll(false);
-    } else if (selectedTrainees.length + 1 === filteredTrainees.length) {
+    } else if (selectedTrainees.length + 1 === trainees.length) {
       setSelectAll(true);
     }
   };
@@ -99,13 +85,14 @@ const ManageTrainees = () => {
       setMessage('Please select at least one trainee');
       return;
     }
+
     try {
       setLoading(true);
       const token = localStorage.getItem("authToken");
 
       // Log the token and selected trainees for debugging
-      console.log("Authorization Token:", token); // Log the token for debugging
-      console.log("Selected Trainees:", selectedTrainees); // Log the trainees being updated
+      console.log("Authorization Token:", token);
+      console.log("Selected Trainees:", selectedTrainees);
 
       if (!token) {
         setMessage('Access Denied: No token found. Please log in again.');
@@ -128,7 +115,7 @@ const ManageTrainees = () => {
       );
 
       // Log the response data from updating program dates
-      console.log("Response from Setting Dates:", response.data); // Log the response being received
+      console.log("Response from Setting Dates:", response.data);
 
       setMessage(`Successfully updated ${response.data.totalUpdated} trainees`);
       setSelectedTrainees([]);
@@ -142,7 +129,11 @@ const ManageTrainees = () => {
 
   return (
     <div className="program-manager-container">
+      <button className="back-arrow" onClick={() => navigate('/settings')}>
+        ← {/* This can be replaced with an icon if desired */}
+      </button>
       <h2 className="program-title">Manage Trainee Program Dates</h2>
+
       {/* Date Inputs */}
       <div className="date-inputs">
         <div className="date-input-group">
@@ -165,19 +156,7 @@ const ManageTrainees = () => {
           />
         </div>
       </div>
-      {/* Search and Selection Stats */}
-      <div className="search-container">
-        <input
-          type="text"
-          placeholder="Search trainees by name or ID..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="search-input"
-        />
-        <div className="selection-stats">
-          {selectedTrainees.length} of {trainees.length} trainees selected
-        </div>
-      </div>
+
       {/* Trainees Selection */}
       <div className="trainees-selection">
         <div className="select-all-container">
@@ -189,15 +168,16 @@ const ManageTrainees = () => {
             id="select-all-trainees"
           />
           <label htmlFor="select-all-trainees" className="select-all-label">
-            Select All Visible Trainees ({filteredTrainees.length})
+            Select All Trainees ({trainees.length})
           </label>
         </div>
+        
         {loading ? (
           <p className="loading-text">Loading trainees...</p>
         ) : (
           <div className="trainees-list">
-            {filteredTrainees.length > 0 ? (
-              filteredTrainees.map((trainee) => (
+            {trainees.length > 0 ? (
+              trainees.map((trainee) => (
                 <div
                   key={trainee.id}
                   className={`trainee-item ${selectedTrainees.includes(trainee.id) ? 'selected' : ''}`}
@@ -218,18 +198,18 @@ const ManageTrainees = () => {
                 </div>
               ))
             ) : (
-              <p className="no-results">No trainees match your search</p>
+              <p className="no-results">No trainees available</p>
             )}
           </div>
         )}
       </div>
+
       {/* Actions */}
       <div className="actions-container">
         <button
           onClick={() => {
             setSelectedTrainees([]);
             setSelectAll(false);
-            setSearchTerm('');
           }}
           className="clear-button"
           disabled={loading || selectedTrainees.length === 0}
@@ -244,6 +224,7 @@ const ManageTrainees = () => {
           {loading ? 'Updating...' : 'Set Program Dates'}
         </button>
       </div>
+
       {/* Message Display */}
       {message && (
         <div className={`message ${message.includes('Successfully') ? 'success-message' : 'error-message'}`}>

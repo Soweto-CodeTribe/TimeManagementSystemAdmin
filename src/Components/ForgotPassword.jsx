@@ -1,6 +1,9 @@
+/* eslint-disable no-unused-vars */
 import { useState } from 'react';
 import CodeTribeImage from '../assets/CodeTribeImage.png';
 import './styling/forgotPassword.css';
+import { useSelector } from 'react-redux';
+import axios from 'axios';
 
 const ForgotPassword = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -8,6 +11,8 @@ const ForgotPassword = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [notification, setNotification] = useState({ show: false, message: '' });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const token = useSelector((state) => state.auth.token);
   const BASE_URL = 'https://timemanagementsystemserver.onrender.com';

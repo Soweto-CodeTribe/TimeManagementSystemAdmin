@@ -15,6 +15,18 @@ html, body, #root {
   background:#8CC63F;
   color:#f2f2f8;
 }
+::-webkit-scrollbar-thumb {
+  background: #eee;
+  border-radius: 10px;
+  transition: all .4s linear
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #bbb;
+}
+::-webkit-scrollbar {
+  width: 10px;
+}
+
 
 .app-container {
   display: flex;
