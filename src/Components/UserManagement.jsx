@@ -18,79 +18,117 @@ const UserManagement = () => {
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState(null)
   const [feedbackMessage, setFeedbackMessage] = useState("")
+  const token = localStorage.getItem("authToken")
+  const userRole = localStorage.getItem("role") // Fetch user role from localStorage
+  const userLocation = localStorage.getItem("userLocation"); // Assuming you also store location
+
+ 
 
   const fetchData = async () => {
-    const token = localStorage.getItem("authToken")
-    const userRole = localStorage.getItem("userRole") // Fetch user role from localStorage
-    const userLocation = localStorage.getItem("userLocation"); // Assuming you also store location
-
     if (!token) {
-      setFeedbackMessage("No authorization token found. Please log in again.")
-      return
+      setFeedbackMessage("No authorization token found. Please log in again.");
+      return;
     }
-
+ 
     try {
-      const headers = { Authorization: `Bearer ${token}` }
-      
-      // Make API calls based on user role
+      const headers = { Authorization: `Bearer ${token}` };
+ 
+      // Fetch trainees based on role
       let traineesResponse;
-      if (userRole === 'Facilitator' && userLocation) {
-        traineesResponse = await axios.get(`https://timemanagementsystemserver.onrender.com/api/trainees/location?location=${userLocation}`, {
-          headers,
-        });
-      } else {
-        traineesResponse = await axios.get("https://timemanagementsystemserver.onrender.com/api/trainees", {
-          headers,
-        });
+      if (userRole === "facilitator") {
+        if (userLocation) {
+          traineesResponse = await axios.get(
+            `https://timemanagementsystemserver.onrender.com/api/trainees/location?location=${userLocation}`,
+            { headers }
+          );
+        } else {
+          traineesResponse = await axios.get(
+            "https://timemanagementsystemserver.onrender.com/api/my-trainees",
+            { headers }
+          );
+        }
+      } else if (userRole === "super_admin") {
+        // Use a different endpoint for super admin
+        traineesResponse = await axios.get(
+          "https://timemanagementsystemserver.onrender.com/api/trainees",
+          { headers }
+        );
       }
-
-      const facilitatorsResponse = await axios.get("https://timemanagementsystemserver.onrender.com/api/facilitators", {
-        headers,
+ 
+      // Log the trainees response for debugging
+      console.log("Trainees Response:", traineesResponse?.data);
+ 
+      // Extract the trainees array based on role
+      let traineesArray;
+      if (userRole === "facilitator") {
+        traineesArray = traineesResponse?.data?.allTrainees || [];
+      } else if (userRole === "super_admin") {
+        traineesArray = traineesResponse?.data?.trainees || [];
+      }
+ 
+      // Fetch facilitators only if the role is not a facilitator
+      let facilitatorsResponse;
+      if (userRole !== "facilitator") {
+        try {
+          facilitatorsResponse = await axios.get(
+            "https://timemanagementsystemserver.onrender.com/api/facilitators",
+            { headers }
+          );
+          console.log("Facilitators Response:", facilitatorsResponse?.data);
+        } catch (error) {
+          console.error("Error fetching facilitators:", error);
+          setFeedbackMessage("Error fetching facilitators. Please try again later.");
+        }
+      }
+ 
+      // Fetch stakeholders only if the role is not a facilitator
+      let stakeholdersResponse;
+      if (userRole !== "facilitator") {
+        try {
+          stakeholdersResponse = await axios.get(
+            "https://timemanagementsystemserver.onrender.com/api/stakeholder/all",
+            { headers }
+          );
+          console.log("Stakeholders Response:", stakeholdersResponse?.data);
+        } catch (error) {
+          if (error.response?.status === 403) {
+            console.error("Access denied to stakeholders endpoint.");
+            setFeedbackMessage("You do not have permission to access stakeholders.");
+          } else {
+            console.error("Error fetching stakeholders:", error);
+            setFeedbackMessage("Error fetching stakeholders. Please try again later.");
+          }
+        }
+      }
+ 
+      // Extract the facilitators and stakeholders arrays from the API responses
+      const facilitatorsArray = facilitatorsResponse?.data?.facilitators || [];
+      const stakeholdersArray = stakeholdersResponse?.data?.stakeholders || [];
+ 
+      const mapUser = (user, role) => ({
+        id: user._id || user.id || crypto.randomUUID(),
+        fullName: user.fullName || `${user.name || ""} ${user.surname || ""}`.trim(),
+        email: user.email || "N/A",
+        role: role,
+        status: user.status || "active",
       });
-      const stakeholdersResponse = await axios.get(
-        "https://timemanagementsystemserver.onrender.com/api/stakeholder/all",
-        { headers },
-      );
-
-      const traineesArray = traineesResponse.data.trainees || [];
-      const facilitatorsArray = facilitatorsResponse.data.facilitators || facilitatorsResponse.data || [];
-      const stakeholdersArray = stakeholdersResponse.data || [];
-
-      const trainees = traineesArray.map((user) => ({
-        id: user._id || user.id || `trainee-${Date.now()}-${Math.random()}`,
-        fullName: user.fullName || user.name || `${user.name || ""} ${user.surname || ""}`.trim(),
-        email: user.email,
-        role: "Trainee",
-        status: user.status || "active", // Default status to active if not provided
-      }));
-
-      const facilitators = Array.isArray(facilitatorsArray)
-        ? facilitatorsArray.map((user) => ({
-            id: user._id || user.id || `facilitator-${Date.now()}-${Math.random()}`,
-            fullName: user.fullName || user.name || `${user.name || ""} ${user.surname || ""}`.trim(),
-            email: user.email,
-            role: "Facilitator",
-          }))
-        : [];
-
-      const stakeholders = Array.isArray(stakeholdersArray)
-        ? stakeholdersArray.map((user) => ({
-            id: user._id || user.id || `stakeholder-${Date.now()}-${Math.random()}`,
-            fullName: user.fullName || user.name || `${user.name || ""} ${user.surname || ""}`.trim(),
-            email: user.email,
-            role: "Stakeholder",
-          }))
-        : [];
-
-      const allUsers = [...stakeholders, ...trainees, ...facilitators]
-
-      setUsers(allUsers)
-      setFeedbackMessage("Data fetched successfully.")
+ 
+      const trainees = traineesArray.map((user) => mapUser(user, "Trainee"));
+      const facilitators = facilitatorsArray.map((user) => mapUser(user, "Facilitator"));
+      const stakeholders = stakeholdersArray.map((user) => mapUser(user, "Stakeholder"));
+ 
+      const allUsers = [...stakeholders, ...trainees, ...facilitators];
+ 
+      // Log mapped users for debugging
+      console.log("All Users:", allUsers);
+ 
+      setUsers(allUsers);
+      setFeedbackMessage("Data fetched successfully.");
     } catch (error) {
-      console.error("Error fetching data from the server", error)
-      setFeedbackMessage("Error fetching data. Please try again later.")
+      console.error("Error fetching data:", error);
+      setFeedbackMessage("Error fetching data. Please try again later.");
     }
-  }
+  };
 
   useEffect(() => {
     fetchData()
@@ -259,6 +297,7 @@ const UserManagement = () => {
       (guest.phoneNumber && guest.phoneNumber.toLowerCase().includes(searchTerm.toLowerCase())),
   )
 
+
   return (
     <div className="user-management-container">
       <Modal
@@ -284,7 +323,10 @@ const UserManagement = () => {
       </div>
 
       {/* Table Section for Facilitators */}
-      <div className="table-section">
+ 
+
+    {userRole === 'super_admin' && (
+           <div className="table-section">
         <div className="table-header">
           <h2>
             Facilitators{" "}
@@ -341,6 +383,7 @@ const UserManagement = () => {
           </table>
         </div>
       </div>
+    )}
 
       {/* Table Section for Trainees */}
       <div className="table-section">
@@ -406,46 +449,49 @@ const UserManagement = () => {
       </div>
 
       {/* Table Section for Stakeholders */}
-      <div className="table-section">
-        <div className="table-header">
-          <h2>
-            Stakeholders{" "}
-            <span className="count">{filteredUsers.filter((user) => user.role === "Stakeholder").length}</span>
-          </h2>
-        </div>
 
-        <div className="table-container">
-          <table className="users-table">
-            <thead>
-              <tr>
-                <th>Full Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredUsers
-                .filter((user) => user.role === "Stakeholder")
-                .map((user) => (
-                  <tr key={user.id || user.email || `user-${Math.random()}`}>
-                    <td>{user.fullName}</td>
-                    <td>{user.email}</td>
-                    <td>{user.role}</td>
-                    <td>
-                      <button className="action-btn" onClick={() => handleTakeAction(user)}>
-                        <span>Take action</span>
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {userRole === 'super_admin' && (
+              <div className="table-section">
+              <div className="table-header">
+                <h2>
+                  Stakeholders{" "}
+                  <span className="count">{filteredUsers.filter((user) => user.role === "Stakeholder").length}</span>
+                </h2>
+              </div>
+     
+              <div className="table-container">
+                <table className="users-table">
+                  <thead>
+                    <tr>
+                      <th>Full Name</th>
+                      <th>Email</th>
+                      <th>Role</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredUsers
+                      .filter((user) => user.role === "Stakeholder")
+                      .map((user) => (
+                        <tr key={user.id || user.email || `user-${Math.random()}`}>
+                          <td>{user.fullName}</td>
+                          <td>{user.email}</td>
+                          <td>{user.role}</td>
+                          <td>
+                            <button className="action-btn" onClick={() => handleTakeAction(user)}>
+                              <span>Take action</span>
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+      )}
 
       {/* Table Section for Guests */}
-      <div className="table-section">
+      {/* <div className="table-section">
         <div className="table-header">
           <h2>
             Guests <span className="count">{filteredGuests.length}</span>
@@ -482,7 +528,7 @@ const UserManagement = () => {
             </tbody>
           </table>
         </div>
-      </div>
+      </div> */}
 
       {/* Add CSS for status badges */}
       <style jsx>{`
@@ -494,13 +540,13 @@ const UserManagement = () => {
           text-transform: capitalize;
           display: inline-block;
         }
-        
+       
         .status-badge.active {
           background-color: #e6f7e6;
           color: #2e7d32;
           border: 1px solid #2e7d32;
         }
-        
+       
         .status-badge.deactive {
           background-color: #ffebee;
           color: #c62828;
@@ -512,5 +558,3 @@ const UserManagement = () => {
 }
 
 export default UserManagement
-
-

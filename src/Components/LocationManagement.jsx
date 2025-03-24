@@ -261,7 +261,7 @@ const LocationManagement = () => {
             <thead>
               <tr>
                 <th>Name</th>
-                <th>Coordinates</th>
+                <th>Co-ordinates</th>
                 <th>Radius</th>
                 <th>Status</th>
                 <th>Actions</th>
