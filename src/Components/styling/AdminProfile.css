@@ -1,132 +1,256 @@
 /* Container */
 .profile-container {
   display: flex;
+  flex-direction: column;
+  /* min-height: 100vh; */
   height: 100vh;
   background: url('./background.jpg') no-repeat center center fixed;
   background-size: cover;
+  font-family: 'Inter', sans-serif; /* Modern font */
+  margin-top: -30px;
+}
+/* Disable scrolling */
+.no-scroll {
+  overflow: hidden;
 }
 
 /* Sidebar */
 .profile-sidebar {
-  width: 25%;
-  background-color: #ffffff;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.95); /* Semi-transparent white */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   padding: 20px;
-  box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.1);
-  display: flex; /* Use flexbox for layout */
-  flex-direction: column; /* Stack elements vertically */
-  align-items: center; /* Center elements */
+  backdrop-filter: blur(10px); /* Frosted glass effect */
 }
 
 /* Sidebar Header */
 .profile-sidebar h2 {
   font-size: 24px;
+  font-weight: 600;
   margin-bottom: 20px;
+  color: #333;
 }
 
 /* Avatar Section */
 .avatar-section {
   text-align: center;
-  margin-bottom: 20px; /* Add a margin to space it from other content */
+  margin-bottom: 20px;
 }
 
 .avatar-placeholder {
-  width: 270px; /* Fixed size for avatar placeholder */
-  height: 270px; /* Fixed size for avatar placeholder */
+  width: 150px;
+  margin-top: 70px;
+  height: 150px;
   border-radius: 50%;
-  background-color: #f4f4f4;
+  background-color: #f0f0f0;
   display: flex;
+  margin-left: 35px;
   justify-content: center;
   align-items: center;
-  overflow: hidden; /* Ensure no overflow */
+  justify-items: center;
+  overflow: hidden;
+  border: 3px solid #e0e0e0;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.avatar-placeholder:hover {
+  transform: scale(1.05);
+  border-color: #04AA6D;
 }
 
 /* Custom File Upload Button */
 .upload-btn {
   display: inline-block;
-  margin-top: 10px;
-  background-color: #04AA6D; /* Green */
+  margin-top: 20px;
+  background-color: #04AA6D;
   color: white;
   border: none;
-  padding: 5px 10px;
+  padding: 16px 15px;
   cursor: pointer;
-  border-radius: 5px; /* Adds slight rounding to the button */
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.upload-btn:hover {
+  background-color: #038a5a;
 }
 
 /* Hide Original File Input */
 input[type="file"] {
-  display: none; /* Hide original file input */
+  display: none;
 }
 
 /* Uploaded Image Display */
 .uploaded-image {
   border-radius: 50%;
-  width: 100%; /* Fill the avatar placeholder */
-  height: 100%; /* Fill the avatar placeholder */
-  object-fit: cover; /* Maintain the aspect ratio of the image */
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 /* Main Content */
 .profile-main {
-  width: calc(75%);
-  margin-left: auto;
-  padding: 40px; /* Add padding for the main content */
+  width: 100%;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
+  backdrop-filter: blur(10px); /* Frosted glass effect */
 }
 
 /* Profile Form Styles */
 .profile-form {
-  width: 100%; /* Use full width */
+  width: 100%;
 }
 
 .profile-form label {
   display: block;
-  margin-top: 20px;
+  margin-top: 15px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
 }
 
 .profile-form input,
 .profile-form textarea {
   width: calc(100% - 20px);
   padding: 10px;
+  margin-top: 8px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Adjust Right Panel */
-textarea {
-  height: auto !important;
+.profile-form input:focus,
+.profile-form textarea:focus {
+  border-color: #04AA6D;
+  box-shadow: 0 0 8px rgba(4, 170, 109, 0.2);
+  outline: none;
 }
 
 /* Buttons */
-.upload-btn,
 .update-btn {
-  background-color: #04AA6D; /* Green */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  background-color: #04AA6D;
   color: white;
   border: none;
-  padding: 10px;
-  cursor: pointer; /* Clarifies buttons are clickable */
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 8px;
+  font-size: 8px;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.update-btn:hover {
+  background-color: #038a5a;
+}
+
+.image-controls {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  margin-top: 15px;
+  justify-content: center;
+  align-items: center;
+}
+
+.save-image-btn {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 8px;
+  font-size: 8px;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+  margin-top: 20px;
+ 
+}
+
+.save-image-btn:hover {
+  background-color: #45a049;
+}
+
+.image-message {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #4CAF50;
+  font-weight: 500;
 }
 
 /* Success Message */
 .success-message {
-  color: green;
+  color: #4CAF50;
   margin-top: 10px;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 /* Media Queries */
-@media (max-width: 768px) { /* Adjust for smaller screens */
+@media (min-width: 768px) {
+  .profile-container {
+    flex-direction: row;
+    
+  }
+
   .profile-sidebar {
-    width: 100%; /* Full width for smaller screens */
-    padding: 10px; /* Reduce padding */
+    width: 30%;
+    padding: 30px;
   }
-
+  .uploaded-image{
+    display: flex;
+    justify-content: center;
+  }
   .avatar-placeholder {
-    width: 150px; /* Adjust the size for smaller screens */
-    height: 150px; /* Adjust the size for smaller screens */
-  }
-
-  .uploaded-image {
-    width: 150px; /* Ensure the uploaded image fits */
-    height: 150px; /* Ensure the uploaded image fits */
+    width: 200px;
+    height: 200px;
   }
 
   .profile-main {
-    width: 100%; /* Take full width on smaller screens */
+    width: 70%;
+    padding: 40px;
+  }
+
+  .profile-form input,
+  .profile-form textarea {
+    padding: 12px;
+  }
+
+  .update-btn,
+  .save-image-btn {
+    padding: 12px 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .avatar-placeholder {
+    width: 270px;
+    height: 270px;
+  }
+
+  .profile-sidebar h2 {
+    font-size: 26px;
+  }
+
+  .profile-form label {
+    font-size: 16px;
+  }
+
+  .profile-form input,
+  .profile-form textarea {
+    font-size: 16px;
+  }
+
+  .update-btn,
+  .save-image-btn {
+    font-size: 16px;
   }
 }
