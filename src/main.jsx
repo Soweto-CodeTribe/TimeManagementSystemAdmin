@@ -4,6 +4,7 @@ import App from './App.jsx';
 import store from './Redux/store.jsx';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
+import NotificationHandler from './Components/ui/NotificationHandler.jsx';
 
 // Add Redux store debugging
 console.log("Redux store initial state:", store.getState());
@@ -19,6 +20,7 @@ createRoot(document.getElementById('root')).render(
     <BrowserRouter>
       <StrictMode>
         <App />
+        <NotificationHandler />
       </StrictMode>
     </BrowserRouter>
   </Provider>

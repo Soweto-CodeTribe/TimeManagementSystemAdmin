@@ -485,7 +485,7 @@
 }
 
 .tickets-modal-container {
-  background-color: white;
+  background-color: red;
   border-radius: 8px;
   max-width: 1020px;
   max-height: 90vh;
@@ -735,10 +735,10 @@
   animation: tickets-fadeIn 0.2s ease;
 }
 
-.tickets-ticket-detail-container {
-  background-color: white;
+.My-tickets-ticket-detail-container {
+  background-color: #fff;
   border-radius: 8px;
-  max-width: 1080px;
+  width: 700px;
   max-height: 80vh;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   overflow: hidden;
