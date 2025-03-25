@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { checkAuthStatus } from "./Slices/authSlice";
@@ -27,6 +27,7 @@ import { generateFCMToken, setupFCMListener, fetchUnreadCount } from './Slices/n
 import EventManagement from "./Components/EventManagement";
 import LocationManagement from "./Components/LocationManagement";
 import TimeManagement from "./Components/TimeManagement";
+import ManageTrainees from "./Components/ManageTrainees";
 
 function App() {
   const location = useLocation();
@@ -121,6 +122,12 @@ const getScreenName = (path) => {
         return "CombinedNotifications";
       case "/EventManagement":
         return "EventManagement";
+        case "/location-management": // New case for Location Management
+        return "Location Management"; // New screen name
+      case "/manage-trainees": // New case for Manage Trainees
+        return "Manage Trainees"; // New screen name
+      case "/time-management": // New case for Time Management
+        return "Time Management"; // New screen name
       default:
         return "";
     }
@@ -171,6 +178,7 @@ const getScreenName = (path) => {
                     <Route path="/location-management" element={<LocationManagement />} />
                     <Route path="/time-management" element={<TimeManagement />} />
                     <Route path="/EventManagement" element={<EventManagement/>} />
+                    <Route path="/manage-trainees" element={<ManageTrainees />} />
                     <Route path="/logout" element={<Logout />} />
                     <Route path="/add-user" element={<AddUserForm />} />
                     

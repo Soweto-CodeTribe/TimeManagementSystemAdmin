@@ -281,7 +281,7 @@ const TraineeOverview = ({ token }) => {
               <th>Email</th>
               <th>Phone</th>
               <th>Attendance Rate</th>
-              <th>Status</th>
+              {/* <th>Status</th> */}
               <th>Actions</th>
             </tr>
           </thead>
@@ -292,8 +292,8 @@ const TraineeOverview = ({ token }) => {
                 <td>{trainee.traineeLocation}</td>
                 <td>{trainee.traineeEmail}</td>
                 <td>{trainee.traineePhoneNumber}</td>
-                <td>{trainee.attendancePercentage}%</td>
-                <td>{trainee.status}</td>
+                <td>{trainee.attendancePercentage}</td>
+                {/* <td>{trainee.status}</td> */}
                 <td>
                   <div className="action-dropdown">
                     <button className="action-btn">Take Action</button>

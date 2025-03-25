@@ -157,6 +157,7 @@ const UserManagement = () => {
         } catch (error) {
           console.error("Failed to fetch trainees for facilitator:", error);
           setFeedbackMessage("Failed to fetch trainees for facilitator.");
+
         }
       } else if (userRole === "super_admin" || userRole === "admin") {
         try {
