@@ -10,14 +10,15 @@
   margin-bottom: 24px;
 }
 
-.title-section h1 {
+.UM-title-section h1 {
   font-size: 24px;
   font-weight: 600;
   margin: 0;
   color: #333;
+  text-align: left;
 }
 
-.subtitle {
+.UM-subtitle {
   font-size: 14px;
   color: #666;
   margin: 4px 0 0 0;

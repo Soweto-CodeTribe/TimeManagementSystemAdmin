@@ -37,17 +37,12 @@ const UserManagement = () => {
   const [columns, setColumns] = useState({
     fullName: true,
     surname: true,
-    codeTribeId: false,
-    idNumber: true,
-    cohortYear: false,
-    emailAddress: true,
+    email: true,
     phoneNumber: true,
-    linkedinProfileUrl: true,
-    currentEmployer: true,
-    jobTitle: true,
-    startDate: false,
-    lastCheckInDate: true,
-    missedCheckIns: false,
+    location: true,
+    idNumber: true,
+    postalAddress: true,
+    cohortYear: false,
   });
 
   // Debounce search term to avoid excessive filtering
@@ -81,16 +76,23 @@ const UserManagement = () => {
   }, [location.state]);
 
   // Main function to fetch all necessary data
+  // In fetchAllData function:
+  // Main function to fetch all necessary data
   const fetchAllData = async () => {
     setIsLoading(true);
     setFetchError(null);
-    
+
     try {
-      // Fetch users based on role
+      // Fetch users based on role.  Always fetch users, but the endpoint changes.
       await fetchUsers();
-      // Fetch guests data
-      await fetchGuests();
-      
+
+      // Fetch guests data - conditionally based on role.
+      if (userRole === "super_admin" || userRole === "admin" || userRole === "facilitator") {
+        await fetchGuests();
+      } else {
+        console.warn("User role does not have permission to access guest data.");
+      }
+
       setFeedbackMessage("Data loaded successfully");
     } catch (error) {
       console.error("Error loading data:", error);
@@ -108,24 +110,31 @@ const UserManagement = () => {
         "https://timemanagementsystemserver.onrender.com/api/guests/getGuests",
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      
+
       const guestsData = response.data.eventsWithGuests || [];
-      const formattedGuests = guestsData.flatMap((event) =>
-        (event.guestDetails || []).map((guest) => ({
-          id: guest.id || guest._id || `guest-${crypto.randomUUID()}`,
-          fullName: guest.fullNames || "N/A",
-          email: guest.email || "N/A",
-          phoneNumber: guest.cellPhone || "N/A",
-          lastVisit: guest.lastVisit || event.date || "N/A",
-          role: "Guest",
-          status: "active",
-        }))
-      );
-      
-      setGuests(formattedGuests);
+
+      // Add check to ensure we have some guestsData
+      if (guestsData.length > 0) {
+        const formattedGuests = guestsData.flatMap((event) =>
+          (event.guestDetails || []).map((guest) => ({
+            id: guest.id || guest._id || `guest-${crypto.randomUUID()}`,
+            fullName: guest.fullNames || "N/A",
+            email: guest.email || "N/A",
+            phoneNumber: guest.cellPhone || "N/A",
+            lastVisit: guest.lastVisit || event.date || "N/A",
+            role: "Guest",
+            status: "active",
+          }))
+        );
+        setGuests(formattedGuests);
+      } else {
+        // Handle the case where there are no guests.
+        setGuests([]);
+        console.warn("No guest data found.");
+      }
     } catch (error) {
       console.error("Error fetching guests:", error);
-      throw new Error("Failed to fetch guests data");
+      setFeedbackMessage("Failed to fetch guests data.");
     }
   };
 
@@ -133,97 +142,87 @@ const UserManagement = () => {
   const fetchUsers = async () => {
     const headers = { Authorization: `Bearer ${token}` };
     let allUserResults = [];
-    
+
     try {
-      // === 1. Fetch trainees based on role ===
       let traineesData = [];
-      
+
       if (userRole === "facilitator") {
-        // Facilitators can see their trainees or trainees at their location
         try {
-          let traineesUrl = userLocation 
+          const traineesUrl = userLocation
             ? `https://timemanagementsystemserver.onrender.com/api/trainees/location?location=${userLocation}`
             : "https://timemanagementsystemserver.onrender.com/api/my-trainees";
-          
+
           const traineesResponse = await axios.get(traineesUrl, { headers });
-          
-          // Extract trainees from response based on API structure
           traineesData = traineesResponse.data?.allTrainees || traineesResponse.data?.trainees || [];
         } catch (error) {
           console.error("Failed to fetch trainees for facilitator:", error);
-          throw new Error("Failed to fetch trainees");
+          setFeedbackMessage("Failed to fetch trainees for facilitator.");
         }
-      } 
-      else if (userRole === "super_admin" || userRole === "admin") {
-        // Admins can see all trainees
+      } else if (userRole === "super_admin" || userRole === "admin") {
         try {
           const traineesResponse = await axios.get(
             "https://timemanagementsystemserver.onrender.com/api/trainees",
             { headers }
           );
-          
+
           traineesData = traineesResponse.data?.trainees || [];
         } catch (error) {
           console.error("Failed to fetch trainees for admin:", error);
-          throw new Error("Failed to fetch trainees");
+          setFeedbackMessage("Failed to fetch trainees for admin.");
         }
       }
-      
-      // Map trainees to common format
-      const formattedTrainees = traineesData.map(trainee => ({
+
+      const formattedTrainees = traineesData.map((trainee) => ({
         id: trainee._id || trainee.id || `trainee-${crypto.randomUUID()}`,
         fullName: trainee.fullName || `${trainee.name || ""} ${trainee.surname || ""}`.trim(),
         email: trainee.email || trainee.emailAddress || "N/A",
         phoneNumber: trainee.phoneNumber || trainee.phone || "N/A",
         role: "Trainee",
         status: trainee.status || "active",
-        lastCheckIn: trainee.lastCheckInDate || "N/A"
+        lastCheckIn: trainee.lastCheckInDate || "N/A",
       }));
-      
+
       allUserResults = [...formattedTrainees];
-      
-      // === 2. Fetch facilitators and stakeholders if user has appropriate role ===
+
       if (userRole === "super_admin" || userRole === "admin") {
-        // Fetch facilitators
         try {
           const facilitatorsResponse = await axios.get(
             "https://timemanagementsystemserver.onrender.com/api/facilitators",
             { headers }
           );
-          
+
           const facilitatorsData = facilitatorsResponse.data?.facilitators || [];
-          const formattedFacilitators = facilitatorsData.map(facilitator => ({
+          const formattedFacilitators = facilitatorsData.map((facilitator) => ({
             id: facilitator._id || facilitator.id || `facilitator-${crypto.randomUUID()}`,
             fullName: facilitator.fullName || `${facilitator.name || ""} ${facilitator.surname || ""}`.trim(),
             email: facilitator.email || facilitator.emailAddress || "N/A",
             phoneNumber: facilitator.phoneNumber || facilitator.phone || "N/A",
             role: "Facilitator",
-            status: facilitator.status || "active"
+            status: facilitator.status || "active",
           }));
-          
+
           allUserResults = [...allUserResults, ...formattedFacilitators];
         } catch (error) {
           console.error("Failed to fetch facilitators:", error);
-          // Don't throw error, just continue with what we have
+          setFeedbackMessage("Failed to fetch facilitators.");
         }
-        
-        // Fetch stakeholders
+
         try {
           const stakeholdersResponse = await axios.get(
             "https://timemanagementsystemserver.onrender.com/api/stakeholder/all",
             { headers }
           );
-          
+
           const stakeholdersData = stakeholdersResponse.data?.stakeholders || [];
-          const formattedStakeholders = stakeholdersData.map(stakeholder => ({
+          const formattedStakeholders = stakeholdersData.map((stakeholder) => ({
             id: stakeholder._id || stakeholder.id || `stakeholder-${crypto.randomUUID()}`,
             fullName: stakeholder.fullName || `${stakeholder.name || ""} ${stakeholder.surname || ""}`.trim(),
             email: stakeholder.email || stakeholder.emailAddress || "N/A",
-            phoneNumber: stakeholder.phoneNumber || stakeholder.phone || "N/A",
+            phoneNumber: stakeholder.phone || stakeholder.phone || "N/A",
             role: "Stakeholder",
-            status: stakeholder.status || "active"
+            status: stakeholder.status || "active",
           }));
-          
+
           allUserResults = [...allUserResults, ...formattedStakeholders];
         } catch (error) {
           // Check if it's a permission error
@@ -232,18 +231,433 @@ const UserManagement = () => {
           } else {
             console.error("Failed to fetch stakeholders:", error);
           }
-          // Don't throw error, just continue with what we have
+          setFeedbackMessage("Failed to fetch stakeholders.");
         }
       }
-      
-      // Update state with all user data
+
       setUsers(allUserResults);
-      
     } catch (error) {
       console.error("Error in fetchUsers:", error);
-      throw error;
     }
   };
+
+
+  // Fetch guests data
+  // const fetchGuests = async () => {
+  //   try {
+  //     const response = await axios.get(
+  //       "https://timemanagementsystemserver.onrender.com/api/guests/getGuests",
+  //       { headers: { Authorization: `Bearer ${token}` } }
+  //     );
+
+  //     const guestsData = response.data.eventsWithGuests || [];
+  //     const formattedGuests = guestsData.flatMap((event) =>
+  //       (event.guestDetails || []).map((guest) => ({
+  //         id: guest.id || guest._id || `guest-${crypto.randomUUID()}`,
+  //         fullName: guest.fullNames || "N/A",
+  //         email: guest.email || "N/A",
+  //         phoneNumber: guest.cellPhone || "N/A",
+  //         lastVisit: guest.lastVisit || event.date || "N/A",
+  //         role: "Guest", // Ensure role is explicitly set to 'Guest'
+  //         status: "active",
+  //       }))
+  //     );
+
+  //     setGuests(formattedGuests);
+  //   } catch (error) {
+  //     console.error("Error fetching guests:", error);
+  //     throw new Error("Failed to fetch guests data");
+  //   }
+  // };
+
+  // // Fetch users (trainees, facilitators, stakeholders) based on role
+  // const fetchUsers = async () => {
+  //   const headers = { Authorization: `Bearer ${token}` };
+  //   let allUserResults = [];
+
+  //   try {
+  //     // === 1. Fetch trainees based on role ===
+  //     let traineesData = [];
+
+  //     if (userRole === "facilitator") {
+  //       try {
+  //         let traineesUrl = userLocation
+  //           ? `https://timemanagementsystemserver.onrender.com/api/trainees/location?location=${userLocation}`
+  //           : "https://timemanagementsystemserver.onrender.com/api/my-trainees";
+
+  //         const traineesResponse = await axios.get(traineesUrl, { headers });
+  //         traineesData = traineesResponse.data?.allTrainees || traineesResponse.data?.trainees || [];
+  //       } catch (error) {
+  //         console.error("Failed to fetch trainees for facilitator:", error);
+  //         throw new Error("Failed to fetch trainees");
+  //       }
+  //     } else if (userRole === "super_admin" || userRole === "admin") {
+  //       try {
+  //         const traineesResponse = await axios.get(
+  //           "https://timemanagementsystemserver.onrender.com/api/trainees",
+  //           { headers }
+  //         );
+  //         traineesData = traineesResponse.data?.trainees || [];
+  //       } catch (error) {
+  //         console.error("Failed to fetch trainees for admin:", error);
+  //         throw new Error("Failed to fetch trainees");
+  //       }
+  //     }
+
+  //     const formattedTrainees = traineesData.map((trainee) => ({
+  //       id: trainee._id || trainee.id || `trainee-${crypto.randomUUID()}`,
+  //       fullName: trainee.fullName || `${trainee.name || ""} ${trainee.surname || ""}`.trim(),
+  //       email: trainee.email || trainee.emailAddress || "N/A",
+  //       phoneNumber: trainee.phoneNumber || trainee.phone || "N/A",
+  //       role: "Trainee", // Ensure role is explicitly set
+  //       status: trainee.status || "active",
+  //       lastCheckIn: trainee.lastCheckInDate || "N/A",
+  //     }));
+
+  //     allUserResults = [...formattedTrainees];
+
+  //     if (userRole === "super_admin" || userRole === "admin") {
+  //       try {
+  //         const facilitatorsResponse = await axios.get(
+  //           "https://timemanagementsystemserver.onrender.com/api/facilitators",
+  //           { headers }
+  //         );
+
+  //         const facilitatorsData = facilitatorsResponse.data?.facilitators || [];
+  //         const formattedFacilitators = facilitatorsData.map((facilitator) => ({
+  //           id: facilitator._id || facilitator.id || `facilitator-${crypto.randomUUID()}`,
+  //           fullName: facilitator.fullName || `${facilitator.name || ""} ${facilitator.surname || ""}`.trim(),
+  //           email: facilitator.email || facilitator.emailAddress || "N/A",
+  //           phoneNumber: facilitator.phoneNumber || facilitator.phone || "N/A",
+  //           role: "Facilitator", // Ensure role is explicitly set
+  //           status: facilitator.status || "active",
+  //         }));
+
+  //         allUserResults = [...allUserResults, ...formattedFacilitators];
+  //       } catch (error) {
+  //         console.error("Failed to fetch facilitators:", error);
+  //       }
+
+  //       try {
+  //         const stakeholdersResponse = await axios.get(
+  //           "https://timemanagementsystemserver.onrender.com/api/stakeholder/all",
+  //           { headers }
+  //         );
+
+  //         const stakeholdersData = stakeholdersResponse.data?.stakeholders || [];
+  //         const formattedStakeholders = stakeholdersData.map((stakeholder) => ({
+  //           id: stakeholder._id || stakeholder.id || `stakeholder-${crypto.randomUUID()}`,
+  //           fullName: stakeholder.fullName || `${stakeholder.name || ""} ${stakeholder.surname || ""}`.trim(),
+  //           email: stakeholder.email || stakeholder.emailAddress || "N/A",
+  //           phoneNumber: stakeholder.phoneNumber || stakeholder.phone || "N/A",
+  //           role: "Stakeholder", // Ensure role is explicitly set
+  //           status: stakeholder.status || "active",
+  //         }));
+
+  //         allUserResults = [...allUserResults, ...formattedStakeholders];
+  //       } catch (error) {
+  //         if (error.response?.status === 403) {
+  //           console.warn("User doesn't have permission to access stakeholders");
+  //         } else {
+  //           console.error("Failed to fetch stakeholders:", error);
+  //         }
+  //       }
+  //     }
+
+  //     setUsers(allUserResults);
+  //   } catch (error) {
+  //     console.error("Error in fetchUsers:", error);
+  //     throw error;
+  //   }
+  // };
+
+//   const fetchGuests = async () => {
+//     try {
+//         const response = await axios.get(
+//             "https://timemanagementsystemserver.onrender.com/api/guests/getGuests",
+//             { headers: { Authorization: `Bearer ${token}` } }
+//         );
+
+//         const guestsData = response.data.eventsWithGuests || [];
+//         const formattedGuests = guestsData.flatMap((event) =>
+//             (event.guestDetails || []).map((guest) => ({
+//                 id: guest.id || guest._id || `guest-${crypto.randomUUID()}`, //this line might be creating issues, ideally the id should be unique at the database
+//                 fullName: guest.fullNames || "N/A",
+//                 email: guest.email || "N/A",
+//                 phoneNumber: guest.cellPhone || "N/A",
+//                 lastVisit: guest.lastVisit || event.date || "N/A",
+//                 role: "Guest",
+//                 status: "active",
+//             }))
+//         );
+
+//         setGuests(formattedGuests);
+//     } catch (error) {
+//         console.error("Error fetching guests:", error);
+//         throw new Error("Failed to fetch guests data");
+//     }
+// };
+
+// // Fetch users (trainees, facilitators, stakeholders) based on role
+// const fetchUsers = async () => {
+//     const headers = { Authorization: `Bearer ${token}` };
+//     let allUserResults = [];
+
+//     try {
+//         // === 1. Fetch trainees based on role ===
+//         let traineesData = [];
+
+//         if (userRole === "facilitator") {
+//             // Facilitators can see their trainees or trainees at their location
+//             try {
+//                 let traineesUrl = userLocation
+//                     ? `https://timemanagementsystemserver.onrender.com/api/trainees/location?location=${userLocation}`
+//                     : "https://timemanagementsystemserver.onrender.com/api/my-trainees";
+
+//                 const traineesResponse = await axios.get(traineesUrl, { headers });
+
+//                 // Extract trainees from response based on API structure
+//                 traineesData = traineesResponse.data?.allTrainees || traineesResponse.data?.trainees || [];
+//             } catch (error) {
+//                 console.error("Failed to fetch trainees for facilitator:", error);
+//                 throw new Error("Failed to fetch trainees");
+//             }
+//         }
+//         else if (userRole === "super_admin" || userRole === "admin") {
+//             // Admins can see all trainees
+//             try {
+//                 const traineesResponse = await axios.get(
+//                     "https://timemanagementsystemserver.onrender.com/api/trainees",
+//                     { headers }
+//                 );
+
+//                 traineesData = traineesResponse.data?.trainees || [];
+//             } catch (error) {
+//                 console.error("Failed to fetch trainees for admin:", error);
+//                 throw new Error("Failed to fetch trainees");
+//             }
+//         }
+
+//         // Map trainees to common format
+//         const formattedTrainees = traineesData.map(trainee => ({
+//             id: trainee._id || trainee.id || `trainee-${crypto.randomUUID()}`, //this line might be creating issues, ideally the id should be unique at the database
+//             fullName: trainee.fullName || `${trainee.name || ""} ${trainee.surname || ""}`.trim(),
+//             email: trainee.email || trainee.emailAddress || "N/A",
+//             phoneNumber: trainee.phoneNumber || trainee.phone || "N/A",
+//             role: "Trainee",
+//             status: trainee.status || "active",
+//             lastCheckIn: trainee.lastCheckInDate || "N/A"
+//         }));
+
+//         allUserResults = [...formattedTrainees];
+
+//         // === 2. Fetch facilitators and stakeholders if user has appropriate role ===
+//         if (userRole === "super_admin" || userRole === "admin") {
+//             // Fetch facilitators
+//             try {
+//                 const facilitatorsResponse = await axios.get(
+//                     "https://timemanagementsystemserver.onrender.com/api/facilitators",
+//                     { headers }
+//                 );
+
+//                 const facilitatorsData = facilitatorsResponse.data?.facilitators || [];
+//                 const formattedFacilitators = facilitatorsData.map(facilitator => ({
+//                     id: facilitator._id || facilitator.id || `facilitator-${crypto.randomUUID()}`,  //this line might be creating issues, ideally the id should be unique at the database
+//                     fullName: facilitator.fullName || `${facilitator.name || ""} ${facilitator.surname || ""}`.trim(),
+//                     email: facilitator.email || facilitator.emailAddress || "N/A",
+//                     phoneNumber: facilitator.phoneNumber || facilitator.phone || "N/A",
+//                     role: "Facilitator",
+//                     status: facilitator.status || "active"
+//                 }));
+
+//                 allUserResults = [...allUserResults, ...formattedFacilitators];
+//             } catch (error) {
+//                 console.error("Failed to fetch facilitators:", error);
+//                 // Don't throw error, just continue with what we have
+//             }
+
+//             // Fetch stakeholders
+//             try {
+//                 const stakeholdersResponse = await axios.get(
+//                     "https://timemanagementsystemserver.onrender.com/api/stakeholder/all",
+//                     { headers }
+//                 );
+
+//                 const stakeholdersData = stakeholdersResponse.data?.stakeholders || [];
+//                 const formattedStakeholders = stakeholdersData.map(stakeholder => ({
+//                     id: stakeholder._id || stakeholder.id || `stakeholder-${crypto.randomUUID()}`, //this line might be creating issues, ideally the id should be unique at the database
+//                     fullName: stakeholder.fullName || `${stakeholder.name || ""} ${stakeholder.surname || ""}`.trim(),
+//                     email: stakeholder.email || stakeholder.emailAddress || "N/A",
+//                     phoneNumber: stakeholder.phoneNumber || stakeholder.phone || "N/A",
+//                     role: "Stakeholder",
+//                     status: stakeholder.status || "active"
+//                 }));
+
+//                 allUserResults = [...allUserResults, ...formattedStakeholders];
+//             } catch (error) {
+//                 // Check if it's a permission error
+//                 if (error.response?.status === 403) {
+//                     console.warn("User doesn't have permission to access stakeholders");
+//                 } else {
+//                     console.error("Failed to fetch stakeholders:", error);
+//                 }
+//                 // Don't throw error, just continue with what we have
+//             }
+//         }
+
+//         // Update state with all user data
+//         setUsers(allUserResults);
+
+//     } catch (error) {
+//         console.error("Error in fetchUsers:", error);
+//         throw error;
+//     }
+// };
+
+
+  // Fetch guest data
+  // const fetchGuests = async () => {
+  //   try {
+  //     const response = await axios.get(
+  //       "https://timemanagementsystemserver.onrender.com/api/guests/getGuests",
+  //       { headers: { Authorization: `Bearer ${token}` } }
+  //     );
+      
+  //     const guestsData = response.data.eventsWithGuests || [];
+  //     const formattedGuests = guestsData.flatMap((event) =>
+  //       (event.guestDetails || []).map((guest) => ({
+  //         id: guest.id || guest._id || `guest-${crypto.randomUUID()}`,
+  //         fullName: guest.fullNames || "N/A",
+  //         email: guest.email || "N/A",
+  //         phoneNumber: guest.cellPhone || "N/A",
+  //         lastVisit: guest.lastVisit || event.date || "N/A",
+  //         role: "Guest",
+  //         status: "active",
+  //       }))
+  //     );
+      
+  //     setGuests(formattedGuests);
+  //   } catch (error) {
+  //     console.error("Error fetching guests:", error);
+  //     throw new Error("Failed to fetch guests data");
+  //   }
+  // };
+
+  // Fetch users (trainees, facilitators, stakeholders) based on role
+  // const fetchUsers = async () => {
+  //   const headers = { Authorization: `Bearer ${token}` };
+  //   let allUserResults = [];
+    
+  //   try {
+  //     // === 1. Fetch trainees based on role ===
+  //     let traineesData = [];
+      
+  //     if (userRole === "facilitator") {
+  //       // Facilitators can see their trainees or trainees at their location
+  //       try {
+  //         let traineesUrl = userLocation 
+  //           ? `https://timemanagementsystemserver.onrender.com/api/trainees/location?location=${userLocation}`
+  //           : "https://timemanagementsystemserver.onrender.com/api/my-trainees";
+          
+  //         const traineesResponse = await axios.get(traineesUrl, { headers });
+          
+  //         // Extract trainees from response based on API structure
+  //         traineesData = traineesResponse.data?.allTrainees || traineesResponse.data?.trainees || [];
+  //       } catch (error) {
+  //         console.error("Failed to fetch trainees for facilitator:", error);
+  //         throw new Error("Failed to fetch trainees");
+  //       }
+  //     } 
+  //     else if (userRole === "super_admin" || userRole === "admin") {
+  //       // Admins can see all trainees
+  //       try {
+  //         const traineesResponse = await axios.get(
+  //           "https://timemanagementsystemserver.onrender.com/api/trainees",
+  //           { headers }
+  //         );
+          
+  //         traineesData = traineesResponse.data?.trainees || [];
+  //       } catch (error) {
+  //         console.error("Failed to fetch trainees for admin:", error);
+  //         throw new Error("Failed to fetch trainees");
+  //       }
+  //     }
+      
+  //     // Map trainees to common format
+  //     const formattedTrainees = traineesData.map(trainee => ({
+  //       id: trainee._id || trainee.id || `trainee-${crypto.randomUUID()}`,
+  //       fullName: trainee.fullName || `${trainee.name || ""} ${trainee.surname || ""}`.trim(),
+  //       email: trainee.email || trainee.emailAddress || "N/A",
+  //       phoneNumber: trainee.phoneNumber || trainee.phone || "N/A",
+  //       role: "Trainee",
+  //       status: trainee.status || "active",
+  //       lastCheckIn: trainee.lastCheckInDate || "N/A"
+  //     }));
+      
+  //     allUserResults = [...formattedTrainees];
+      
+  //     // === 2. Fetch facilitators and stakeholders if user has appropriate role ===
+  //     if (userRole === "super_admin" || userRole === "admin") {
+  //       // Fetch facilitators
+  //       try {
+  //         const facilitatorsResponse = await axios.get(
+  //           "https://timemanagementsystemserver.onrender.com/api/facilitators",
+  //           { headers }
+  //         );
+          
+  //         const facilitatorsData = facilitatorsResponse.data?.facilitators || [];
+  //         const formattedFacilitators = facilitatorsData.map(facilitator => ({
+  //           id: facilitator._id || facilitator.id || `facilitator-${crypto.randomUUID()}`,
+  //           fullName: facilitator.fullName || `${facilitator.name || ""} ${facilitator.surname || ""}`.trim(),
+  //           email: facilitator.email || facilitator.emailAddress || "N/A",
+  //           phoneNumber: facilitator.phoneNumber || facilitator.phone || "N/A",
+  //           role: "Facilitator",
+  //           status: facilitator.status || "active"
+  //         }));
+          
+  //         allUserResults = [...allUserResults, ...formattedFacilitators];
+  //       } catch (error) {
+  //         console.error("Failed to fetch facilitators:", error);
+  //         // Don't throw error, just continue with what we have
+  //       }
+        
+  //       // Fetch stakeholders
+  //       try {
+  //         const stakeholdersResponse = await axios.get(
+  //           "https://timemanagementsystemserver.onrender.com/api/stakeholder/all",
+  //           { headers }
+  //         );
+          
+  //         const stakeholdersData = stakeholdersResponse.data?.stakeholders || [];
+  //         const formattedStakeholders = stakeholdersData.map(stakeholder => ({
+  //           id: stakeholder._id || stakeholder.id || `stakeholder-${crypto.randomUUID()}`,
+  //           fullName: stakeholder.fullName || `${stakeholder.name || ""} ${stakeholder.surname || ""}`.trim(),
+  //           email: stakeholder.email || stakeholder.emailAddress || "N/A",
+  //           phoneNumber: stakeholder.phoneNumber || stakeholder.phone || "N/A",
+  //           role: "Stakeholder",
+  //           status: stakeholder.status || "active"
+  //         }));
+          
+  //         allUserResults = [...allUserResults, ...formattedStakeholders];
+  //       } catch (error) {
+  //         // Check if it's a permission error
+  //         if (error.response?.status === 403) {
+  //           console.warn("User doesn't have permission to access stakeholders");
+  //         } else {
+  //           console.error("Failed to fetch stakeholders:", error);
+  //         }
+  //         // Don't throw error, just continue with what we have
+  //       }
+  //     }
+      
+  //     // Update state with all user data
+  //     setUsers(allUserResults);
+      
+  //   } catch (error) {
+  //     console.error("Error in fetchUsers:", error);
+  //     throw error;
+  //   }
+  // };
 
   // Toggle user status (active/deactive)
   const toggleUserStatus = async (userId) => {
@@ -287,6 +701,21 @@ const UserManagement = () => {
   };
 
   // Filter data based on search term
+  // const filteredUsersData = users.filter(
+  //   (user) =>
+  //     user.fullName.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+  //     user.email.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+  //     user.role.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+  // );
+
+  // const filteredGuestsData = guests.filter(
+  //   (guest) =>
+  //     guest.fullName.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+  //     guest.email.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+  //     (guest.phoneNumber && guest.phoneNumber.toLowerCase().includes(debouncedSearchTerm.toLowerCase()))
+  // );
+
+
   const filteredUsersData = users.filter(
     (user) =>
       user.fullName.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
@@ -304,6 +733,22 @@ const UserManagement = () => {
   // Get tab-specific data
 // Update the getTabData function to ensure guests only appear in the Guests tab
 
+// const getTabData = (tabName) => {
+//   switch (tabName) {
+//     case "Trainees":
+//       return filteredUsersData.filter((u) => u.role === "Trainee");
+//     case "Facilitators":
+//       return filteredUsersData.filter((u) => u.role === "Facilitator");
+//     case "Stakeholders":
+//       return filteredUsersData.filter((u) => u.role === "Stakeholder");
+//     case "Guests":
+//       // Only return the guest data for this tab - do not filter users
+//       return filteredGuestsData;
+//     default:
+//       return [];
+//   }
+// };
+
 const getTabData = (tabName) => {
   switch (tabName) {
     case "Trainees":
@@ -313,12 +758,12 @@ const getTabData = (tabName) => {
     case "Stakeholders":
       return filteredUsersData.filter((u) => u.role === "Stakeholder");
     case "Guests":
-      // Only return the guest data for this tab - do not filter users
-      return filteredGuestsData;
+      return filteredGuestsData; // Only return guests data here
     default:
       return [];
   }
 };
+
 
   // Pagination logic
   const paginate = (data) => {
@@ -465,7 +910,8 @@ const getTabData = (tabName) => {
           </thead>
           <tbody>
             {paginatedData.map((item) => (
-              <tr key={item.id}>
+              console.log('item',item.id),
+              <tr key={item.id.toString()}>
                 {tabName === "Guests" ? (
                   <>
                     <td>{item.fullName}</td>
@@ -560,10 +1006,10 @@ const getTabData = (tabName) => {
 
       {/* Header */}
       <div className="header">
-        <div className="title-section">
+        <div className="UM-title-section">
           <h1>User Management</h1>
-          <p className="subtitle">
-            Manage trainees, facilitators, stakeholders, and guests
+          <p className="UM-subtitle">
+            {`Manage trainees${userRole === 'facilitator' ? '' : ', facilitators, stakeholders'} and guests`}
           </p>
           {feedbackMessage && (
             <p className="feedback-message">{feedbackMessage}</p>
@@ -608,7 +1054,7 @@ const getTabData = (tabName) => {
               <Search className="search-icon" />
               <input
                 type="text"
-                placeholder="Search..."
+                placeholder="Search by email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="search-input"

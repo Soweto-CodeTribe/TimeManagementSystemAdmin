@@ -1,3 +1,4 @@
+/* eslint-disable no-async-promise-executor */
 // firebaseConfig.js
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
@@ -5,6 +6,7 @@ import { getFirestore, serverTimestamp } from "firebase/firestore";
 import { getDatabase } from "firebase/database";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { setDoc, doc } from "firebase/firestore";
+// import { admin } from "firebase-admin";
 // Firebase configuration
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_APIKEY,
@@ -22,6 +24,7 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const rtdb = getDatabase(app);
 export const messaging = getMessaging(app)
+
 // VAPID key for web push notifications
 const vapidKey = 'BDsqPLmY25EV2VmocEZn5KKZxb8-M49AtnJW8AQG-2s7q9uGpkMsBlyoXXbQ5F9Dg0IgSf5wRj_gk8QooevAd74';
 // Store the messaging instance
@@ -118,6 +121,15 @@ export const onForegroundMessage = () => {
     }
   });
 };
+
+export const setupForegroundMessageListener = () =>{
+  onMessage(messaging, (payload) => {
+    console.log('Foreground Message Received:', payload);
+    // Handle foreground message
+  });
+}
+
+
 // Initialize Firebase Messaging on module load
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {

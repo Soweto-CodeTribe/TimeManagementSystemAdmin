@@ -4,7 +4,7 @@ let socket;
 
 export const initializeSocket = (token) => {
   if (!socket) {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const apiUrl = 'https://timemanagementsystemserver.onrender.com/api';
     
     socket = io(apiUrl, {
       auth: { token },

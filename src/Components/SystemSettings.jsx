@@ -1,3 +1,5 @@
+/* eslint-disable react/no-unknown-property */
+/* eslint-disable react/prop-types */
 "use client"
 
 import { useState } from "react"
@@ -20,6 +22,7 @@ function SystemSettings() {
   }
 
   const openModal = () => {
+    
     setShowModal(true) // Show the modal
   }
 

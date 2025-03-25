@@ -302,7 +302,7 @@ const Tickets = () => {
       {/* Detail View */}
       {selectedTicket && (
         <div className="tickets-ticket-detail-overlay">
-          <div className="tickets-ticket-detail-container">
+          <div className="My-tickets-ticket-detail-container">
             <div className="tickets-ticket-detail-header">
               <h3>Ticket Details</h3>
               <button onClick={closeDetailView} className="tickets-close-button">X</button>
