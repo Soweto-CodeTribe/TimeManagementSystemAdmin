@@ -65,7 +65,7 @@ const Sidebar = ({ activeScreen }) => {
   };
 
   const sidebarItems = [
-    { name: 'Dashboard', icon: <RxDashboard style={{ fontSize: '20px', color: "gray"}} />, route: '/' },
+    { name: 'Dashboard', icon: <RxDashboard style={{ fontSize: '20px', color: "gray"}} />, route: '/dashboard' },
     { name: 'User Management', icon: <HiUsers style={{ fontSize: '20px' }} />, route: '/user-management' },
     { name: 'Session Monitoring', icon: <WiTime4 style={{ fontSize: '20px' }} />, route: '/session' },
     {name:'Event Management', icon: <MdEvent style={{ fontSize: '20px' }} />, route:'/EventManagement'},

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -20,16 +19,14 @@ import ForgotPassword from "./Components/ForgotPassword";
 import AdminProfile from "./Components/AdminProfile";
 import TwoFactorAuth from "./Components/TwoFactorAuth";
 import Tickets from "./Components/Tickets";
-import ErrorPage from "./Components/ErrorPage"; // Renamed from NotFound to ErrorPage
+import ErrorPage from "./Components/ErrorPage";
 import Loader from "./Components/Loader";
 import Notifications from "./Components/Notifications";
 import Feedback from "./Components/Feedback";
-import { generateFCMToken, setupFCMListener,fetchNotifications, fetchUnreadCount } from './Slices/notificationsSlice';
-import NotificationsPage from "./Components/Notifications"
-import EventManagement from "./Components/EventManagement"
+import { generateFCMToken, setupFCMListener, fetchUnreadCount } from './Slices/notificationsSlice';
+import EventManagement from "./Components/EventManagement";
 import LocationManagement from "./Components/LocationManagement";
 import TimeManagement from "./Components/TimeManagement";
-
 
 function App() {
   const location = useLocation();
@@ -42,32 +39,28 @@ function App() {
   // Get traineeId from localStorage
   const traineeId = localStorage.getItem('userId');
 
-/// First useEffect
-useEffect(() => {
-  if (isAuthenticated && traineeId) {
-    // Only fetch the unread count
-    dispatch(fetchUnreadCount(traineeId))
-      .catch((error) => {
-        console.error("Error fetching unread count:", error);
-      });
-  }
-}, [dispatch, isAuthenticated, traineeId]);
-
-// Second useEffect
-useEffect(() => {
-  if (user?.id) {
-    // Initialize FCM
-    dispatch(generateFCMToken());
-    dispatch(setupFCMListener());
-
-    // Only fetch the unread count
-    const userId = user.id || localStorage.getItem('userId');
-    if (userId) {
-      dispatch(fetchUnreadCount(userId));
+  // First useEffect
+  useEffect(() => {
+    if (isAuthenticated && traineeId) {
+      dispatch(fetchUnreadCount(traineeId))
+        .catch((error) => {
+          console.error("Error fetching unread count:", error);
+        });
     }
-  }
-}, [dispatch, user]);
+  }, [dispatch, isAuthenticated, traineeId]);
 
+  // Second useEffect
+  useEffect(() => {
+    if (user?.id) {
+      dispatch(generateFCMToken());
+      dispatch(setupFCMListener());
+
+      const userId = user.id || localStorage.getItem('userId');
+      if (userId) {
+        dispatch(fetchUnreadCount(userId));
+      }
+    }
+  }, [dispatch, user]);
 
   // Initial auth check on app load
   useEffect(() => {
@@ -100,9 +93,9 @@ useEffect(() => {
   }
 
   // Determine current screen name for Navbar
-  const getScreenName = (path) => {
+const getScreenName = (path) => {
     switch (path) {
-      case "/":
+      case "/dashboard":
         return "Dashboard";
       case "/TwoFactorAuth":
         return "Two Factor Authentication";
@@ -135,21 +128,11 @@ useEffect(() => {
 
   const currentScreen = getScreenName(location.pathname);
 
-  // Global loading overlay while auth status is pending
-  if (isLoading) {
-    return (
-      <div className="loading-overlay">
-        <Loader />
-      </div>
-    );
-  }
-
-  // Define public routes that should be accessible without authentication
-  const publicRoutes = ["/login", "/forgotPassword", "/TwoFactorAuth"];
-  const isPublicRoute = publicRoutes.includes(location.pathname);
-
   return (
     <Routes>
+      {/* Default route redirects to login */}
+      <Route path="/" element={<Navigate to="/login" />} />
+
       {/* Public routes */}
       <Route path="/login" element={isAuthenticated ? <Navigate to="/TwoFactorAuth" /> : <Login />} />
       <Route path="/forgotPassword" element={<ForgotPassword />} />
@@ -174,7 +157,7 @@ useEffect(() => {
                     toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
                   />
                   <Routes>
-                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/user-management" element={<UserManagement />} />
                     <Route path="/session" element={<Session />} />
                     <Route path="/reports" element={<Reports />} />
@@ -184,7 +167,6 @@ useEffect(() => {
                     <Route path="/alerts" element={<Alerts />} />
                     <Route path="/audit-logs" element={<AuditLogs />} />
                     <Route path="/Tickets" element={<Tickets />} />
-                    {/* <Route path="/notifications" element={<NotificationsPage />} /> */}
                     <Route path="/Feedback" element={<Feedback />} />
                     <Route path="/location-management" element={<LocationManagement />} />
                     <Route path="/time-management" element={<TimeManagement />} />
@@ -209,4 +191,3 @@ useEffect(() => {
 }
 
 export default App;
-

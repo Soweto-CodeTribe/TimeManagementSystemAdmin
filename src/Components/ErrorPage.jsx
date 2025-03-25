@@ -27,7 +27,7 @@ const ErrorPage = ({ errorType = '404' }) => {
       solutions: [
         'Check the URL and try again',
         'Return to the previous page',
-        <Link to="/" className="login-link">Go to Dashboard</Link>
+        <Link to="/dashboard" className="login-link">Go to Dashboard</Link>
       ]
     },
     '500': {
