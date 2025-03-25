@@ -84,14 +84,12 @@
 
 .sidebar ul li.active {
   background-color: #d0d0d0; /* Change to your preferred active color */
-  color: #000;
   font-weight: bold;
 }
 
 
 .sidebar ul li:hover {
   background-color: #e0e0e0;
-  color: #000;
 }
 
 /* Icon Styling */
@@ -99,17 +97,19 @@
   width: 24px;
   height: 24px;
   color: rgba(0, 0, 0, 0.5);
+  rotate: 270deg;
 }
 
 /* Logout Button */
 .logout-btn {
   width: 100%;
-  color: #000;
+  color: #464444;
   cursor: pointer;
   font-size: 14px;
   display: flex;
   padding: 8px 12px;
   margin-top: 8px;
+  font-weight: normal;
   background-color: transparent;
   border: none;
   align-items: center;
