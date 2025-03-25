@@ -134,7 +134,7 @@ const getScreenName = (path) => {
       <Route path="/" element={<Navigate to="/login" />} />
 
       {/* Public routes */}
-      <Route path="/login" element={isAuthenticated ? <Navigate to="/TwoFactorAuth" /> : <Login />} />
+      <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login />} />
       <Route path="/forgotPassword" element={<ForgotPassword />} />
       <Route path="/TwoFactorAuth" element={<TwoFactorAuth />} />
       
