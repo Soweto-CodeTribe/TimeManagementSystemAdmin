@@ -182,7 +182,7 @@ const getScreenName = (path) => {
             </div>
           ) : (
             // For unauthenticated users trying to access protected routes
-            <ErrorPage errorType="403" />
+            <Navigate to="/login" replace />
           )
         }
       />
