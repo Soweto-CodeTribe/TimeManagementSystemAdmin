@@ -45,7 +45,7 @@
 
 .avatar-placeholder:hover {
   transform: scale(1.05);
-  border-color: #8ac052;
+  border-color:#4285f4;
 }
 
 /* Buttons */
@@ -57,13 +57,13 @@
 }
 
 .upload-btn:hover{
- box-shadow: #8ac052 0px 0px 10px;
+ box-shadow: #4285f4;
 }
 .save-image-btn:hover{
-  box-shadow: #8ac052 0px 0px 10px;
+  box-shadow: #4285f4;
  }
  .update-btn:hover{
-  box-shadow: #8ac052 0px 0px 10px;
+  box-shadow: #4285f4;
  }
 
 
@@ -71,7 +71,7 @@
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  background-color: #8ac052;
+  background-color: #0c0c0c;
   color: white;
   border: none;
   padding: 0.75rem 1rem;
@@ -132,7 +132,7 @@
 }
 
 .profile-form input:focus, .profile-form textarea:focus {
-  border-color: #8ac052;
+  border-color: #4285f4;
   box-shadow: 0 0 0.5rem rgba(138, 192, 82, 0.3);
   outline: none;
 }
