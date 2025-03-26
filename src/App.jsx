@@ -148,7 +148,6 @@ const getScreenName = (path) => {
       {/* Error page routes */}
       <Route path="/error/404" element={<ErrorPage errorType="404" />} />
       <Route path="/error/500" element={<ErrorPage errorType="500" />} />
-      <Route path="/error/403" element={<ErrorPage errorType="403" />} />
       
       {/* Protected routes */}
       <Route
