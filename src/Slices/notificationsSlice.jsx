@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-import { initializeMessaging, requestFCMToken, onForegroundMessage } from '../firebaseConfig';
+import { initializeMessaging, requestNotificationPermission, onMessageListener } from '../firebaseConfig'
 
 // API Configuration
 const BASE_URL = 'https://timemanagementsystemserver.onrender.com/api';
@@ -33,7 +33,7 @@ export const generateFCMToken = createAsyncThunk(
   async (_, { getState, rejectWithValue }) => {
     try {
       await initializeMessaging();
-      const token = await requestFCMToken();
+      const token = await requestNotificationPermission();
       
       if (getState().auth.token && getState().auth.user?.id) {
         await axios.post(
@@ -57,7 +57,7 @@ export const generateFCMToken = createAsyncThunk(
 export const setupFCMListener = createAsyncThunk(
   'notifications/setupFCMListener',
   async (_, { dispatch, getState }) => {
-    onForegroundMessage().then((payload) => {
+    onMessageListener().then((payload) => {
       if (payload.data?.notificationType === 'newMessage') {
         const traineeId = getState().auth.user?.id;
         if (traineeId) {

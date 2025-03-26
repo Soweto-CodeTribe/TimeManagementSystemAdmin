@@ -107,8 +107,8 @@
   font-weight: bold;
 }
 
-.add-user-form-container .nav-item:hover {
-  color: #4CAF50; /* Darker green on hover */
+.nav-item .active:hover{
+  background: unset
 }
 
 .add-user-form-container .checkbox-group {

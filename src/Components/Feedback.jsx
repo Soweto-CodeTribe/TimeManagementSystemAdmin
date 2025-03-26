@@ -14,7 +14,6 @@ function FeedbackPage() {
     const fetchFeedback = async () => {
       try {
         setIsLoading(true);
-        console.log("Token:", token);
 
         const response = await axios.get('https://timemanagementsystemserver.onrender.com/api/add-user/getFeedBack', {
           headers: {
@@ -23,7 +22,6 @@ function FeedbackPage() {
           },
         });
 
-        console.log("Feedback Data:", response.data);
 
         if (response.data.success && Array.isArray(response.data.feedback)) {
           setFeedback(response.data.feedback);
