@@ -1,14 +1,15 @@
 .time-management-container {
-  max-width: 600px;
+  /* max-width: 600px; */
   margin: 0 auto;
-  padding: 20px;
+  /* padding: 20px; */
   font-family: Arial, sans-serif;
   color: #333;
   position: relative;
 }
 
 .title {
-  font-size: 18px;
+  font-size: 20px;
+  text-align: left;
   font-weight: bold;
   margin-bottom: 10px;
   color: #000;
@@ -220,11 +221,10 @@
   border: none; /* No border */
   cursor: pointer; /* Pointer cursor */
   font-size: 1.5em; /* Size */
-  color:rgb(4, 5, 4) Color */
   margin-bottom: 1em; /* Spacing below */
   position: absolute; /* Absolute positioning */
-  top: 20px; /* Position from the top */
-  left: 20px; /* Position from the left */
+  top: 0px; /* Position from the top */
+  left: 0px; /* Position from the left */
 }
 
 .back-button:hover {

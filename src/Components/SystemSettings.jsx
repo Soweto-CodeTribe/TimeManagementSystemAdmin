@@ -175,7 +175,6 @@ function SystemSettings() {
         }
 
         .light {
-          background-color: #f0f0f0; /* Light mode background */
           color: black; /* Default text color in light mode */
         }
 
