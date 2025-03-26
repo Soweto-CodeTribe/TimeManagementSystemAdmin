@@ -4,11 +4,12 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000; /* Ensure modal is above other content */
+    z-index: 9999;
+    padding: 15px; /* Add padding for smaller screens */
 }
 
 .modalContent {
@@ -16,7 +17,10 @@
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    width: 400px; /* Adjust width as needed */
+    width: 100%;
+    max-width: 400px; /* Limit maximum width */
+    max-height: 90vh; /* Limit maximum height */
+    overflow-y: auto; /* Allow scrolling if content is too long */
 }
 
 .close-button {
@@ -24,46 +28,88 @@
     border: none;
     cursor: pointer;
     font-size: 20px;
-    float: right;
+    position: absolute;
+    top: 10px;
+    right: 10px;
 }
 
 h2 {
     margin-top: 0;
     text-align: center;
+    font-size: 1.2rem; /* Slightly smaller on mobile */
 }
 
-ul {
-    list-style: none;
-    padding: 0;
+.form-group {
+    margin-bottom: 15px;
 }
 
-ul li {
+.input-group {
     display: flex;
-    align-items: center;
-    padding: 10px 0;
+    flex-direction: column; /* Stack inputs vertically on small screens */
+    gap: 10px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+.actions-button {
+    background-color: lightgrey;
+    color:black;
+    border: none;
+    padding: 10px 12px;
     cursor: pointer;
+    width: 100%; /* Full width on small screens */
+    margin-top: 5px;
 }
 
-ul li:hover {
-    background-color: #f0f0f0; /* Light hover effect */
+.actions-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
 }
 
-.view-icon {
-    color: blue; /* View icon color */
-    margin-right: 10px; /* Space between icon and text */
+.error-message {
+    color: red;
+    margin-top: 10px;
+    text-align: center;
 }
 
-.export-csv-icon {
-    color: green; /* Export CSV icon color */
-    margin-right: 10px; /* Space between icon and text */
+.success-message {
+    color: green;
+    margin-top: 10px;
+    text-align: center;
 }
 
-.export-pdf-icon {
-    color: red; /* Export PDF icon color */
-    margin-right: 10px; /* Space between icon and text */
+.date-input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
 }
 
-.delete-icon {
-    color: red; /* Delete icon color */
-    margin-right: 10px; /* Space between icon and text */
+/* Tablet and Desktop Styles */
+@media screen and (min-width: 600px) {
+    .input-group {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .input-group input {
+        width: auto;
+        flex-grow: 1;
+    }
+
+    .actions-button {
+        width: auto;
+        margin-top: 0;
+        margin-left: 10px;
+    }
+}
+
+/* Large Desktop Styles */
+@media screen and (min-width: 1024px) {
+    .modalContent {
+        max-width: 500px;
+    }
 }

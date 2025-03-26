@@ -38,7 +38,7 @@ const TwoFactorAuth = () => {
 
     dispatch(verifyOTP({ verificationId, verificationCode: otp }))
       .unwrap()
-      .then(() => navigate("/")) // Redirect on success
+      .then(() => navigate("/dashboard")) // Redirect on success
       .catch((err) => console.error("Verification failed:", err));
   };
 

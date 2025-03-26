@@ -17,7 +17,6 @@ const Login = () => {
   const { isLoading, error } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
-  console.log("Login component rendering");
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -67,6 +66,7 @@ const Login = () => {
       
       if (loginAction.fulfilled.match(resultAction)) {
         setDebugInfo("Login successful!");
+        navigate("/TwoFactorAuth");
         console.log("Login successful:", resultAction.payload);
         
         if (resultAction.payload.verificationId) {

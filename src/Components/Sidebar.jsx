@@ -11,7 +11,14 @@ import {
   FaTimes,
   FaComment 
 } from 'react-icons/fa';
+import { RxDashboard } from "react-icons/rx";
+import { HiUsers } from "react-icons/hi2";
+import { WiTime4 } from "react-icons/wi";
 import { MdEvent } from "react-icons/md";
+import { CgFileDocument } from "react-icons/cg";
+import { LuTicketSlash } from "react-icons/lu";
+import { IoSettingsOutline } from "react-icons/io5";
+import { AiOutlineLogout } from "react-icons/ai";
 import Modal from 'react-modal';
 import { useDispatch } from 'react-redux';
 import { logout } from '../Slices/authSlice'; // Adjust the import path as needed
@@ -58,15 +65,15 @@ const Sidebar = ({ activeScreen }) => {
   };
 
   const sidebarItems = [
-    { name: 'Dashboard', icon: <FaTachometerAlt style={{ fontSize: '20px', color: "gray"}} />, route: '/' },
-    { name: 'User Management', icon: <FaUsers style={{ fontSize: '20px' }} />, route: '/user-management' },
-    { name: 'Session Monitoring', icon: <FaClock style={{ fontSize: '20px' }} />, route: '/session' },
+    { name: 'Dashboard', icon: <RxDashboard style={{ fontSize: '20px', color: "gray"}} />, route: '/dashboard' },
+    { name: 'User Management', icon: <HiUsers style={{ fontSize: '20px' }} />, route: '/user-management' },
+    { name: 'Session Monitoring', icon: <WiTime4 style={{ fontSize: '20px' }} />, route: '/session' },
     {name:'Event Management', icon: <MdEvent style={{ fontSize: '20px' }} />, route:'/EventManagement'},
-    { name: 'Reports', icon: <FaChartBar style={{ fontSize: '20px' }} />, route: '/reports' },
-    {name:'Tickets', icon: <FaComment style={{ fontSize: '20px' }} />, route: '/tickets'},
+    { name: 'Reports', icon: <CgFileDocument style={{ fontSize: '20px' }} />, route: '/reports' },
+    {name:'Tickets', icon: <LuTicketSlash style={{ fontSize: '20px' }} />, route: '/tickets'},
     {name:'Feedback', icon: <VscFeedback style={{ fontSize: '20px' }} />, route: '/feedback'},
     {name : 'Other', icon:null, route:null},
-    { name: 'Settings', icon: <FaCogs style={{ fontSize: '20px' }} />, route: '/settings' },
+    { name: 'Settings', icon: <IoSettingsOutline style={{ fontSize: '20px' }} />, route: '/settings' },
   ];
   
   return (
@@ -103,7 +110,7 @@ const Sidebar = ({ activeScreen }) => {
             ))}
           </ul>
           <button className="logout-btn" onClick={openLogoutModal}>
-            <FaSignOutAlt className="icon" /> Logout
+            <AiOutlineLogout className="icon" /> Sign out
           </button>
         </ul>
 

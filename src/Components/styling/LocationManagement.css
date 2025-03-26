@@ -1,28 +1,26 @@
 .location-management {
-    max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
-  h1 {
+  .location-management h1 {
     color: #2C3E50;
     margin-bottom: 2rem;
     text-align: center;
-  }
-  h2 {
+  } 
+  .location-management h2 {
     color: #34495E;
     margin-bottom: 1rem;
     border-bottom: 1px solid #eee;
     padding-bottom: 0.5rem;
-  }
-  .message {
+  } 
+  .location-management .message {
     padding: 0.8rem 1rem;
     margin-bottom: 1.5rem;
     border-radius: 4px;
     position: relative;
     animation: fadeIn 0.3s ease-in;
   }
-  .success {
+  .location-management .success {
     background-color: #D4EDDA;
     color: #155724;
     border: 1px solid #C3E6CB;
@@ -43,11 +41,11 @@
     color: inherit;
   }
   .location-form-container {
-    background-color: #F8F9FA;
-    border-radius: 8px;
-    padding: 1.5rem;
+    /* background-color: #F8F9FA; */
+    /* border-radius: 8px; */
+    /* padding: 1.5rem; */
     margin-bottom: 2rem;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    /* box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); */
   }
   .location-form {
     display: flex;
@@ -65,18 +63,18 @@
   .form-row .form-group {
     flex: 1;
   }
-  label {
+  .location-management label {
     margin-bottom: 0.5rem;
     font-weight: 500;
     color: #495057;
   }
-  input, textarea {
+  .location-management input, .location-management  textarea {
     padding: 0.8rem;
     border: 1px solid #CED4DA;
     border-radius: 4px;
     font-size: 1rem;
   }
-  input:focus, textarea:focus {
+  .location-management input:focus, .location-management textarea:focus {
     outline: none;
     border-color: #4299E1;
     box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
@@ -100,7 +98,7 @@
     gap: 1rem;
     margin-top: 1rem;
   }
-  button {
+  .location-management button {
     padding: 0.8rem 1.5rem;
     border: none;
     border-radius: 4px;
@@ -108,25 +106,25 @@
     cursor: pointer;
     transition: all 0.2s ease;
   }
-  .submit-btn {
+  .location-management  .submit-btn {
     background-color: #4299E1;
     color: white;
   }
-  .submit-btn:hover {
+  .location-management  .submit-btn:hover {
     background-color: #3182CE;
   }
-  .submit-btn:disabled {
+  .location-management  .submit-btn:disabled {
     background-color: #A0AEC0;
     cursor: not-allowed;
   }
-  .cancel-btn {
+  .location-management  .cancel-btn {
     background-color: #E2E8F0;
     color: #4A5568;
   }
   .cancel-btn:hover {
     background-color: #CBD5E0;
   }
-  .current-location-btn {
+  .location-management  .current-location-btn {
     background-color: #48BB78;
     color: white;
     width: fit-content;

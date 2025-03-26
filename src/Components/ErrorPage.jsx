@@ -10,7 +10,7 @@ const ErrorPage = ({ errorType = '404' }) => {
   const pathErrorType = pathParts[pathParts.length - 1];
   
   // Use URL error type if it's valid, otherwise use the prop
-  const currentErrorType = ['404', '500', '403'].includes(pathErrorType) 
+  const currentErrorType = ['404', '500'].includes(pathErrorType) 
     ? pathErrorType 
     : errorType;
 
@@ -27,7 +27,7 @@ const ErrorPage = ({ errorType = '404' }) => {
       solutions: [
         'Check the URL and try again',
         'Return to the previous page',
-        <Link to="/" className="login-link">Go to Dashboard</Link>
+        <Link to="/dashboard" className="login-link">Go to Dashboard</Link>
       ]
     },
     '500': {
@@ -42,20 +42,6 @@ const ErrorPage = ({ errorType = '404' }) => {
         'Try refreshing the page',
         'Try again in a few minutes',
         'Contact support if the problem persists'
-      ]
-    },
-    '403': {
-      code: '403',
-      message: 'Access Forbidden',
-      reasons: [
-        'You need to login to gain access',
-        'You do not have permission to view this page',
-        'Your session might have expired'
-      ],
-      solutions: [
-        <Link to="/login" className="login-link">LOGIN</Link>,
-        'Contact your administrator if you need access',
-        'Check your internet connection'
       ]
     }
   };

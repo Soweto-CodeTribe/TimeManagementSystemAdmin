@@ -1,256 +1,205 @@
-/* Container */
+/* Base Styles (Mobile First) */
 .profile-container {
   display: flex;
   flex-direction: column;
-  /* min-height: 100vh; */
-  height: 100vh;
-  background: url('./background.jpg') no-repeat center center fixed;
+  min-height: 100vh;
+  background: url("./background.jpg") no-repeat center center fixed;
   background-size: cover;
-  font-family: 'Inter', sans-serif; /* Modern font */
-  margin-top: -30px;
-}
-/* Disable scrolling */
-.no-scroll {
-  overflow: hidden;
+  font-family: "Inter", sans-serif;
+  margin: 0;
+  overflow-x: hidden;
 }
 
 /* Sidebar */
 .profile-sidebar {
   width: 100%;
-  background-color: rgba(255, 255, 255, 0.95); /* Semi-transparent white */
+  background-color: rgba(255, 255, 255, 0.95);
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
-  backdrop-filter: blur(10px); /* Frosted glass effect */
+  padding: 1rem;
+  backdrop-filter: blur(10px);
+  box-sizing: border-box;
 }
 
-/* Sidebar Header */
-.profile-sidebar h2 {
-  font-size: 24px;
-  font-weight: 600;
-  margin-bottom: 20px;
-  color: #333;
-}
-
-/* Avatar Section */
-.avatar-section {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
+/* Avatar */
 .avatar-placeholder {
-  width: 150px;
-  margin-top: 70px;
-  height: 150px;
+  width: 6rem;
+  height: 6rem;
   border-radius: 50%;
   background-color: #f0f0f0;
   display: flex;
-  margin-left: 35px;
   justify-content: center;
   align-items: center;
-  justify-items: center;
   overflow: hidden;
-  border: 3px solid #e0e0e0;
+  border: 2px solid #e0e0e0;
   transition: transform 0.3s ease, border-color 0.3s ease;
+  margin: 1rem auto;
+}
+.uploaded-image{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .avatar-placeholder:hover {
   transform: scale(1.05);
-  border-color: #04AA6D;
+  border-color:#4285f4;
 }
 
-/* Custom File Upload Button */
-.upload-btn {
-  display: inline-block;
-  margin-top: 20px;
-  background-color: #04AA6D;
+/* Buttons */
+.image-controls {
+  display: flex;
+  flex-direction: row; /* Ensures buttons stack vertically */
+  width: 100%; /* Makes sure they take full width */
+  gap: 0.75rem; /* Adds spacing between buttons */
+}
+
+.upload-btn:hover{
+ box-shadow: #4285f4;
+}
+.save-image-btn:hover{
+  box-shadow: #4285f4;
+ }
+ .update-btn:hover{
+  box-shadow: #4285f4;
+ }
+
+
+.upload-btn, .update-btn, .save-image-btn {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #0c0c0c;
   color: white;
   border: none;
-  padding: 16px 15px;
+  padding: 0.75rem 1rem;
   cursor: pointer;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
   font-weight: 500;
   transition: background-color 0.3s ease;
-}
-
-.upload-btn:hover {
-  background-color: #038a5a;
-}
-
-/* Hide Original File Input */
-input[type="file"] {
-  display: none;
-}
-
-/* Uploaded Image Display */
-.uploaded-image {
-  border-radius: 50%;
+  margin-top: 0.75rem;
+  text-align: center;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  box-sizing: border-box;
+  /*  */
 }
 
-/* Main Content */
+/* Adds spacing between Update and Save buttons */
+.save-image-btn{
+  margin: 1rem;
+}
+.upload-btn{
+  margin: 1rem;
+}
+.update-btn {
+  margin-bottom: 0.75rem;
+}
+
+/* Profile Main Content */
 .profile-main {
   width: 100%;
-  padding: 20px;
-  background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
-  backdrop-filter: blur(10px); /* Frosted glass effect */
+  padding: 1rem;
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  box-sizing: border-box;
 }
 
-/* Profile Form Styles */
+/* Form Styles */
 .profile-form {
   width: 100%;
 }
 
 .profile-form label {
   display: block;
-  margin-top: 15px;
-  font-size: 14px;
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
   font-weight: 500;
   color: #555;
 }
 
-.profile-form input,
-.profile-form textarea {
-  width: calc(100% - 20px);
-  padding: 10px;
-  margin-top: 8px;
+.profile-form input, .profile-form textarea {
+  width: 100%;
+  padding: 0.65rem;
+  margin-top: 0.4rem;
   border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  box-sizing: border-box;
 }
 
-.profile-form input:focus,
-.profile-form textarea:focus {
-  border-color: #04AA6D;
-  box-shadow: 0 0 8px rgba(4, 170, 109, 0.2);
+.profile-form input:focus, .profile-form textarea:focus {
+  border-color: #4285f4;
+  box-shadow: 0 0 0.5rem rgba(138, 192, 82, 0.3);
   outline: none;
 }
 
-/* Buttons */
-.update-btn {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 20px;
-  background-color: #04AA6D;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  cursor: pointer;
-  border-radius: 8px;
-  font-size: 8px;
-  font-weight: 500;
-  transition: background-color 0.3s ease;
-}
-
-.update-btn:hover {
-  background-color: #038a5a;
-}
-
-.image-controls {
-  display: flex;
-  flex-direction: row;
-  gap: 10px;
-  margin-top: 15px;
-  justify-content: center;
-  align-items: center;
-}
-
-.save-image-btn {
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  cursor: pointer;
-  border-radius: 8px;
-  font-size: 8px;
-  font-weight: 500;
-  transition: background-color 0.3s ease;
-  margin-top: 20px;
- 
-}
-
-.save-image-btn:hover {
-  background-color: #45a049;
-}
-
-.image-message {
-  margin-top: 10px;
-  font-size: 14px;
-  color: #4CAF50;
-  font-weight: 500;
-}
-
-/* Success Message */
-.success-message {
-  color: #4CAF50;
-  margin-top: 10px;
-  font-size: 14px;
-  font-weight: 500;
-}
-
 /* Media Queries */
+@media (min-width: 480px) {
+  .avatar-placeholder {
+    width: 8rem;
+    height: 8rem;
+  }
+  .upload-btn, .update-btn, .save-image-btn {
+    width: auto;
+    padding: 0.6rem 1.2rem;
+  }
+}
+
 @media (min-width: 768px) {
   .profile-container {
     flex-direction: row;
-    
+    height: 100vh;
   }
-
   .profile-sidebar {
-    width: 30%;
-    padding: 30px;
-  }
-  .uploaded-image{
-    display: flex;
-    justify-content: center;
+    width: 35%;
+    padding: 1.5rem;
+    height: 100vh;
+    overflow-y: auto;
   }
   .avatar-placeholder {
-    width: 200px;
-    height: 200px;
+    width: 10rem;
+    height: 10rem;
   }
+
 
   .profile-main {
-    width: 70%;
-    padding: 40px;
+    width: 65%;
+    padding: 1.5rem;
+    height: 100vh;
+    overflow-y: auto;
   }
-
-  .profile-form input,
-  .profile-form textarea {
-    padding: 12px;
-  }
-
-  .update-btn,
-  .save-image-btn {
-    padding: 12px 24px;
+  .upload-btn, .update-btn, .save-image-btn {
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
   }
 }
 
 @media (min-width: 1024px) {
   .avatar-placeholder {
-    width: 270px;
-    height: 270px;
+    width: 12rem;
+    height: 12rem;
   }
-
-  .profile-sidebar h2 {
-    font-size: 26px;
+  .profile-sidebar {
+    width: 30%;
   }
-
-  .profile-form label {
-    font-size: 16px;
+  .profile-main {
+    width: 70%;
   }
+}
 
-  .profile-form input,
-  .profile-form textarea {
-    font-size: 16px;
+@media (min-width: 1280px) {
+  .profile-sidebar {
+    width: 25%;
   }
-
-  .update-btn,
-  .save-image-btn {
-    font-size: 16px;
+  .profile-main {
+    width: 75%;
+  }
+  .avatar-placeholder {
+    width: 13rem;
+    height: 13rem;
   }
 }

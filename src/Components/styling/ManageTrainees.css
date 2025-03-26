@@ -1,9 +1,6 @@
 .program-manager-container {
-  max-width: 800px; /* Maximum width of the container */
   margin: 0 auto; /* Center the container */
-  padding: 20px; /* Padding inside the container */
-  font-family: Arial, sans-serif; /* Font family */
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Soft shadow around the container */
+  font-family: Arial, sans-serif; 
   border-radius: 8px; /* Rounded corners */
   background-color: #FFFFFF; /* White background */
 }
