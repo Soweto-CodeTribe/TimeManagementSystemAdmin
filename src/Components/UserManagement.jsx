@@ -480,7 +480,6 @@ const getTabData = (tabName) => {
           </thead>
           <tbody>
             {paginatedData.map((item) => (
-              console.log('item',item.id),
               <tr key={item.id.toString()}>
                 {tabName === "Guests" ? (
                   <>
@@ -556,7 +555,7 @@ const getTabData = (tabName) => {
       <Modal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        onView={() => console.log("View user:", selectedUser)}
+        // onView={() => console.log("View user:", selectedUser)}
         onExportCSV={handleExportCSV}
         onExportPDF={exportPDF}
         onDelete={handleDeleteUser}

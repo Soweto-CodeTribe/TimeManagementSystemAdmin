@@ -15,6 +15,7 @@ const AddUserForm = () => {
     const [idNumber, setIdNumber] = useState(''); // State for ID Number
     const [location, setLocation] = useState(''); // State for Location
     const [role, setRole] = useState(''); // State for user role
+    const userRole = localStorage.getItem('role')
 
     // State for address
     const [street, setStreet] = useState('');
@@ -69,6 +70,8 @@ const AddUserForm = () => {
                 case 'Stakeholder':
                     endpoint = '/api/stakeholder';
                     break;
+                case 'SuperAdmin':
+                    endpoint = '/api/super-admin/create'
                 default:
                     setFeedbackMessage("Please select a role.");
                     return; // Stop execution if the role is not selected
@@ -109,9 +112,9 @@ const AddUserForm = () => {
 
                 <div className="navigation">
                     <span className="nav-item">Basic Information</span>
-                    {' > '}
+                    {/* {' > '} */}
                     <span className="nav-item active">Physical Address</span>
-                    {' > '}
+                    {/* {' > '} */}
                     <span className="nav-item">Additional Info</span>
                 </div>
 
@@ -189,9 +192,9 @@ const AddUserForm = () => {
 
             <div className="navigation">
                 <span className="nav-item active">Basic Information</span>
-                {' > '}
+                {/* {' > '} */}
                 <span className="nav-item">Physical Address</span>
-                {' > '}
+                {/* {' > '} */}
                 <span className="nav-item">Additional Info</span>
             </div>
 
@@ -255,7 +258,7 @@ const AddUserForm = () => {
                 </div>
 
                 {/* Conditional Location input field */}
-                {(role === 'Trainee' || role === 'Facilitator') && (
+                {(userRole === 'Trainee' || role === 'Facilitator') && (
                     <div className="form-group">
                         <label htmlFor="location">Location</label>
                         <input 
@@ -276,9 +279,14 @@ const AddUserForm = () => {
                         onChange={(e) => setRole(e.target.value)}
                     >
                         <option value="" disabled>Select role</option>
+                        {userRole === 'super_admin' && (
+                           <>
+                            <option value="SuperAdmin">Super Admin</option>
+                            <option value="Stakeholder">Stakeholder</option>
+                            <option value="Facilitator">Facilitator</option>
+                           </>
+                        ) }
                         <option value="Trainee">Trainee</option>
-                        <option value="Facilitator">Facilitator</option>
-                        <option value="Stakeholder">Stakeholder</option>
                     </select>
                 </div>
 

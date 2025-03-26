@@ -186,26 +186,6 @@ const ReportsScreen = () => {
         Monitor and manage reports and issues submitted by trainees.
       </p>
 
-      {/* Metrics Grid */}
-      <div className="metrics-grid">
-        {[
-          { label: "Total Reports", value: metrics.totalReports, color: "blue" },
-          { label: "Resolved", value: metrics.resolvedReports, color: "green" },
-          { label: "Pending", value: metrics.pendingReports, color: "yellow" },
-          { label: "Rejected", value: metrics.rejectedReports, color: "red" },
-        ].map((metric, index) => (
-          <div className={`metric-card ${metric.color}`} key={index}>
-            <div className="metric-header">
-              <div className={`metric-icon ${metric.color}`}>
-                <div className={`metric-dot ${metric.color}`}></div>
-              </div>
-              <span className="metric-label">{metric.label}</span>
-            </div>
-            <div className={`metric-value ${metric.color}`}>{metric.value}</div>
-          </div>
-        ))}
-      </div>
-
       {/* Table Container */}
       <div className="table-container">
         <div className="table-header">

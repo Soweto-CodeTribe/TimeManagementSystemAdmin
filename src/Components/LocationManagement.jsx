@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
+import { useNavigate } from 'react-router-dom';
 import './styling/LocationManagement.css';
 
 const LocationManagement = () => {
-  const navigate = useNavigate(); // Initialize navigate
+  const navigate = useNavigate();
   const [locations, setLocations] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
@@ -114,32 +114,6 @@ const LocationManagement = () => {
     }
   };
 
-  const handleGetCurrentLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setFormData({
-            ...formData,
-            latitude: position.coords.latitude.toString(),
-            longitude: position.coords.longitude.toString()
-          });
-          setMessage({ text: 'Current location fetched', type: 'success' });
-        },
-        (error) => {
-          setMessage({
-            text: `Geolocation error: ${error.message}`,
-            type: 'error'
-          });
-        }
-      );
-    } else {
-      setMessage({
-        text: 'Geolocation is not supported by this browser',
-        type: 'error'
-      });
-    }
-  };
-
   return (
     <div className="location-management">
       <button className="back-arrow" onClick={() => navigate('/settings')}>
@@ -183,7 +157,7 @@ const LocationManagement = () => {
                 onChange={handleInputChange}
                 required
                 step="any"
-                placeholder="Latitude (e.g. 51.509865)"
+                placeholder="Manually enter latitude (e.g. 51.509865)"
               />
             </div>
             <div className="form-group">
@@ -196,17 +170,10 @@ const LocationManagement = () => {
                 onChange={handleInputChange}
                 required
                 step="any"
-                placeholder="Longitude (e.g. -0.118092)"
+                placeholder="Manually enter longitude (e.g. -0.118092)"
               />
             </div>
           </div>
-          <button
-            type="button"
-            onClick={handleGetCurrentLocation}
-            className="current-location-btn"
-          >
-            Use Current Location
-          </button>
           <div className="form-group">
             <label htmlFor="radius">Radius (meters)*</label>
             <input

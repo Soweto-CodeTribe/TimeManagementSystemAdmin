@@ -1,13 +1,18 @@
 /* eslint-disable no-async-promise-executor */
-// firebaseConfig.js
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore, serverTimestamp } from "firebase/firestore";
+import { 
+  getFirestore, 
+  serverTimestamp, 
+  doc, 
+  setDoc, 
+  arrayUnion, 
+  arrayRemove 
+} from "firebase/firestore";
 import { getDatabase } from "firebase/database";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
-import { setDoc, doc } from "firebase/firestore";
-// import { admin } from "firebase-admin";
-// Firebase configuration
+
+// Firebase configuration (using environment variables for security)
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_APIKEY,
   authDomain: import.meta.env.VITE_AUTHDOMAIN,
@@ -18,130 +23,136 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_MEASUREMENTID,
   databaseURL: import.meta.env.VITE_DATABASEURL,
 };
-// Initialize Firebase
+
+// Initialize Firebase app
 const app = initializeApp(firebaseConfig);
+
+// Export Firebase services
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const rtdb = getDatabase(app);
-export const messaging = getMessaging(app)
+export const messaging = getMessaging(app);
 
 // VAPID key for web push notifications
-const vapidKey = 'BDsqPLmY25EV2VmocEZn5KKZxb8-M49AtnJW8AQG-2s7q9uGpkMsBlyoXXbQ5F9Dg0IgSf5wRj_gk8QooevAd74';
+const vapidKey = import.meta.env.VITE_VAPID_KEY;
+
 // Store the messaging instance
 let messagingInstance = null;
+
 /**
-* Initialize Firebase Messaging
-* This registers the service worker and sets up messaging
-*/
+ * Initialize Firebase Messaging
+ */
 export const initializeMessaging = async () => {
   try {
-    // Register service worker first
-    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
-      scope: '/'
-    });
-    console.log(":white_tick: Service Worker Registered:", registration);
-    // Initialize messaging once service worker is registered
+    if (!('serviceWorker' in navigator)) {
+      throw new Error("❌ Service workers are not supported in this browser");
+    }
+
+    // Register the service worker
+    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', { scope: '/' });
+    console.log("✅ Service Worker Registered:", registration);
+
+    // Initialize Firebase Messaging
     messagingInstance = getMessaging(app);
-    console.log(":white_tick: Firebase Messaging Initialized");
+    console.log("✅ Firebase Messaging Initialized");
     return messagingInstance;
   } catch (error) {
-    console.error(":x: Failed to initialize messaging:", error);
+    console.error("❌ Failed to initialize Firebase Messaging:", error);
     throw error;
   }
 };
+
 /**
-* Request FCM token for push notifications
-* @returns {Promise<string>} FCM token
-*/
-export const requestFCMToken = async () => {
+ * Register the service worker for Firebase Messaging
+ */
+export const registerServiceWorker = async () => {
   try {
-    // Ensure messaging is initialized
+    if (!('serviceWorker' in navigator)) {
+      throw new Error("❌ Service workers are not supported in this browser");
+    }
+
+    // Register the service worker
+    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', { scope: '/' });
+    console.log("✅ Service Worker Registered:", registration);
+    return registration;
+  } catch (error) {
+    console.error("❌ Failed to register service worker:", error);
+    throw error;
+  }
+};
+
+/**
+ * Request notification permission and retrieve FCM token
+ * @returns {Promise<string>} FCM token
+ */
+export const requestNotificationPermission = async () => {
+  try {
     if (!messagingInstance) {
       await initializeMessaging();
     }
-    // Request notification permission
+
     const permission = await Notification.requestPermission();
     if (permission !== "granted") {
-      throw new Error(":x: Notification permission denied");
+      throw new Error("❌ Notification permission denied");
     }
-    // Get FCM token
+
     const token = await getToken(messagingInstance, { vapidKey });
-    console.log(":calling: FCM Token:", token);
-    // Save token to database or server
+    console.log("📞 FCM Token:", token);
+
     await saveTokenToDatabase(token);
     return token;
   } catch (error) {
-    console.error(":x: Error getting FCM token:", error);
+    console.error("❌ Error requesting notification permission:", error);
     throw error;
   }
 };
+
 /**
-* Save FCM token to database
-* @param {string} token - FCM token
-*/
+ * Save FCM token to Firestore
+ * @param {string} token - FCM token
+ */
 const saveTokenToDatabase = async (token) => {
   try {
-    console.log(":satellite_antenna: Saving FCM Token:", token);
-    // Example: Save to Firestore under current user
     const user = auth.currentUser;
-    if (user) {
-      const traineeRef = doc(db, "trainees", user.uid); // Assuming user.uid matches trainee ID
-      await setDoc(
-        traineeRef,
-        {
-          fcmTokens: admin.firestore.FieldValue.arrayUnion(token),
-          tokenLastUpdated: serverTimestamp(),
-        },
-        { merge: true }
-      );
+    if (!user) {
+      throw new Error("❌ No authenticated user found");
     }
+
+    const userRef = doc(db, "users", user.uid);
+    await setDoc(
+      userRef,
+      {
+        fcmTokens: arrayUnion(token),
+        tokenLastUpdated: serverTimestamp(),
+      },
+      { merge: true }
+    );
+    console.log("📡 FCM Token saved successfully");
   } catch (error) {
-    console.error(":x: Error saving token:", error);
+    console.error("❌ Error saving FCM token to database:", error);
   }
 };
+
 /**
-* Listen for foreground messages
-* @returns {Promise} Resolves with the message payload
-*/
-export const onForegroundMessage = () => {
-  return new Promise(async (resolve) => {
+ * Listen for foreground messages
+ * @returns {Promise} Resolves with the message payload
+ */
+export const onMessageListener = () => {
+  return new Promise((resolve) => {
     try {
-      // Ensure messaging is initialized
       if (!messagingInstance) {
-        await initializeMessaging();
+        throw new Error("❌ Messaging instance not initialized");
       }
-      // Set up message handler
+
       onMessage(messagingInstance, (payload) => {
-        console.log(":envelope_with_arrow: Foreground Message Received:", payload);
-        alert(`Push Notification: ${payload.notification.title}\n${payload.notification.body}`);
+        console.log("📨 Foreground Message Received:", payload);
         resolve(payload);
       });
     } catch (error) {
-      console.error(":x: Error setting up message listener:", error);
+      console.error("❌ Error setting up foreground message listener:", error);
     }
   });
 };
 
-export const setupForegroundMessageListener = () =>{
-  onMessage(messaging, (payload) => {
-    console.log('Foreground Message Received:', payload);
-    // Handle foreground message
-  });
-}
-
-
-// Initialize Firebase Messaging on module load
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', async () => {
-    try {
-      const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
-        scope: '/',
-      });
-      console.log('Service Worker Registered:', registration);
-    } catch (error) {
-      console.error('Failed to register service worker:', error);
-    }
-  });
-}
-// Export Firebase Timestamp
+// Export server timestamp utility
 export { serverTimestamp };
