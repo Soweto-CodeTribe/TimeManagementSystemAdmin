@@ -262,7 +262,7 @@ const AdminProfile = () => {
             <input
               type="text"
               name="fullname"
-              value={userData.name || ''}
+              value={userData.name || userData.fullName ||''}
               onChange={handleInputChange}
             />
             <label>Surname:</label>
@@ -276,7 +276,7 @@ const AdminProfile = () => {
             <input
               type="text"
               name="IdNumber"
-              value={userData.IdNumber || ''}
+              value={userData.IdNumber || userData.idNumber||''}
               onChange={handleInputChange}
              
             />
@@ -301,9 +301,6 @@ const AdminProfile = () => {
               name="email"
               value={userData.email || ''}
               onChange={handleInputChange}
-<<<<<<< HEAD
-=======
-         
             />
           </form>
 
@@ -321,7 +318,7 @@ const AdminProfile = () => {
             <input
               type="text"
               name="City"
-              value={userData.City || ''}
+              value={userData.City || userData.city||''}
               onChange={handleInputChange}
             />
             <label>Postal Code:</label>
@@ -330,7 +327,6 @@ const AdminProfile = () => {
               name="postalCode"
               value={userData.postalCode || ''}
               onChange={handleInputChange}
->>>>>>> 919cb199f3126b0b54af69bd5fbb80af1f0a421b
             />
             <button
               className="update-btn"
