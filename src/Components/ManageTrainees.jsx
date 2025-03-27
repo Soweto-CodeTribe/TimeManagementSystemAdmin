@@ -214,7 +214,7 @@ const ManageTrainees = () => {
           className="clear-button"
           disabled={loading || selectedTrainees.length === 0}
         >
-          Clear Selection
+          Clear
         </button>
         <button
           onClick={handleSetProgramDates}

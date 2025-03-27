@@ -55,17 +55,17 @@ h2 {
     box-sizing: border-box;
 }
 
-.actions-button {
-    background-color: lightgrey;
-    color:black;
-    border: none;
-    padding: 10px 12px;
-    cursor: pointer;
-    width: 100%; /* Full width on small screens */
-    margin-top: 5px;
+.myBtns {
+    background:#000;
+    border-radius: 14px;
+    color: #fff;
+    width: 92px;
+    height: 34px;
+    font-size: 12px;
+    border: 0;
 }
 
-.actions-button:disabled {
+.myBtns:disabled {
     background-color: #cccccc;
     cursor: not-allowed;
 }

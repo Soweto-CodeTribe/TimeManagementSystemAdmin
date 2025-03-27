@@ -116,7 +116,7 @@ const LocationManagement = () => {
 
   return (
     <div className="location-management">
-      <button className="back-arrow" onClick={() => navigate('/settings')}>
+      <button className="back" onClick={() => navigate('/settings')}>
         ← {/* This can be replaced by a back arrow icon */}
       </button>
 
@@ -157,7 +157,7 @@ const LocationManagement = () => {
                 onChange={handleInputChange}
                 required
                 step="any"
-                placeholder="Manually enter latitude (e.g. 51.509865)"
+                placeholder="Enter latitude (e.g. 51.509865)"
               />
             </div>
             <div className="form-group">
@@ -170,7 +170,7 @@ const LocationManagement = () => {
                 onChange={handleInputChange}
                 required
                 step="any"
-                placeholder="Manually enter longitude (e.g. -0.118092)"
+                placeholder="Enter longitude (e.g. -0.118092)"
               />
             </div>
           </div>

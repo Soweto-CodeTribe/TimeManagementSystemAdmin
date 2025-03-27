@@ -131,3 +131,21 @@
   padding: 15px; /* Padding inside loading text */
   color: #666; /* Gray color for loading text */
 }
+
+.back-arrow{
+  background: 0;
+  color: #000;
+  font-size: 24px;
+  padding: unset;
+  border: 0;
+  position: absolute;
+}
+
+.clear-button{
+  background:#000;
+  border-radius: 14px;
+  color: #fff;
+  width: 92px;
+  height: 34px;
+  font-size: 12px;
+}
