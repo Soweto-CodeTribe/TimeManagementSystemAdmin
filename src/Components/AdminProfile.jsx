@@ -276,7 +276,6 @@ const AdminProfile = () => {
               name="role"
               value={userData.role || ''}
               onChange={handleInputChange}
-              readOnly
             />
             <label>Email:</label>
             <input
@@ -284,7 +283,6 @@ const AdminProfile = () => {
               name="email"
               value={userData.email || ''}
               onChange={handleInputChange}
-              readOnly
             />
             <button
               className="update-btn"
