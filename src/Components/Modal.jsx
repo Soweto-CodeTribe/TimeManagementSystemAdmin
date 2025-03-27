@@ -178,7 +178,7 @@ const Modal = ({
                         <button 
                             onClick={handleCheckIn} 
                             disabled={loading}
-                            className="actions-button"
+                            className="myBtns"
                         >
                             Check In
                         </button>
@@ -197,7 +197,7 @@ const Modal = ({
                         <button 
                             onClick={handleLunchStart} 
                             disabled={loading}
-                            className="actions-button"
+                            className="myBtns"
                         >
                             Start Lunch
                         </button>
@@ -216,7 +216,7 @@ const Modal = ({
                         <button 
                             onClick={handleLunchEnd} 
                             disabled={loading}
-                            className="actions-button"
+                            className="myBtns"
                         >
                             End Lunch
                         </button>
@@ -235,7 +235,7 @@ const Modal = ({
                         <button 
                             onClick={handleCheckOut} 
                             disabled={loading}
-                            className="actions-button"
+                            className="myBtns"
                         >
                             Check Out
                         </button>

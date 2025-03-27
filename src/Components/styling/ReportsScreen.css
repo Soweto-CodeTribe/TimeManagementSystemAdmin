@@ -227,9 +227,14 @@
   padding: 4px 8px;
   border: 1px solid var(--border-color);
   border-radius: 4px;
-  background-color: white;
   font-size: 12px;
   cursor: pointer;
+  background:#000;
+  border-radius: 14px;
+  color: #fff;
+  width: 92px;
+  height: 34px;
+  font-size: 12px;
 }
 
 .view-button:hover {
