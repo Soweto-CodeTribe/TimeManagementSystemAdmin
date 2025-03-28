@@ -13,6 +13,7 @@ const ManageTrainees = () => {
   const [selectAll, setSelectAll] = useState(false);
   const [message, setMessage] = useState('');
   const API_BASE_URL = 'https://timemanagementsystemserver.onrender.com/api/trainees';
+  const API_BASE_URLS = 'https://timemanagementsystemserver.onrender.com/api';
 
   // Fetch all trainees when component mounts
   useEffect(() => {
@@ -42,7 +43,7 @@ const ManageTrainees = () => {
       // Log the fetched trainees data
       console.log("Trainees Data:", response.data);
 
-      setTrainees(response.data);
+      setTrainees(response.data.trainees);
       console.log("Trainees state after fetch:", response.data); // Display the data set to state
     } catch (error) {
       console.error("Error fetching trainees:", error);
@@ -77,6 +78,8 @@ const ManageTrainees = () => {
   };
 
   const handleSetProgramDates = async () => {
+    console.log('startDate', programStartDate)
+
     if (!programStartDate) {
       setMessage('Please select a program start date');
       return;
@@ -100,11 +103,11 @@ const ManageTrainees = () => {
       }
 
       const response = await axios.post(
-        `${API_BASE_URL}/session/set-bulk-program-date`,
+        `${API_BASE_URLS}/session/set-bulk-program-date`,
         {
           programStartDate: new Date(programStartDate).getTime(),
           programEndDate: programEndDate ? new Date(programEndDate).getTime() : null,
-          traineeIds: selectedTrainees
+          traineeId: selectedTrainees
         },
         {
           headers: {
@@ -113,6 +116,7 @@ const ManageTrainees = () => {
           }
         }
       );
+
 
       // Log the response data from updating program dates
       console.log("Response from Setting Dates:", response.data);
@@ -218,8 +222,8 @@ const ManageTrainees = () => {
         </button>
         <button
           onClick={handleSetProgramDates}
-          disabled={loading || selectedTrainees.length === 0}
-          className={`action-button ${loading ? 'button-disabled' : ''}`}
+          // disabled={loading || selectedTrainees.length === 0}
+          // className={`action-button ${loading ? 'button-disabled' : ''}`}
         >
           {loading ? 'Updating...' : 'Set Program Dates'}
         </button>

@@ -7,11 +7,11 @@ import { BrowserRouter } from 'react-router-dom';
 import NotificationHandler from './Components/ui/NotificationHandler.jsx';
 
 // Add Redux store debugging
-console.log("Redux store initial state:", store.getState());
+// console.log("Redux store initial state:", store.getState());
 
 // Subscribe to state changes
 store.subscribe(() => {
-  console.log("Redux state updated:", store.getState().auth);
+  // console.log("Redux state updated:", store.getState().auth);
 });
 
 // Clean up the render syntax (remove the stray comma)
