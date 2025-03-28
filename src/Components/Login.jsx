@@ -62,7 +62,7 @@ const Login = () => {
       // console.log("Login attempt with:", { email, password: "********", userType });
 
       const resultAction = await dispatch(loginAction({ email, password }));
-      // console.log("Login result:", resultAction);
+      console.log("Login result:", resultAction);
       
       if (loginAction.fulfilled.match(resultAction)) {
         setDebugInfo("Login successful!");

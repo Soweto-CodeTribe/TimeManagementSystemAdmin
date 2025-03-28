@@ -1,8 +1,15 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
-"use client";
-import React, { useState, useEffect, useCallback } from "react";
-import { Search, Filter, Download, Upload, UserPlus } from "lucide-react";
+import React, { useState, useEffect, useMemo } from "react";
+import {
+  Search,
+  Filter,
+  Download,
+  Upload,
+  UserPlus,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./styling/UserManagement.css";
 import jsPDF from "jspdf";
@@ -10,12 +17,12 @@ import Modal from "./Modal";
 import axios from "axios";
 import DataLoader from "./dataLoader";
 import CsvConfigModal from "./ui/CsvConfigModal";
+import ImportCsvModal from "./ui/ImportCsvConfig";
 
 const UserManagement = () => {
   // Location and Navigation Hooks
   const location = useLocation();
   const navigate = useNavigate();
-
   // State Management
   const [users, setUsers] = useState([]);
   const [guests, setGuests] = useState([]);
@@ -27,17 +34,20 @@ const UserManagement = () => {
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [activeTab, setActiveTab] = useState("Trainees");
   const [isLoading, setIsLoading] = useState(true);
+  // Pagination States
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(12); // Increased to match your total
+  const [itemsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  // Export and Import States
   const [exportStatus, setExportStatus] = useState("configuring");
   const [openCsvConfig, setOpenCsvConfig] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false); // New state for import modal
+  const [selectedFileType, setSelectedFileType] = useState("trainees"); // To track file type selection
   const [fetchError, setFetchError] = useState(null);
-
   // Authentication Details
   const token = localStorage.getItem("authToken");
   const userRole = localStorage.getItem("role");
   const userLocation = localStorage.getItem("userLocation");
-
   // Columns for CSV Export
   const [columns, setColumns] = useState({
     fullName: true,
@@ -80,35 +90,27 @@ const UserManagement = () => {
     }
   }, [location.state]);
 
-  // Fetch Online People (Placeholder Implementation)
+  // Fetch Online People
   const fetchOnlinePeople = async () => {
     try {
-      // Simulating online people data - replace with actual endpoint
-      const mockOnlinePeople = [
-        {
-          id: `online-${crypto.randomUUID()}`,
-          fullName: "John Doe",
-          email: "john.doe@example.com",
-          phoneNumber: "123-456-7890",
-          role: "Online",
-          status: "online",
-          lastActive: new Date().toISOString()
-        },
-        {
-          id: `online-${crypto.randomUUID()}`,
-          fullName: "Jane Smith",
-          email: "jane.smith@example.com",
-          phoneNumber: "098-765-4321",
-          role: "Online",
-          status: "online",
-          lastActive: new Date().toISOString()
-        }
-      ];
+      const response = await axios.get(
+        "https://timemanagementsystemserver.onrender.com/api/online-trainees",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-      setOnlinePeople(mockOnlinePeople);
+      const onlineTrainees = response.data.map((trainee) => ({
+        id: trainee.traineeId,
+        fullName: trainee.fullName,
+        email: trainee.email,
+        phoneNumber: trainee.phoneNumber || "N/A",
+        role: "Online Trainee",
+        lastActive: trainee.createdAt || new Date().toISOString(),
+      }));
+
+      setOnlinePeople(onlineTrainees);
     } catch (error) {
-      console.error("Error fetching online people:", error);
-      setFeedbackMessage("Failed to fetch online people.");
+      console.error("Error fetching online trainees:", error);
+      setFeedbackMessage("Failed to fetch online trainees data.");
     }
   };
 
@@ -119,9 +121,7 @@ const UserManagement = () => {
         "https://timemanagementsystemserver.onrender.com/api/guests/getGuests",
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
       const guestsData = response.data.eventsWithGuests || [];
-
       if (guestsData.length > 0) {
         const formattedGuests = guestsData.flatMap((event) =>
           (event.guestDetails || []).map((guest) => ({
@@ -146,21 +146,25 @@ const UserManagement = () => {
   };
 
   // Fetch Users
-  const fetchUsers = async () => {
+  const fetchUsers = async (page = 1) => {
     const headers = { Authorization: `Bearer ${token}` };
     let allUserResults = [];
-
     try {
       let traineesData = [];
-
       if (userRole === "facilitator") {
         try {
           const traineesUrl = userLocation
-            ? `https://timemanagementsystemserver.onrender.com/api/trainees/location?location=${userLocation}`
-            : "https://timemanagementsystemserver.onrender.com/api/my-trainees";
-
+            ? `https://timemanagementsystemserver.onrender.com/api/trainees/location?location=${userLocation}&page=${page}&limit=${itemsPerPage}`
+            : `https://timemanagementsystemserver.onrender.com/api/my-trainees?page=${page}&limit=${itemsPerPage}`;
           const traineesResponse = await axios.get(traineesUrl, { headers });
-          traineesData = traineesResponse.data?.allTrainees || traineesResponse.data?.trainees || [];
+          traineesData =
+            traineesResponse.data?.allTrainees ||
+            traineesResponse.data?.trainees ||
+            [];
+          if (traineesResponse.data.pagination) {
+            setTotalPages(traineesResponse.data.pagination.totalPages);
+            setCurrentPage(traineesResponse.data.pagination.currentPage);
+          }
         } catch (error) {
           console.error("Failed to fetch trainees for facilitator:", error);
           setFeedbackMessage("Failed to fetch trainees for facilitator.");
@@ -168,11 +172,14 @@ const UserManagement = () => {
       } else if (userRole === "super_admin" || userRole === "admin") {
         try {
           const traineesResponse = await axios.get(
-            "https://timemanagementsystemserver.onrender.com/api/trainees",
+            `https://timemanagementsystemserver.onrender.com/api/trainees?page=${page}&limit=${itemsPerPage}`,
             { headers }
           );
-
           traineesData = traineesResponse.data?.trainees || [];
+          if (traineesResponse.data.pagination) {
+            setTotalPages(traineesResponse.data.pagination.totalPages);
+            setCurrentPage(traineesResponse.data.pagination.currentPage);
+          }
         } catch (error) {
           console.error("Failed to fetch trainees for admin:", error);
           setFeedbackMessage("Failed to fetch trainees for admin.");
@@ -181,14 +188,15 @@ const UserManagement = () => {
 
       const formattedTrainees = traineesData.map((trainee) => ({
         id: trainee._id || trainee.id || `trainee-${crypto.randomUUID()}`,
-        fullName: trainee.fullName || `${trainee.name || ""} ${trainee.surname || ""}`.trim(),
+        fullName:
+          trainee.fullName ||
+          `${trainee.name || ""} ${trainee.surname || ""}`.trim(),
         email: trainee.email || trainee.emailAddress || "N/A",
         phoneNumber: trainee.phoneNumber || trainee.phone || "N/A",
         role: "Trainee",
         status: trainee.status || "active",
         lastCheckIn: trainee.lastCheckInDate || "N/A",
       }));
-
       allUserResults = [...formattedTrainees];
 
       if (userRole === "super_admin" || userRole === "admin") {
@@ -197,17 +205,21 @@ const UserManagement = () => {
             "https://timemanagementsystemserver.onrender.com/api/facilitators",
             { headers }
           );
-
-          const facilitatorsData = facilitatorsResponse.data?.facilitators || [];
+          const facilitatorsData =
+            facilitatorsResponse.data?.facilitators || [];
           const formattedFacilitators = facilitatorsData.map((facilitator) => ({
-            id: facilitator._id || facilitator.id || `facilitator-${crypto.randomUUID()}`,
-            fullName: facilitator.fullName || `${facilitator.name || ""} ${facilitator.surname || ""}`.trim(),
+            id:
+              facilitator._id ||
+              facilitator.id ||
+              `facilitator-${crypto.randomUUID()}`,
+            fullName:
+              facilitator.fullName ||
+              `${facilitator.name || ""} ${facilitator.surname || ""}`.trim(),
             email: facilitator.email || facilitator.emailAddress || "N/A",
             phoneNumber: facilitator.phoneNumber || facilitator.phone || "N/A",
             role: "Facilitator",
             status: facilitator.status || "active",
           }));
-
           allUserResults = [...allUserResults, ...formattedFacilitators];
         } catch (error) {
           console.error("Failed to fetch facilitators:", error);
@@ -219,17 +231,21 @@ const UserManagement = () => {
             "https://timemanagementsystemserver.onrender.com/api/stakeholder/all",
             { headers }
           );
-
-          const stakeholdersData = stakeholdersResponse.data?.stakeholders || [];
+          const stakeholdersData =
+            stakeholdersResponse.data?.stakeholders || [];
           const formattedStakeholders = stakeholdersData.map((stakeholder) => ({
-            id: stakeholder._id || stakeholder.id || `stakeholder-${crypto.randomUUID()}`,
-            fullName: stakeholder.fullName || `${stakeholder.name || ""} ${stakeholder.surname || ""}`.trim(),
+            id:
+              stakeholder._id ||
+              stakeholder.id ||
+              `stakeholder-${crypto.randomUUID()}`,
+            fullName:
+              stakeholder.fullName ||
+              `${stakeholder.name || ""} ${stakeholder.surname || ""}`.trim(),
             email: stakeholder.email || stakeholder.emailAddress || "N/A",
             phoneNumber: stakeholder.phone || stakeholder.phone || "N/A",
             role: "Stakeholder",
             status: stakeholder.status || "active",
           }));
-
           allUserResults = [...allUserResults, ...formattedStakeholders];
         } catch (error) {
           if (error.response?.status === 403) {
@@ -240,9 +256,7 @@ const UserManagement = () => {
           setFeedbackMessage("Failed to fetch stakeholders.");
         }
       }
-
       setUsers(allUserResults);
-      // console.log("Total users:", allUserResults.length); // Logging total users
     } catch (error) {
       console.error("Error in fetchUsers:", error);
     }
@@ -252,18 +266,14 @@ const UserManagement = () => {
   const fetchAllData = async () => {
     setIsLoading(true);
     setFetchError(null);
-
     try {
-      await fetchUsers();
-      
+      await fetchUsers(currentPage);
       if (userRole === "super_admin" || userRole === "admin" || userRole === "facilitator") {
         await fetchGuests();
       }
-
       if (userRole === "super_admin") {
-        await fetchOnlinePeople();
+        await fetchOnlinePeople(); // Ensure this is called for super admins
       }
-
       setFeedbackMessage("Data loaded successfully");
     } catch (error) {
       console.error("Error loading data:", error);
@@ -274,11 +284,42 @@ const UserManagement = () => {
     }
   };
 
+  // Pagination Handler
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      fetchUsers(page);
+    }
+  };
+
+  // Render Pagination Numbers
+  const renderPaginationNumbers = () => {
+    const pageNumbers = [];
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(
+        <button
+          key={i}
+          onClick={() => handlePageChange(i)}
+          className={`pagination-number ${currentPage === i ? "active" : ""}`}
+        >
+          {i}
+        </button>
+      );
+    }
+    return pageNumbers;
+  };
+
   // Toggle User Status
   const toggleUserStatus = async (userId) => {
     try {
-      setUsers(prevUsers => 
-        prevUsers.map(user =>
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
           user.id === userId
             ? { ...user, status: user.status === "active" ? "deactive" : "active" }
             : user
@@ -294,9 +335,8 @@ const UserManagement = () => {
   // Delete User
   const handleDeleteUser = async () => {
     if (!selectedUser) return;
-    
     try {
-      setUsers(prevUsers => prevUsers.filter(user => user.id !== selectedUser.id));
+      setUsers((prevUsers) => prevUsers.filter((user) => user.id !== selectedUser.id));
       setModalOpen(false);
       setFeedbackMessage("User deleted successfully.");
     } catch (error) {
@@ -311,71 +351,10 @@ const UserManagement = () => {
     setModalOpen(true);
   };
 
-  // Data Filtering
-  const filteredUsersData = users.filter(
-    (user) =>
-      user.fullName.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-      user.role.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
-  );
-
-  const filteredGuestsData = guests.filter(
-    (guest) =>
-      guest.fullName.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-      guest.email.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-      (guest.phoneNumber && guest.phoneNumber.toLowerCase().includes(debouncedSearchTerm.toLowerCase()))
-  );
-
-  const filteredOnlinePeopleData = onlinePeople.filter(
-    (person) =>
-      person.fullName.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-      person.email.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-      (person.phoneNumber && person.phoneNumber.toLowerCase().includes(debouncedSearchTerm.toLowerCase()))
-  );
-
-  // Get Tab Data
-  const getTabData = (tabName) => {
-    switch (tabName) {
-      case "Trainees":
-        return filteredUsersData.filter((u) => u.role === "Trainee");
-      case "Facilitators":
-        return filteredUsersData.filter((u) => u.role === "Facilitator");
-      case "Stakeholders":
-        return filteredUsersData.filter((u) => u.role === "Stakeholder");
-      case "Guests":
-        return filteredGuestsData;
-      case "Online People":
-        return filteredOnlinePeopleData;
-      default:
-        return [];
-    }
-  };
-
-  // Pagination
-  const paginate = (data) => {
-    // Always show all data if less than or equal to itemsPerPage
-    if (data.length <= itemsPerPage) return data;
-
-    const start = (currentPage - 1) * itemsPerPage;
-    return data.slice(start, start + itemsPerPage);
-  };
-
-  // Available Tabs
-  const getAvailableTabs = () => {
-    if (userRole === "super_admin") {
-      return ["Trainees", "Facilitators", "Stakeholders", "Guests", "Online People"];
-    } else if (userRole === "admin") {
-      return ["Trainees", "Facilitators", "Stakeholders", "Guests"];
-    } else {
-      return ["Trainees", "Guests"];
-    }
-  };
-
   // CSV Export
   const handleExportCSV = () => {
     setExportStatus("generating");
     const selectedColumns = Object.keys(columns).filter((key) => columns[key]);
-
     setTimeout(() => {
       try {
         const data = getTabData(activeTab).map((user) => {
@@ -385,7 +364,7 @@ const UserManagement = () => {
                 case "fullName":
                   return user.fullName || "";
                 case "surname":
-                  return (user.fullName?.split(" ").pop()) || "";
+                  return user.fullName?.split(" ").pop() || "";
                 case "codeTribeId":
                   return user.id || "";
                 case "emailAddress":
@@ -400,7 +379,6 @@ const UserManagement = () => {
             })
             .join(",");
         });
-
         const csvContent = `data:text/csv;charset=utf-8,${[
           selectedColumns.join(","),
           ...data,
@@ -411,7 +389,6 @@ const UserManagement = () => {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-
         setExportStatus("completed");
         setTimeout(() => {
           setExportStatus("configuring");
@@ -433,7 +410,9 @@ const UserManagement = () => {
     data.forEach((user, index) => {
       if (index < 30) {
         doc.text(
-          `${user.fullName?.substring(0, 30) || ""}, ${user.email?.substring(0, 30) || ""}, ${user.role || ""}`,
+          `${user.fullName?.substring(0, 30) || ""}, ${
+            user.email?.substring(0, 30) || ""
+          }, ${user.role || ""}`,
           10,
           30 + index * 10
         );
@@ -446,10 +425,8 @@ const UserManagement = () => {
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file || !token) return;
-
     const formData = new FormData();
     formData.append("file", file);
-
     try {
       setFeedbackMessage("Uploading CSV...");
       const response = await axios.post(
@@ -466,12 +443,107 @@ const UserManagement = () => {
     }
   };
 
+  // Data Filtering
+  const filteredUsersData = useMemo(() => {
+    return users.filter(
+      (user) =>
+        user.fullName
+          .toLowerCase()
+          .includes(debouncedSearchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        user.role.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+    );
+  }, [users, debouncedSearchTerm]);
+
+  const filteredGuestsData = useMemo(() => {
+    return guests.filter(
+      (guest) =>
+        guest.fullName
+          .toLowerCase()
+          .includes(debouncedSearchTerm.toLowerCase()) ||
+        guest.email.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        (guest.phoneNumber &&
+          guest.phoneNumber
+            .toLowerCase()
+            .includes(debouncedSearchTerm.toLowerCase()))
+    );
+  }, [guests, debouncedSearchTerm]);
+
+  const filteredOnlinePeopleData = useMemo(() => {
+    return onlinePeople.filter(
+      (person) =>
+        person.fullName
+          .toLowerCase()
+          .includes(debouncedSearchTerm.toLowerCase()) ||
+        person.email.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        (person.phoneNumber &&
+          person.phoneNumber
+            .toLowerCase()
+            .includes(debouncedSearchTerm.toLowerCase()))
+    );
+  }, [onlinePeople, debouncedSearchTerm]);
+
+  // Get Tab Data
+  const getTabData = (tabName) => {
+    switch (tabName) {
+      case "Trainees":
+        return filteredUsersData.filter((u) => u.role === "Trainee");
+      case "Facilitators":
+        return filteredUsersData.filter((u) => u.role === "Facilitator");
+      case "Stakeholders":
+        return filteredUsersData.filter((u) => u.role === "Stakeholder");
+      case "Guests":
+        return filteredGuestsData;
+      case "Online Trainees":
+        return filteredOnlinePeopleData;
+      default:
+        return [];
+    }
+  };
+
+  // Available Tabs
+  const getAvailableTabs = () => {
+    if (userRole === "super_admin") {
+      return ["Trainees", "Facilitators", "Stakeholders", "Guests", "Online Trainees"];
+    } else if (userRole === "admin") {
+      return ["Trainees", "Facilitators", "Stakeholders", "Guests"];
+    } else {
+      return ["Trainees", "Guests"];
+    }
+  };
+
   // Render Table
   const renderTable = (tabName) => {
     const data = getTabData(tabName);
-    const paginatedData = data; // Remove pagination to show all items
 
-    if (paginatedData.length === 0) {
+    if (tabName === "Online Trainees") {
+      return (
+        <div className="users-table-wrapper">
+          <table className="users-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Last Active</th>
+              </tr>
+            </thead>
+            <tbody>
+              {onlinePeople.map((trainee) => (
+                <tr key={trainee.id}>
+                  <td>{trainee.fullName}</td>
+                  <td>{trainee.email}</td>
+                  <td>{trainee.phoneNumber}</td>
+                  <td>{new Date(trainee.lastActive).toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
+
+    if (data.length === 0) {
       return <div className="no-data-message">No {tabName.toLowerCase()} found.</div>;
     }
 
@@ -494,7 +566,7 @@ const UserManagement = () => {
                   <th>Phone</th>
                   <th>Last Active</th>
                 </>
-              ) : (
+              ) : tabName === "Trainees" ? (
                 <>
                   <th>Full Name</th>
                   <th>Email</th>
@@ -502,11 +574,19 @@ const UserManagement = () => {
                   <th>Status</th>
                   <th>Actions</th>
                 </>
+              ) : (
+                <>
+                  <th>Full Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  {/* <th>Location</th> */}
+                  <th>Status</th>
+                </>
               )}
             </tr>
           </thead>
           <tbody>
-            {paginatedData.map((item) => (
+            {data.map((item) => (
               <tr key={item.id.toString()}>
                 {tabName === "Guests" ? (
                   <>
@@ -527,6 +607,7 @@ const UserManagement = () => {
                     <td>{item.fullName}</td>
                     <td>{item.email}</td>
                     <td>{item.role}</td>
+                    {/* <td>{item.location}</td> */}
                     <td>
                       <span
                         className={`status-badge ${item.status}`}
@@ -535,14 +616,16 @@ const UserManagement = () => {
                         {item.status === "deactive" ? "Deactive" : "Active"}
                       </span>
                     </td>
-                    <td>
-                      <button
-                        className="action-btn"
-                        onClick={() => handleTakeAction(item)}
-                      >
-                        Take action
-                      </button>
-                    </td>
+                    {tabName === "Trainees" && (
+                      <td>
+                        <button
+                          className="action-btn"
+                          onClick={() => handleTakeAction(item)}
+                        >
+                          Take action
+                        </button>
+                      </td>
+                    )}
                   </>
                 )}
               </tr>
@@ -553,14 +636,49 @@ const UserManagement = () => {
     );
   };
 
-  // Pagination Controls (Removed since we're showing all items)
-  const renderPagination = () => null;
-
   // Available Tabs
   const availableTabs = getAvailableTabs();
 
-  // Log total trainees when the component renders
-  // console.log("Total trainees:", getTabData("Trainees").length);
+  // Import CSV Modal Logic
+  const handleImportModalOpen = () => {
+    setIsImportModalOpen(true);
+  };
+
+  const handleFileTypeChange = (type) => {
+    setSelectedFileType(type);
+  };
+
+  const handleImportSubmit = async () => {
+    const fileInput = document.getElementById("csvInput");
+    const file = fileInput.files[0];
+    if (!file) {
+      setFeedbackMessage("Please select a CSV file.");
+      return;
+    }
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("trainees", selectedFileType === "trainees"); // Send 'true' for trainees
+    try {
+      setFeedbackMessage("Uploading CSV...");
+      const response = await axios.post(
+        "https://timemanagementsystemserver.onrender.com/api/csv/csv-upload",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      if (response.status === 202) {
+        setFeedbackMessage("Upload complete! Refreshing data...");
+        fetchAllData();
+        setIsImportModalOpen(false); // Close the modal after successful upload
+      }
+    } catch (error) {
+      setFeedbackMessage(`Upload failed: ${error.message}`);
+    }
+  };
 
   return (
     <div className="user-management-container">
@@ -573,7 +691,6 @@ const UserManagement = () => {
         onDelete={handleDeleteUser}
         user={selectedUser}
       />
-
       {/* CSV Configuration Modal */}
       {openCsvConfig && (
         <CsvConfigModal
@@ -584,20 +701,19 @@ const UserManagement = () => {
           exportStatus={exportStatus}
         />
       )}
-
       {/* Header */}
       <div className="header">
         <div className="UM-title-section">
           <h1>User Management</h1>
           <p className="UM-subtitle">
-            {`Manage trainees${userRole === 'facilitator' ? '' : ', facilitators, stakeholders'} and guests`}
+            {`Manage trainees${
+              userRole === "facilitator" ? "" : ", facilitators, stakeholders"
+            } and guests`}
           </p>
           {feedbackMessage && (
             <p className="feedback-message">{feedbackMessage}</p>
           )}
-          {fetchError && (
-            <p className="error-message">{fetchError}</p>
-          )}
+          {fetchError && <p className="error-message">{fetchError}</p>}
         </div>
         <button
           className="add-user-btn"
@@ -607,7 +723,6 @@ const UserManagement = () => {
           <span>Add user</span>
         </button>
       </div>
-
       {/* Tabs and Controls */}
       <div className="UMtabs-container">
         <div className="UMtabs-navigation">
@@ -617,13 +732,13 @@ const UserManagement = () => {
               className={`UMtab-button ${activeTab === tab ? "active" : ""}`}
               onClick={() => {
                 setActiveTab(tab);
+                setCurrentPage(1);
               }}
             >
               {tab} <span className="tab-count">{getTabData(tab).length}</span>
             </button>
           ))}
         </div>
-
         <div className="table-controls">
           <div className="left-controls">
             <div className="search-container">
@@ -646,31 +761,61 @@ const UserManagement = () => {
               <Download size={14} />
               <span>Export CSV</span>
             </button>
-            <input
-              type="file"
-              accept=".csv"
-              onChange={handleFileChange}
-              style={{ display: "none" }}
-              id="csvInput"
-            />
-            <label htmlFor="csvInput" className="import-btn">
+            <button 
+              className="import-btn" 
+              onClick={() => setIsImportModalOpen(true)}
+            >
               <Upload size={14} />
               <span>Import CSV</span>
-            </label>
+            </button>
           </div>
         </div>
-
         {/* Tab Content */}
         <div className="tabContentContainer">
           {isLoading ? (
             <DataLoader />
           ) : (
-            <div className="tab-content active">
-              {renderTable(activeTab)}
-            </div>
+            <>
+              <div className="tab-content active">
+                {renderTable(activeTab)}
+              </div>
+              {totalPages > 1 && activeTab === "Trainees" && (
+                <div className="pagination-container">
+                  <div className="pagination-controls">
+                    <button
+                      className="pagination-arrow"
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronLeft size={18} />
+                    </button>
+                    {renderPaginationNumbers()}
+                    <button
+                      className="pagination-arrow"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                    >
+                      <ChevronRight size={18} />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
+      {/* Import CSV Modal */}
+      {isImportModalOpen ? (
+        <ImportCsvModal
+          isOpen={isImportModalOpen}
+          onClose={() => setIsImportModalOpen(false)}
+          token={token}
+          fetchAllData={fetchAllData}
+          setFeedbackMessage={setFeedbackMessage}
+        />
+      ) : (
+        <></>
+      )}
     </div>
   );
 };
