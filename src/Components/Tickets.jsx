@@ -260,6 +260,12 @@ const Tickets = () => {
   return (
     <div className="tickets-session-container">
       {/* Metrics Section */}
+      <div className="UM-title-section">
+      <h1>Tickets</h1>
+      <p>Here you can view and manage tickets.</p>
+
+      </div>
+      <br/>
       <div className="tickets-metrics-grid">
         <div className="tickets-metric-card blue">
           <div className="tickets-metric-header">

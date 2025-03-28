@@ -256,13 +256,13 @@ export const loginUser = createAsyncThunk(
       localStorage.setItem('role', data.facilitator?.role);
 
 
-      console.log('Role set during user login:', data);
+      // console.log('Role set during user login:', data);
 
 
-      console.log("data",data);
+      // console.log("data",data);
       if (response.ok) {
         if (data.token) {
-          console.log("LoginUser: Token received from API:", data.token); // Debugging
+          // console.log("LoginUser: Token received from API:", data.token); // Debugging
           localStorage.setItem('authToken', data.token);
           localStorage.setItem('userId', data.uid);
 
@@ -299,12 +299,12 @@ export const loginFacilitator = createAsyncThunk(
       
       const data = await response.json();
       localStorage.setItem('role', data.facilitator.role);
-      console.log('Role set during user login:', data.facilitator?.role);
+      // console.log('Role set during user login:', data.facilitator?.role);
 
 
       if (response.ok) {
         if (data.token) {
-          console.log("LoginFacilitator: Token received from API:", data.token); // Debugging
+          // console.log("LoginFacilitator: Token received from API:", data.token); // Debugging
           localStorage.setItem('authToken', data.token);
           
           if (data.requires2FA !== undefined) {
@@ -339,10 +339,10 @@ export const loginStakeholder = createAsyncThunk(
       
       if (response.ok) {
         if (data.token) {
-          console.log("LoginStakeholder: Token received from API:", data.token); // Debugging
+          // console.log("LoginStakeholder: Token received from API:", data.token); // Debugging
           localStorage.setItem('authToken', data.token);
           localStorage.setItem('role', data.stakeholder?.role || 'stakeholder');
-          console.log('Role set during stakeholder login:', data.stakeholder?.role || 'stakeholder');
+          // console.log('Role set during stakeholder login:', data.stakeholder?.role || 'stakeholder');
           
           if (data.requires2FA !== undefined) {
             localStorage.setItem('requires2FA', data.requires2FA.toString());
@@ -375,13 +375,13 @@ export const verifyOTP = createAsyncThunk(
       const data = await response.json();
 
       if (response.ok) {
-        console.log("verifyOTP: Token received from API:", data.token); // Debugging
-        console.log("Data",data);
-        console.log("Role:",data.role);
-        console.log("Name:",data.facilitator?.name || data.facilitator?.fullName);
-        console.log("Location:",data.location);
-        console.log("Email:",data.facilitator?.email);
-        console.log('userId', data.facilitator?.uid);
+        // console.log("verifyOTP: Token received from API:", data.token); // Debugging
+        // console.log("Data",data);
+        // console.log("Role:",data.role);
+        // console.log("Name:",data.facilitator?.name || data.facilitator?.fullName);
+        // console.log("Location:",data.location);
+        // console.log("Email:",data.facilitator?.email);
+        // console.log('userId', data.facilitator?.uid);
 
         localStorage.setItem('authToken', data.token);
         localStorage.setItem('role',data.role);
@@ -409,8 +409,8 @@ export const resend2FA = createAsyncThunk(
       // Get values directly from localStorage
       const verificationId = localStorage.getItem("verificationID");
       const email = localStorage.getItem("Email");
-      console.log("The Verification ID:", verificationId);
-      console.log("The Email:", email);
+      // console.log("The Verification ID:", verificationId);
+      // console.log("The Email:", email);
       
       // Check if both values exist
       if (!verificationId || !email) {
@@ -424,11 +424,11 @@ export const resend2FA = createAsyncThunk(
       });
       
       if (response.ok) {
-        console.log("Response:", response);
+        // console.log("Response:", response);
         const data = await response.json();
         // Return success message or data
         localStorage.setItem("verificationID",data.verificationId);
-        console.log("The new Verification ID:", data.verificationId);
+        // console.log("The new Verification ID:", data.verificationId);
 
         return data;
       } else {
@@ -449,7 +449,7 @@ export const checkAuthStatus = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('authToken');
-      console.log("checkAuthStatus: Token from localStorage:", token); // Debugging
+      // console.log("checkAuthStatus: Token from localStorage:", token); // Debugging
       if (!token) {
         return rejectWithValue('No token found');
       }
@@ -470,7 +470,7 @@ export const checkAuthStatus = createAsyncThunk(
         data = await response.text();
       }
 
-      console.log("checkAuthStatus: Response from API:", data);  // Debugging
+      // console.log("checkAuthStatus: Response from API:", data);  // Debugging
 
       if (response.ok) {
         if (data.requires2FA !== undefined) {

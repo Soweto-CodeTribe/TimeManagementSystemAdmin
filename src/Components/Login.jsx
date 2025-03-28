@@ -46,11 +46,11 @@ const Login = () => {
       });
 
       const data = await response.json();
-      console.log(`${userType} data:`, data);
+      // console.log(`${userType} data:`, data);
       
       if (data.verificationId) {
         localStorage.setItem("verificationID", data.verificationId);
-        console.log("Stored verificationID:", localStorage.getItem("verificationID"));
+        // console.log("Stored verificationID:", localStorage.getItem("verificationID"));
       }
 
       if (!response.ok) {
@@ -59,19 +59,19 @@ const Login = () => {
       }
 
       setDebugInfo("Attempting login...");
-      console.log("Login attempt with:", { email, password: "********", userType });
+      // console.log("Login attempt with:", { email, password: "********", userType });
 
       const resultAction = await dispatch(loginAction({ email, password }));
-      console.log("Login result:", resultAction);
+      // console.log("Login result:", resultAction);
       
       if (loginAction.fulfilled.match(resultAction)) {
         setDebugInfo("Login successful!");
         navigate("/TwoFactorAuth");
-        console.log("Login successful:", resultAction.payload);
+        // console.log("Login successful:", resultAction.payload);
         
         if (resultAction.payload.verificationId) {
           localStorage.setItem("verificationID", resultAction.payload.verificationId);
-          console.log("Stored verificationID:", localStorage.getItem("verificationID"));
+          // console.log("Stored verificationID:", localStorage.getItem("verificationID"));
         }
       } else if (loginAction.rejected.match(resultAction)) {
         const errorMessage = resultAction.payload || resultAction.error.message || "Unknown error";

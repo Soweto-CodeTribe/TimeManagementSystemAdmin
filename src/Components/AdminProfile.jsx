@@ -255,12 +255,14 @@ const AdminProfile = () => {
             <p>Loading profile data...</p>
           </div>
         ) : (
+          <>
           <form className="profile-form" onSubmit={handleUpdate}>
+            <h1>Basic Information</h1>
             <label>Name:</label>
             <input
               type="text"
               name="fullname"
-              value={userData.name || ''}
+              value={userData.name || userData.fullName ||''}
               onChange={handleInputChange}
             />
             <label>Surname:</label>
@@ -269,6 +271,22 @@ const AdminProfile = () => {
               name="surname"
               value={userData.surname || ''}
               onChange={handleInputChange}
+            />
+             <label>ID Number:</label>
+            <input
+              type="text"
+              name="IdNumber"
+              value={userData.IdNumber || userData.idNumber||''}
+              onChange={handleInputChange}
+             
+            />
+             <label>Phone Number:</label>
+            <input
+              type="text"
+              name="phoneNumber"
+              value={userData.phoneNumber || ''}
+              onChange={handleInputChange}
+             
             />
             <label>Role:</label>
             <input
@@ -279,9 +297,35 @@ const AdminProfile = () => {
             />
             <label>Email:</label>
             <input
-              type="email"
+              type="text"
               name="email"
               value={userData.email || ''}
+              onChange={handleInputChange}
+            />
+          </form>
+
+          <form className="profile-form" onSubmit={handleUpdate}>
+            <h1>Physical address</h1>
+
+            <label>Street:</label>
+            <input
+              type="text"
+              name="street"
+              value={userData.street || ''}
+              onChange={handleInputChange}
+            />
+            <label>City:</label>
+            <input
+              type="text"
+              name="City"
+              value={userData.City || userData.city||''}
+              onChange={handleInputChange}
+            />
+            <label>Postal Code:</label>
+            <input
+              type="text"
+              name="postalCode"
+              value={userData.postalCode || ''}
               onChange={handleInputChange}
             />
             <button
@@ -292,6 +336,7 @@ const AdminProfile = () => {
               {isLoading ? 'Updating...' : 'Update Information'}
             </button>
           </form>
+          </>
         )}
         {successMessage && <p className="success-message">{successMessage}</p>}
         {feedbackMessage && <p className="error-message">{feedbackMessage}</p>}
