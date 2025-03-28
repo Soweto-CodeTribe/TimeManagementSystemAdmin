@@ -24,6 +24,17 @@ const AddUserForm = () => {
     const [isConfirmed, setIsConfirmed] = useState(false);
     const [feedbackMessage, setFeedbackMessage] = useState(''); // State for feedback message
 
+    // Locations array
+    const locations = [
+        'Soweto', 
+        'Ga-rankuwa', 
+        'KZN', 
+        'Limpopo', 
+        'Tembisa', 
+        'TIH', 
+        'Kimberly'
+    ];
+
     const handleContinue = () => {
         if (currentScreen === 'basic-info') {
             setCurrentScreen('physical-address');
@@ -258,18 +269,22 @@ const AddUserForm = () => {
                 </div>
 
                 {/* Conditional Location input field */}
-                {(userRole === 'Trainee' || role === 'Facilitator') && (
+                {/* {(userRole === 'Trainee' || role === 'Facilitator') && (
                     <div className="form-group">
                         <label htmlFor="location">Location</label>
-                        <input 
-                            type="text" 
+                        <select 
                             id="location" 
-                            placeholder="Enter Location" 
                             value={location}
                             onChange={(e) => setLocation(e.target.value)}
-                        />
+                            required
+                        >
+                            <option value="" disabled>Select Location</option>
+                            {locations.map((loc) => (
+                                <option key={loc} value={loc}>{loc}</option>
+                            ))}
+                        </select>
                     </div>
-                )}
+                )} */}
 
                 <div className="form-group">
                     <label htmlFor="role">Role</label>
@@ -289,6 +304,24 @@ const AddUserForm = () => {
                         <option value="Trainee">Trainee</option>
                     </select>
                 </div>
+
+                {/* Location field shows when Trainee or Facilitator is selected */}
+                {(role === 'Trainee' || role === 'Facilitator') && (
+                    <div className="form-group">
+                        <label htmlFor="location">Location</label>
+                        <select 
+                            id="location" 
+                            value={location}
+                            onChange={(e) => setLocation(e.target.value)}
+                            required
+                        >
+                            <option value="" disabled>Select Location</option>
+                            {locations.map((loc) => (
+                                <option key={loc} value={loc}>{loc}</option>
+                            ))}
+                        </select>
+                    </div>
+                )}
 
                 <button type="button" onClick={handleContinue}>Continue</button>
             </form>

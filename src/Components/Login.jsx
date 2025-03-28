@@ -18,60 +18,97 @@ const Login = () => {
   const navigate = useNavigate();
 
 
+  // const handleLogin = async (e) => {
+  //   e.preventDefault();
+  //   setDebugInfo("");
+
+  //   if (!email || !password) {
+  //     alert("Please enter both email and password.");
+  //     return;
+  //   }
+
+  //   dispatch(clearError());
+  //   localStorage.setItem("Email", email);
+
+  //   try {
+  //     // Choose the appropriate login action based on user type
+  //     const loginAction = userType === "stakeholder" ? loginStakeholder : loginUser;
+  //     const apiEndpoint = userType === "stakeholder" 
+  //       ? "https://timemanagementsystemserver.onrender.com/api/auth/login-stakeholder" 
+  //       : "https://timemanagementsystemserver.onrender.com/api/auth/login";
+
+  //     const response = await fetch(apiEndpoint, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({ email, password }),
+  //     });
+
+  //     const data = await response.json();
+  //     // console.log(`${userType} data:`, data);
+      
+  //     if (data.verificationId) {
+  //       localStorage.setItem("verificationID", data.verificationId);
+  //       // console.log("Stored verificationID:", localStorage.getItem("verificationID"));
+  //     }
+
+  //     if (!response.ok) {
+  //       alert(data.message || "Invalid credentials!");
+  //       return;
+  //     }
+
+  //     setDebugInfo("Attempting login...");
+  //     // console.log("Login attempt with:", { email, password: "********", userType });
+
+  //     const resultAction = await dispatch(loginAction({ email, password }));
+  //     // console.log("Login result:", resultAction);
+      
+  //     if (loginAction.fulfilled.match(resultAction)) {
+  //       setDebugInfo("Login successful!");
+  //       navigate("/TwoFactorAuth");
+  //       // console.log("Login successful:", resultAction.payload);
+        
+  //       if (resultAction.payload.verificationId) {
+  //         localStorage.setItem("verificationID", resultAction.payload.verificationId);
+  //         // console.log("Stored verificationID:", localStorage.getItem("verificationID"));
+  //       }
+  //     } else if (loginAction.rejected.match(resultAction)) {
+  //       const errorMessage = resultAction.payload || resultAction.error.message || "Unknown error";
+  //       setDebugInfo(`Login failed: ${errorMessage}`);
+  //       console.error("Login rejected:", errorMessage);
+  //     }
+  //   } catch (err) {
+  //     const errorMessage = err.message || "Unknown error";
+  //     setDebugInfo(`Login error: ${errorMessage}`);
+  //     console.error("Login error:", err);
+  //   }
+  // };
+
   const handleLogin = async (e) => {
     e.preventDefault();
-    setDebugInfo("");
-
+    
     if (!email || !password) {
       alert("Please enter both email and password.");
       return;
     }
-
+  
     dispatch(clearError());
     localStorage.setItem("Email", email);
-
+  
     try {
-      // Choose the appropriate login action based on user type
       const loginAction = userType === "stakeholder" ? loginStakeholder : loginUser;
-      const apiEndpoint = userType === "stakeholder" 
-        ? "https://timemanagementsystemserver.onrender.com/api/auth/login-stakeholder" 
-        : "https://timemanagementsystemserver.onrender.com/api/auth/login";
-
-      const response = await fetch(apiEndpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-      // console.log(`${userType} data:`, data);
       
-      if (data.verificationId) {
-        localStorage.setItem("verificationID", data.verificationId);
-        // console.log("Stored verificationID:", localStorage.getItem("verificationID"));
-      }
-
-      if (!response.ok) {
-        alert(data.message || "Invalid credentials!");
-        return;
-      }
-
-      setDebugInfo("Attempting login...");
-      // console.log("Login attempt with:", { email, password: "********", userType });
-
       const resultAction = await dispatch(loginAction({ email, password }));
-      console.log("Login result:", resultAction);
       
       if (loginAction.fulfilled.match(resultAction)) {
         setDebugInfo("Login successful!");
         navigate("/TwoFactorAuth");
-        // console.log("Login successful:", resultAction.payload);
         
+        // Store verification ID only once, from the payload
         if (resultAction.payload.verificationId) {
           localStorage.setItem("verificationID", resultAction.payload.verificationId);
-          // console.log("Stored verificationID:", localStorage.getItem("verificationID"));
+          console.log('login results' , resultAction)
         }
       } else if (loginAction.rejected.match(resultAction)) {
         const errorMessage = resultAction.payload || resultAction.error.message || "Unknown error";
@@ -84,6 +121,7 @@ const Login = () => {
       console.error("Login error:", err);
     }
   };
+
 
   return (
     <div className="login-container">

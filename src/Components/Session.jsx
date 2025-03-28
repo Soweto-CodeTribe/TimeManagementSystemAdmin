@@ -1,14 +1,16 @@
 "use client"
-import { useState, useEffect } from "react"
-import { FileText, Search, Filter, Info, ChevronLeft, ChevronRight } from "lucide-react"
-import "./styling/Session.css"
-import { useSelector } from 'react-redux'
 import axios from "axios"
+import { ChevronLeft, ChevronRight, FileText, Filter, Info, Search } from "lucide-react"
+import { useEffect, useState } from "react"
+import { useSelector } from 'react-redux'
 import DataLoader from "./dataLoader"
+import "./styling/Session.css"
 
 const SessionMonitoring = () => {
   const BASE_URL = "https://timemanagementsystemserver.onrender.com/"
-  const token = useSelector((state) => state.auth.token)
+  const token = useSelector((state) => state.auth.token);
+  const userRole = useSelector((state) => state.auth.role);
+  const userLocation = localStorage.getItem('Location');
 
   // State for API data
   const [summaryData, setSummaryData] = useState(null)
@@ -19,7 +21,19 @@ const SessionMonitoring = () => {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("") // Debounced search term
   const [filterStatus, setFilterStatus] = useState("") // State for status filter
   const [filterDate, setFilterDate] = useState("") // State for date filter
+  const [filterLocation, setFilterLocation] = useState("") // State for location filter
   const [isFilterOpen, setIsFilterOpen] = useState(false) // State for filter visibility
+
+  // Locations array
+  const LOCATIONS = [
+    "TIH", 
+    "Tembisa", 
+    "Soweto", 
+    "Ga-rankuwa", 
+    "Limpopo", 
+    "KZN", 
+    "Kimberly"
+  ]
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
@@ -38,11 +52,19 @@ const SessionMonitoring = () => {
   useEffect(() => {
     fetchData(currentPage)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, currentPage, itemsPerPage, debouncedSearchTerm, filterStatus, filterDate])
+  }, [token, currentPage, itemsPerPage, debouncedSearchTerm, filterStatus, filterDate, 
+    ...(userRole === 'super_admin' ?  [filterLocation]: [])
+  ])
 
   const fetchData = async (page = 1) => {
     setIsLoading(true)
     try {
+      // Determine location filter based on user role
+      const locationFilter = 
+        userRole === 'super_admin' 
+          ? (filterLocation || undefined)
+          : userLocation; // For facilitators, use their own location
+
       const response = await axios.get(`${BASE_URL}api/super-admin/daily`, {
         params: {
           page: page,
@@ -50,6 +72,8 @@ const SessionMonitoring = () => {
           search: debouncedSearchTerm, // Use debounced search term
           status: filterStatus || undefined,
           date: filterDate || undefined,
+          // location: filterLocation || undefined,
+          location: locationFilter,
         },
         headers: {
           Authorization: `Bearer ${token}`,
@@ -90,6 +114,24 @@ const SessionMonitoring = () => {
       return "-"
     }
   }
+
+  // Handle Status Filter Change
+  const handleStatusChange = (value) => {
+    setFilterStatus(value);
+    setIsFilterOpen(false);
+  };
+
+  // Handle Date Filter Change
+  const handleDateChange = (value) => {
+    setFilterDate(value);
+    setIsFilterOpen(false);
+  };
+
+  // Handle Location Filter Change
+  const handleLocationChange = (value) => {
+    setFilterLocation(value);
+    setIsFilterOpen(false);
+  };
 
   const renderPaginationNumbers = () => {
     const pageNumbers = []
@@ -175,7 +217,8 @@ const SessionMonitoring = () => {
                     <label>Status:</label>
                     <select
                       value={filterStatus}
-                      onChange={(e) => setFilterStatus(e.target.value)}
+                      // onChange={(e) => setFilterStatus(e.target.value)}
+                      onChange={(e) => handleStatusChange(e.target.value)}
                     >
                       <option value="">All</option>
                       <option value="present">Present</option>
@@ -188,9 +231,28 @@ const SessionMonitoring = () => {
                     <input
                       type="date"
                       value={filterDate}
-                      onChange={(e) => setFilterDate(e.target.value)}
+                      // onChange={(e) => setFilterDate(e.target.value)}
+                      onChange={(e) => handleDateChange(e.target.value)}
                     />
                   </div>
+                  {/* Location Filter */}
+                  {userRole === 'super_admin' && (
+                  <div className="filter-group">
+                    <label>Location:</label>
+                    <select
+                      value={filterLocation}
+                      // onChange={(e) => setFilterLocation(e.target.value)}
+                      onChange={(e) => handleLocationChange(e.target.value)}
+                    >
+                      <option value="">All Locations</option>
+                      {LOCATIONS.map((location) => (
+                        <option key={location} value={location}>
+                          {location}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  )}
                 </div>
               )}
             </div>
