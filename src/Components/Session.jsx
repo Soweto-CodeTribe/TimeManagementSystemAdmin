@@ -1,15 +1,16 @@
 "use client"
-import { useState, useEffect } from "react"
-import { FileText, Search, Filter, Info, ChevronLeft, ChevronRight } from "lucide-react"
-import "./styling/Session.css"
-import { useSelector } from 'react-redux'
 import axios from "axios"
+import { ChevronLeft, ChevronRight, FileText, Filter, Info, Search } from "lucide-react"
+import { useEffect, useState } from "react"
+import { useSelector } from 'react-redux'
 import DataLoader from "./dataLoader"
+import "./styling/Session.css"
 
 const SessionMonitoring = () => {
   const BASE_URL = "https://timemanagementsystemserver.onrender.com/"
   const token = useSelector((state) => state.auth.token);
   const userRole = useSelector((state) => state.auth.role);
+  const userLocation = localStorage.getItem('Location');
 
   // State for API data
   const [summaryData, setSummaryData] = useState(null)
@@ -58,6 +59,12 @@ const SessionMonitoring = () => {
   const fetchData = async (page = 1) => {
     setIsLoading(true)
     try {
+      // Determine location filter based on user role
+      const locationFilter = 
+        userRole === 'super_admin' 
+          ? (filterLocation || undefined)
+          : userLocation; // For facilitators, use their own location
+
       const response = await axios.get(`${BASE_URL}api/super-admin/daily`, {
         params: {
           page: page,
@@ -65,7 +72,8 @@ const SessionMonitoring = () => {
           search: debouncedSearchTerm, // Use debounced search term
           status: filterStatus || undefined,
           date: filterDate || undefined,
-          location: filterLocation || undefined,
+          // location: filterLocation || undefined,
+          location: locationFilter,
         },
         headers: {
           Authorization: `Bearer ${token}`,
