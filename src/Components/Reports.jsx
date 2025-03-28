@@ -10,6 +10,7 @@ import TraineeReportModal from "../Components/ui/TraineeReportModal";
 const ReportsScreen = () => {
   const BASE_URL = "https://timemanagementsystemserver.onrender.com/";
   const token = useSelector((state) => state.auth.token);
+  const userRole = useSelector((state) => state.auth.role);
 
   // State for API data
   const [summaryData, setSummaryData] = useState(null);
@@ -22,7 +23,20 @@ const ReportsScreen = () => {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(""); // Debounced search term
   const [filterStatus, setFilterStatus] = useState(""); // Status filter
   const [filterDate, setFilterDate] = useState(""); // Date filter
+  const [filterLocation, setFilterLocation] = useState("") // State for location filter
   const [isFilterOpen, setIsFilterOpen] = useState(false); // Filter visibility
+
+  // Locations array
+  const LOCATIONS = [
+    "TIH", 
+    "Tembisa", 
+    "Soweto", 
+    "Ga-rankuwa", 
+    "Limpopo", 
+    "KZN", 
+    "Kimberly"
+  ]
+
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -50,7 +64,8 @@ const ReportsScreen = () => {
     if (allReports.length === 0) {
       fetchAllReportsForStats();
     }
-  }, [token, currentPage, itemsPerPage, debouncedSearchTerm, filterStatus, filterDate]);
+  }, [token, currentPage, itemsPerPage, debouncedSearchTerm, filterStatus, filterDate, 
+    ...(userRole === 'super_admin' ?  [filterLocation]: [])]);
 
   // Function to fetch all reports for accurate statistics calculation
   const fetchAllReportsForStats = async () => {
@@ -107,6 +122,7 @@ const ReportsScreen = () => {
           search: debouncedSearchTerm, // Use debounced search term
           status: filterStatus || undefined,
           date: filterDate || undefined,
+          location: filterLocation || undefined,
         },
         headers: {
           Authorization: `Bearer ${token}`,
@@ -131,6 +147,24 @@ const ReportsScreen = () => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
+  };
+
+  // Handle Status Filter Change
+  const handleStatusChange = (value) => {
+    setFilterStatus(value);
+    setIsFilterOpen(false);
+  };
+
+  // Handle Date Filter Change
+  const handleDateChange = (value) => {
+    setFilterDate(value);
+    setIsFilterOpen(false);
+  };
+
+  // Handle Location Filter Change
+  const handleLocationChange = (value) => {
+    setFilterLocation(value);
+    setIsFilterOpen(false);
   };
 
   // Reset Pagination on Filter Change
@@ -206,7 +240,8 @@ const ReportsScreen = () => {
                     <label>Status:</label>
                     <select
                       value={filterStatus}
-                      onChange={(e) => setFilterStatus(e.target.value)}
+                      // onChange={(e) => setFilterStatus(e.target.value)}
+                      onChange={(e) => handleStatusChange(e.target.value)}
                     >
                       <option value="">All</option>
                       <option value="resolved">Resolved</option>
@@ -219,8 +254,25 @@ const ReportsScreen = () => {
                     <input
                       type="date"
                       value={filterDate}
-                      onChange={(e) => setFilterDate(e.target.value)}
+                      // onChange={(e) => setFilterDate(e.target.value)}
+                      onChange={(e) => handleDateChange(e.target.value)}
                     />
+                  </div>
+                  {/* Location Filter */}
+                  <div className="filter-group">
+                    <label>Location:</label>
+                    <select
+                      value={filterLocation}
+                      // onChange={(e) => setFilterLocation(e.target.value)}
+                      onChange={(e) => handleLocationChange(e.target.value)}
+                    >
+                      <option value="">All Locations</option>
+                      {LOCATIONS.map((location) => (
+                        <option key={location} value={location}>
+                          {location}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
               )}
