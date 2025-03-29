@@ -97,22 +97,16 @@ const UserManagement = () => {
         "https://timemanagementsystemserver.onrender.com/api/online-trainees",
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      const onlineTrainees = response.data.map((trainee) => ({
-        id: trainee.traineeId,
-        fullName: trainee.fullName,
-        email: trainee.email,
-        phoneNumber: trainee.phoneNumber || "N/A",
-        role: "Online Trainee",
-        lastActive: trainee.createdAt || new Date().toISOString(),
-      }));
-
-      setOnlinePeople(onlineTrainees);
+      console.log('response', response.data);
+  
+      // Access the data array directly
+      setOnlinePeople(response.data.data);
     } catch (error) {
       console.error("Error fetching online trainees:", error);
       setFeedbackMessage("Failed to fetch online trainees data.");
     }
   };
+
 
   // Fetch Guests
   const fetchGuests = async () => {
@@ -128,6 +122,7 @@ const UserManagement = () => {
             id: guest.id || guest._id || `guest-${crypto.randomUUID()}`,
             fullName: guest.fullNames || "N/A",
             email: guest.email || "N/A",
+            location: guest.location || "N/A",
             phoneNumber: guest.cellPhone || "N/A",
             lastVisit: guest.lastVisit || event.date || "N/A",
             role: "Guest",
@@ -186,6 +181,7 @@ const UserManagement = () => {
         }
       }
 
+      console.log('traineesData', traineesData)
       const formattedTrainees = traineesData.map((trainee) => ({
         id: trainee._id || trainee.id || `trainee-${crypto.randomUUID()}`,
         fullName:
@@ -194,10 +190,11 @@ const UserManagement = () => {
         email: trainee.email || trainee.emailAddress || "N/A",
         phoneNumber: trainee.phoneNumber || trainee.phone || "N/A",
         role: "Trainee",
-        status: trainee.status || "active",
+        status: trainee.status,
         lastCheckIn: trainee.lastCheckInDate || "N/A",
       }));
       allUserResults = [...formattedTrainees];
+      console.log('formattedTrainees', formattedTrainees)
 
       if (userRole === "super_admin" || userRole === "admin") {
         try {
@@ -272,7 +269,8 @@ const UserManagement = () => {
         await fetchGuests();
       }
       if (userRole === "super_admin") {
-        await fetchOnlinePeople(); // Ensure this is called for super admins
+        await fetchOnlinePeople();
+
       }
       setFeedbackMessage("Data loaded successfully");
     } catch (error) {
@@ -313,23 +311,6 @@ const UserManagement = () => {
       );
     }
     return pageNumbers;
-  };
-
-  // Toggle User Status
-  const toggleUserStatus = async (userId) => {
-    try {
-      setUsers((prevUsers) =>
-        prevUsers.map((user) =>
-          user.id === userId
-            ? { ...user, status: user.status === "active" ? "deactive" : "active" }
-            : user
-        )
-      );
-      setFeedbackMessage("User status updated successfully.");
-    } catch (error) {
-      console.error("Error updating user status:", error);
-      setFeedbackMessage("Failed to update user status.");
-    }
   };
 
   // Delete User
@@ -501,12 +482,12 @@ const UserManagement = () => {
     }
   };
 
+  console.log(onlinePeople)
+
   // Available Tabs
   const getAvailableTabs = () => {
     if (userRole === "super_admin") {
-      return ["Trainees", "Facilitators", "Stakeholders", "Guests", "Online Trainees"];
-    } else if (userRole === "admin") {
-      return ["Trainees", "Facilitators", "Stakeholders", "Guests"];
+      return ["Facilitators","Trainees", "Online Trainees", "Stakeholders", "Guests",];
     } else {
       return ["Trainees", "Guests"];
     }
@@ -611,9 +592,9 @@ const UserManagement = () => {
                     <td>
                       <span
                         className={`status-badge ${item.status}`}
-                        onClick={() => toggleUserStatus(item.id)}
+                        // onClick={() => toggleUserStatus(item.id)}
                       >
-                        {item.status === "deactive" ? "Deactive" : "Active"}
+                        {item.status}
                       </span>
                     </td>
                     {tabName === "Trainees" && (

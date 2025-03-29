@@ -12,7 +12,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [debugInfo, setDebugInfo] = useState("");
-  const [userType, setUserType] = useState("user"); // Added user type state: "user" or "stakeholder"
+  const [userType, setUserType] = useState("user"); 
   const dispatch = useDispatch();
   const { isLoading, error } = useSelector((state) => state.auth);
   const navigate = useNavigate();

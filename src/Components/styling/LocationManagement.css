@@ -128,13 +128,15 @@
   .cancel-btn:hover {
     background-color: #CBD5E0;
   }
-  .location-management  .current-location-btn {
-    background-color: #48BB78;
+  .location-management  .location-btn {
+    background-color: #000;
     color: white;
     width: fit-content;
+    width: 98px;
     margin-bottom: 1rem;
+    font-size: 12px;
   }
-  .current-location-btn:hover {
+  .location-btn:hover {
     background-color: #38A169;
   }
   .locations-list {

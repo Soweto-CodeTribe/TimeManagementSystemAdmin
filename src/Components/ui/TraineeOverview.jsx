@@ -301,15 +301,12 @@ const TraineeOverview = ({ token }) => {
                       <button onClick={() => openNotificationModal(trainee)}>
                         Send Notification
                       </button>
-                      {trainee.status !== "suspended" ? (
                         <button onClick={() => openSuspendModal(trainee)}>
                           Suspend Trainee
                         </button>
-                      ) : (
                         <button onClick={() => openReinstatementModal(trainee)}>
                           Reinstate Trainee
                         </button>
-                      )}
                     </div>
                   </div>
                 </td>

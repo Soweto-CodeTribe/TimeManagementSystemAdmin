@@ -518,7 +518,7 @@
   border: 1px solid #2e7d32;
 }
 
-.status-badge.deactive {
+.status-badge.suspended, .suspended {
   background-color: #ffebee;
   color: #c62828;
   border: 1px solid #c62828;

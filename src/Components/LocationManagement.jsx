@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './styling/LocationManagement.css';
 
@@ -14,6 +14,7 @@ const LocationManagement = () => {
   });
   const [editingId, setEditingId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
 
   // Fetch all locations when component mounts
@@ -35,12 +36,68 @@ const LocationManagement = () => {
     }
   };
 
+  const getCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setMessage({ text: 'Geolocation is not supported by your browser', type: 'error' });
+      return;
+    }
+
+    setIsGettingLocation(true);
+    setMessage({ text: 'Fetching your current location...', type: 'info' });
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        // Convert strings to numbers
+        const latitude = Number(position.coords.latitude);
+        const longitude = Number(position.coords.longitude);
+        
+        setFormData({
+          ...formData,
+          latitude: latitude,
+          longitude: longitude
+        });
+        setIsGettingLocation(false);
+        setMessage({ text: 'Location successfully retrieved!', type: 'success' });
+      },
+      (error) => {
+        setIsGettingLocation(false);
+        let errorMessage = 'Unknown error occurred';
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = 'User denied the request for geolocation';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = 'Location information is unavailable';
+            break;
+          case error.TIMEOUT:
+            errorMessage = 'The request to get user location timed out';
+            break;
+        }
+        setMessage({ text: errorMessage, type: 'error' });
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    );
+  };
+
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value
-    });
+    
+    // For latitude and longitude, convert string values to numbers
+    if (name === 'latitude' || name === 'longitude' || name === 'radius') {
+      setFormData({
+        ...formData,
+        [name]: value === '' ? '' : Number(value)
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: type === 'checkbox' ? checked : value
+      });
+    }
   };
 
   const resetForm = () => {
@@ -58,6 +115,14 @@ const LocationManagement = () => {
     e.preventDefault();
     setIsLoading(true);
     try {
+      // Ensure latitude, longitude and radius are numbers before submitting
+      const dataToSubmit = {
+        ...formData,
+        latitude: Number(formData.latitude),
+        longitude: Number(formData.longitude),
+        radius: Number(formData.radius)
+      };
+
       const method = editingId ? 'PUT' : 'POST';
       const url = editingId
         ? `https://timemanagementsystemserver.onrender.com/api/locations/${editingId}`
@@ -67,7 +132,7 @@ const LocationManagement = () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(dataToSubmit)
       });
       if (!response.ok) {
         const errorData = await response.json();
@@ -89,9 +154,10 @@ const LocationManagement = () => {
   const handleEdit = (location) => {
     setFormData({
       name: location.name,
-      latitude: location.latitude,
-      longitude: location.longitude,
-      radius: location.radius,
+      // Ensure these are stored as numbers
+      latitude: Number(location.latitude),
+      longitude: Number(location.longitude),
+      radius: Number(location.radius),
       active: location.active !== false
     });
     setEditingId(location.id);
@@ -174,6 +240,14 @@ const LocationManagement = () => {
               />
             </div>
           </div>
+          <button
+            type="button"
+            onClick={getCurrentLocation}
+            className="location-btn"
+            disabled={isGettingLocation}
+          >
+            {isGettingLocation ? 'Getting Location...' : 'Use Current Location'}
+          </button>
           <div className="form-group">
             <label htmlFor="radius">Radius (meters)*</label>
             <input
@@ -239,7 +313,7 @@ const LocationManagement = () => {
                 <tr key={location.id} className={location.active ? '' : 'inactive'}>
                   <td>{location.name}</td>
                   <td>
-                    {location.latitude.toFixed(6)}, {location.longitude.toFixed(6)}
+                    {Number(location.latitude).toFixed(6)}, {Number(location.longitude).toFixed(6)}
                   </td>
                   <td>{location.radius}m</td>
                   <td>
