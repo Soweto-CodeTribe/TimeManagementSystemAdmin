@@ -19,6 +19,7 @@ import {
 } from "recharts";
 import { FaTimes, FaFilePdf, FaFileWord, FaFileExcel } from "react-icons/fa";
 import "../styling/TraineeReportModal.css";
+import DocumentViewer from "./DocumentViewer";
 
 // Constants
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
@@ -32,6 +33,12 @@ const STATUS_COLORS = {
 const PERFORMANCE_COLORS = {
   attendance: { good: 90, average: 75 },
   punctuality: { good: 90, average: 75 },
+};
+
+const UPLOAD_STATUS_COLORS = {
+  pending: "#FFBB28",
+  approved: "#00C49F",
+  rejected: "#FF4842",
 };
 
 const RADIAN = Math.PI / 180;
@@ -95,6 +102,11 @@ const TraineeReportModal = ({ selectedTrainee, onClose }) => {
   const [documentsLoading, setDocumentsLoading] = useState(false);
   const [selectedUpload, setSelectedUpload] = useState(null);
   const [reviewNotes, setReviewNotes] = useState("");
+  
+  // New state for absenteeism uploads
+  const [uploadsData, setUploadsData] = useState([]);
+  const [uploadsLoading, setUploadsLoading] = useState(false);
+  const [uploadsError, setUploadsError] = useState(null);
 
   // Handle click outside to close modal
   useEffect(() => {
@@ -143,6 +155,24 @@ const TraineeReportModal = ({ selectedTrainee, onClose }) => {
     }
   };
 
+  // Fetch Trainee Uploads (Absenteeism Proofs)
+  const fetchTraineeUploads = async () => {
+    setUploadsLoading(true);
+    setUploadsError(null);
+    try {
+      const response = await axios.get(
+        `https://timemanagementsystemserver.onrender.com/api/trainee/${selectedTrainee.traineeId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setUploadsData(response.data);
+    } catch (err) {
+      setUploadsError(err.message);
+      setUploadsData([]);
+    } finally {
+      setUploadsLoading(false);
+    }
+  };
+
   // Update Upload Status
   const updateUploadStatus = async (uploadId, status) => {
     try {
@@ -151,11 +181,30 @@ const TraineeReportModal = ({ selectedTrainee, onClose }) => {
         { status, reviewNotes },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      
+      // Update local state to reflect changes
+      setUploadsData(prev => 
+        prev.map(upload => 
+          upload.id === uploadId ? { ...upload, status, reviewNotes } : upload
+        )
+      );
+      
       setSelectedUpload(null);
       setReviewNotes("");
     } catch (err) {
       alert(`Error updating status: ${err.message}`);
     }
+  };
+
+  // View specific upload
+  const handleViewUpload = (upload) => {
+    setSelectedUpload(upload);
+  };
+
+  // Close upload details
+  const handleCloseUploadDetails = () => {
+    setSelectedUpload(null);
+    setReviewNotes("");
   };
 
   // Data Preparation
@@ -210,6 +259,7 @@ const TraineeReportModal = ({ selectedTrainee, onClose }) => {
     if (selectedTrainee) {
       fetchTraineeReport();
       fetchTraineeDocuments();
+      fetchTraineeUploads();
     }
   }, [selectedTrainee, selectedMonth, selectedYear]);
 
@@ -223,9 +273,9 @@ const TraineeReportModal = ({ selectedTrainee, onClose }) => {
           </button>
         </div>
 
-        {reportLoading ? (
+        {reportLoading && tabValue !== 4 ? (
           <DataLoader />
-        ) : reportError ? (
+        ) : reportError && tabValue !== 4 ? (
           <div className="error-message">Error loading report: {reportError}</div>
         ) : reportData ? (
           <>
@@ -335,6 +385,12 @@ const TraineeReportModal = ({ selectedTrainee, onClose }) => {
               >
                 Attendance Records
               </button>
+              <button
+                className={`tab-button ${tabValue === 4 ? "active" : ""}`}
+                onClick={() => setTabValue(4)}
+              >
+                Absenteeism Proofs
+              </button>
             </div>
 
             {tabValue === 0 && (
@@ -435,6 +491,141 @@ const TraineeReportModal = ({ selectedTrainee, onClose }) => {
                     })}
                   </tbody>
                 </table>
+              </div>
+            )}
+
+            {tabValue === 4 && (
+              <div className="absenteeism-container">
+                {uploadsLoading ? (
+                  <DataLoader />
+                ) : uploadsError ? (
+                  <div className="error-message">Error loading uploads: {uploadsError}</div>
+                ) : selectedUpload ? (
+                  <div className="upload-details">
+                    <div className="upload-details-header">
+                      <h3>Absenteeism Proof Details</h3>
+                      <button className="backs-button" onClick={handleCloseUploadDetails}>
+                        Back to List
+                      </button>
+                    </div>
+                    <div className="upload-details-content">
+                      <div className="detail-row">
+                        <span className="detail-label">Date:</span>
+                        <span className="detail-value">{formatDate(selectedUpload.date)}</span>
+                      </div>
+                      <div className="detail-row">
+                        <span className="detail-label">Reason:</span>
+                        <span className="detail-value">{selectedUpload.reason}</span>
+                      </div>
+                      <div className="detail-row">
+                        <span className="detail-label">Status:</span>
+                        <span className={`detail-value status-${selectedUpload.status}`}>
+                          {selectedUpload.status}
+                        </span>
+                      </div>
+                      <div className="detail-row">
+                        <span className="detail-label">Submitted:</span>
+                        <span className="detail-value">{formatDate(selectedUpload.createdAt)}</span>
+                      </div>
+                      {selectedUpload.reviewedAt && (
+                        <div className="detail-row">
+                          <span className="detail-label">Reviewed:</span>
+                          <span className="detail-value">{formatDate(selectedUpload.reviewedAt)}</span>
+                        </div>
+                      )}
+                      {selectedUpload.reviewNotes && (
+                        <div className="detail-row">
+                          <span className="detail-label">Review Notes:</span>
+                          <span className="detail-value">{selectedUpload.reviewNotes}</span>
+                        </div>
+                      )}
+                       <div className="document-preview-section">
+        <h4>Document</h4>
+        <DocumentViewer 
+          documentUrl={selectedUpload.documentUrl} 
+          fileName={`Absence-proof-${formatDate(selectedUpload.date)}`} 
+        />
+      </div>
+                      <div className="update-status">
+                        <h4>Update Status</h4>
+                        <div className="status-form">
+                          <div className="form-group">
+                            <label>Review Notes:</label>
+                            <textarea
+                              value={reviewNotes}
+                              onChange={(e) => setReviewNotes(e.target.value)}
+                              placeholder="Enter review notes..."
+                              rows={4}
+                            />
+                          </div>
+                          <div className="status-buttons">
+                            <button
+                              className="status-button approve"
+                              onClick={() => updateUploadStatus(selectedUpload.id, "approved")}
+                            >
+                              Approve
+                            </button>
+                            <button
+                              className="status-button reject"
+                              onClick={() => updateUploadStatus(selectedUpload.id, "rejected")}
+                            >
+                              Reject
+                            </button>
+                            <button
+                              className="status-button pending"
+                              onClick={() => updateUploadStatus(selectedUpload.id, "pending")}
+                            >
+                              Mark as Pending
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <h3>Absenteeism Proofs</h3>
+                    {uploadsData.length === 0 ? (
+                      <div className="no-uploads">
+                        <p>No absenteeism proofs found for this trainee.</p>
+                      </div>
+                    ) : (
+                      <table className="data-table uploads-table">
+                        <thead>
+                          <tr>
+                            <th>Date</th>
+                            <th>Reason</th>
+                            <th>Status</th>
+                            <th>Submitted</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {uploadsData.map((upload) => (
+                            <tr key={upload.id} className={upload.status}>
+                              <td>{formatDate(upload.date)}</td>
+                              <td>{upload.reason}</td>
+                              <td>
+                                <span className={`status-badge ${upload.status}`}>
+                                  {upload.status}
+                                </span>
+                              </td>
+                              <td>{formatDate(upload.createdAt)}</td>
+                              <td>
+                                <button
+                                  className="views-button"
+                                  onClick={() => handleViewUpload(upload)}
+                                >
+                                  View & Review
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </>
+                )}
               </div>
             )}
           </>
