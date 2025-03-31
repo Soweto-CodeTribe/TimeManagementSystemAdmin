@@ -97,7 +97,7 @@ const UserManagement = () => {
         "https://timemanagementsystemserver.onrender.com/api/online-trainees",
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log('response', response.data);
+      // console.log('response', response.data);
   
       // Access the data array directly
       setOnlinePeople(response.data.data);
@@ -181,7 +181,7 @@ const UserManagement = () => {
         }
       }
 
-      console.log('traineesData', traineesData)
+      // console.log('traineesData', traineesData)
       const formattedTrainees = traineesData.map((trainee) => ({
         id: trainee._id || trainee.id || `trainee-${crypto.randomUUID()}`,
         fullName:
@@ -194,7 +194,7 @@ const UserManagement = () => {
         lastCheckIn: trainee.lastCheckInDate || "N/A",
       }));
       allUserResults = [...formattedTrainees];
-      console.log('formattedTrainees', formattedTrainees)
+      // console.log('formattedTrainees', formattedTrainees)
 
       if (userRole === "super_admin" || userRole === "admin") {
         try {
@@ -482,7 +482,7 @@ const UserManagement = () => {
     }
   };
 
-  console.log(onlinePeople)
+  // console.log(onlinePeople)
 
   // Available Tabs
   const getAvailableTabs = () => {

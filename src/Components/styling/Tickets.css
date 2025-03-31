@@ -47,10 +47,10 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.tickets-metric-card:hover {
+/* .tickets-metric-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
+} */
 
 .tickets-metric-header {
   display: flex;
@@ -86,7 +86,7 @@
 }
 
 /* Colors for Metrics */
-.tickets-metric-card.blue {
+/* .tickets-metric-card.blue {
   border-color: #e6f0ff;
 }
 
@@ -132,7 +132,7 @@
 
 .tickets-metric-dot.yellow {
   background-color: #fbbc05;
-}
+} */
 
 /* Table Container */
 .tickets-table-container {

@@ -108,7 +108,7 @@ const Login = () => {
         // Store verification ID only once, from the payload
         if (resultAction.payload.verificationId) {
           localStorage.setItem("verificationID", resultAction.payload.verificationId);
-          console.log('login results' , resultAction)
+          // console.log('login results' , resultAction)
         }
       } else if (loginAction.rejected.match(resultAction)) {
         const errorMessage = resultAction.payload || resultAction.error.message || "Unknown error";
