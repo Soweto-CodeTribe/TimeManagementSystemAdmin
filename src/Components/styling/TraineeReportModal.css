@@ -395,7 +395,7 @@
     margin-bottom: 20px;
 }
 
-.back-button {
+.backs-button {
     background: none;
     border: none;
     cursor: pointer;
@@ -475,3 +475,135 @@
 .status-button:hover {
     opacity: 0.9;
 }
+
+.document-viewer {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #f9f9f9;
+    margin-bottom: 20px;
+  }
+  
+  .document-viewer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background-color: #f0f0f0;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .document-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .document-name {
+    font-weight: 500;
+    font-size: 16px;
+    color: #333;
+  }
+  
+  .document-actions {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .download-button, .views-button {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  
+  .download-button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+  }
+  
+  .download-button:hover {
+    background-color: #45a049;
+  }
+  
+  .views-button {
+    background-color: black;
+    color: white;
+    border: none;
+  }
+  
+  .views-button:hover {
+    background-color: black;
+  }
+  
+  .document-preview-container {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .document-iframe {
+    border: none;
+    width: 100%;
+    height: 500px;
+    background-color: white;
+  }
+  
+  .document-image {
+    max-width: 100%;
+    max-height: 500px;
+    object-fit: contain;
+  }
+  
+  .document-download-prompt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    padding: 40px 20px;
+    text-align: center;
+  }
+  
+  .document-icon {
+    font-size: 48px;
+  }
+  
+  .document-icon.pdf {
+    color: #e74c3c;
+  }
+  
+  .document-icon.docx {
+    color: #2b579a;
+  }
+  
+  .document-icon.xlsx {
+    color: #217346;
+  }
+  
+  .document-icon.image {
+    color: #8e44ad;
+  }
+  
+  .document-icon.other {
+    color: #7f8c8d;
+  }
+  
+  .loadings-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    color: #666;
+  }
+  
+  .error-message {
+    color: #e74c3c;
+    padding: 20px;
+    text-align: center;
+  }
