@@ -114,40 +114,72 @@ import { FiSearch, FiX } from 'react-icons/fi';
 import './styling/NotificationsPanel.css';
 
 const NotificationsPanel = () => {
-  const [activities, setActivities] = useState([]); // State to store live activities
-  const [loading, setLoading] = useState(true); // State to track loading
-  const [error, setError] = useState(null); // State to track errors
-  const [searchQuery, setSearchQuery] = useState(''); // State for search input
+  const [activities, setActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // Fetch live activities from the backend
   useEffect(() => {
-  const fetchLiveActivities = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+    let isMounted = true;
+    
+    // Initial loading state only on first load
+    setLoading(true);
+    
+    const fetchLiveActivities = async () => {
+      try {
+        // Don't set loading to true on subsequent fetches
+        if (!isMounted) return;
+        
+        // Only show errors if they persist (don't flash error messages)
+        setError(null);
 
-      // Get location from localStorage
-      const location = localStorage.getItem('Location');
+        // Get location from localStorage
+        const location = localStorage.getItem('Location');
 
-      // Determine the endpoint based on location
-      const endpoint = location && location !== 'undefined'
-        ? `https://timemanagementsystemserver.onrender.com/api/session/trainees-by-location?location=${encodeURIComponent(location)}`
-        : 'https://timemanagementsystemserver.onrender.com/api/session/live-trainees';
+        // Determine the endpoint based on location
+        const endpoint = location && location !== 'undefined'
+          ? `https://timemanagementsystemserver.onrender.com/api/session/trainees-by-location?location=${encodeURIComponent(location)}`
+          : 'https://timemanagementsystemserver.onrender.com/api/session/live-trainees';
 
-      // Fetch data using axios
-      const response = await axios.get(endpoint);
-      setActivities(response.data.activities || []); // Set activities or an empty array if none
-    } catch (err) {
-      setError(err.response?.data?.error || 'Failed to fetch live activities');
-    } finally {
-      setLoading(false);
-    }
-  };
+        // Fetch data using axios
+        const response = await axios.get(endpoint);
+        
+        if (isMounted) {
+          // Update activities only if the component is still mounted
+          // Use a functional update to compare with previous state
+          setActivities(prevActivities => {
+            const newActivities = response.data.activities || [];
+            
+            // Only trigger a re-render if the data actually changed
+            if (JSON.stringify(prevActivities) !== JSON.stringify(newActivities)) {
+              return newActivities;
+            }
+            return prevActivities;
+          });
+          
+          // Only set loading to false after initial load
+          if (loading) setLoading(false);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err.response?.data?.error || 'Failed to fetch live activities');
+          if (loading) setLoading(false);
+        }
+      }
+    };
 
-  fetchLiveActivities();
-}, []); // Empty dependency a
+    // Fetch activities initially
+    fetchLiveActivities();
 
-     
+    // Set up an interval to refresh activities in the background
+    const intervalId = setInterval(fetchLiveActivities, 5000);
+
+    // Cleanup function
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
+  }, []); // Empty dependency array ensures this runs once when the component mounts
 
   // Clear the search query
   const clearSearch = () => {
@@ -171,6 +203,7 @@ const NotificationsPanel = () => {
     );
   });
 
+  // Show loading indicator only on first load
   if (loading) return <p>Loading live activities...</p>;
   if (error) return <p>Error: {error}</p>;
 
