@@ -19,7 +19,7 @@ function FeedbackPage() {
   const [error, setError] = useState(null);
   const token = useSelector((state) => state.auth.token);
 
-  // Enhanced sentiment analysis datasets with more natural language patterns
+  // Enhanced sentiment analysis datasets with more natural language patterns and word combinations
   const sentimentPatterns = {
     positive: [
       // Explicit praise
@@ -36,7 +36,11 @@ function FeedbackPage() {
       // Emotional responses
       "excited", "impressed", "pleased", "glad", "delighted", "thrilled", "love using",
       // Recommendation language
-      "recommend", "would use again", "definitely use", "keep up"
+      "recommend", "would use again", "definitely use", "keep up",
+      // Positive word combinations
+      "works perfectly", "exactly what i needed", "very pleased", "really helpful", "made my day",
+      "solved my problem", "saved me time", "exceeded expectations", "pleasant experience",
+      "best experience", "easy to use", "works flawlessly", "absolutely love", "very intuitive"
     ],
     constructive: [
       // Suggestion language
@@ -50,11 +54,16 @@ function FeedbackPage() {
       "however", "although", "while", "even though", "despite", "on the other hand",
       "overall good but", "like it except", "works well but", "good start but",
       // Specific feature requests
-      "feature request", "missing feature", "additional option", "more control", "flexibility"
+      "feature request", "missing feature", "additional option", "more control", "flexibility",
+      // Constructive word combinations
+      "one thing i would", "it would be better if", "have you considered", "could be improved by",
+      "nice but needs", "good but could use", "almost perfect except", "would benefit from",
+      "needs a little more", "might work better with", "consider adding", "potential improvement",
+      "would be perfect if", "my only suggestion is", "a nice addition would be"
     ],
     negative: [
       // Direct criticism
-      "bad", "poor", "terrible", "awful", "horrible", "disappointing", "frustrating", "annoying","again", "bug",
+      "bad", "poor", "terrible", "awful", "horrible", "disappointing", "frustrating", "annoying", "again", "bug",
       // Problem indicators
       "difficult", "complicated", "confusing", "unclear", "hard to", "challenging", "tedious", 
       "boring", "slow", "laggy", "buggy", "glitchy", "unreliable", "unstable", "crashes", 
@@ -66,7 +75,13 @@ function FeedbackPage() {
       "hate", "dislike", "upset", "disappointed", "frustrated", "annoyed", "irritated",
       "angry", "furious", "regret", "unfortunate", "unacceptable", "ridiculous",
       // Comparative criticism
-      "worse than", "declined", "deteriorated", "downgrade", "step backwards"
+      "worse than", "declined", "deteriorated", "downgrade", "step backwards",
+      // Negative word combinations
+      "completely unusable", "doesn't make sense", "very disappointing", "totally frustrated",
+      "wasted my time", "major issues with", "constantly crashes", "extremely difficult",
+      "not at all what", "far too complicated", "very confusing interface", "extremely slow",
+      "couldn't figure out", "worst experience", "just doesn't work", "absolutely terrible",
+      "really annoying when", "consistently fails to", "very poorly designed"
     ],
     question: [
       // Direct questions
@@ -77,11 +92,16 @@ function FeedbackPage() {
       "looking for help", "not sure how", "can't figure out", "don't understand how",
       // Uncertainty expressions
       "confused about", "unclear how", "not certain", "wondering if", "curious if",
-      "would like to know", "trying to understand"
+      "would like to know", "trying to understand",
+      // Question word combinations
+      "is it possible to", "do you have any", "could someone tell me", "is there a way to",
+      "how do i get", "can you explain", "need to know if", "wondering how to",
+      "any idea why", "is this supposed to", "have been trying to", "should i be able to",
+      "what am i doing wrong", "does anyone know how", "could you please explain"
     ]
   };
 
-  // Function to categorize feedback based on enhanced sentiment analysis
+  // Enhanced function to categorize feedback with more advanced pattern recognition
   const categorizeFeedback = (feedbackArray) => {
     const categorized = {
       positive: [],
@@ -91,43 +111,66 @@ function FeedbackPage() {
       question: []
     };
 
+    // Weightings for different sentiment categories
+    const categoryWeights = {
+      positive: 1,
+      constructive: 1.2,  // Give slightly more weight to constructive feedback
+      negative: 1.1,      // Give slightly more weight to negative feedback
+      question: 1.3       // Give more weight to questions
+    };
+
     feedbackArray.forEach(item => {
       const text = item.feedbackText.toLowerCase();
       
-      // Count matches for each category
-      const matches = {
+      // Initialize weighted scores for each category
+      const scores = {
         positive: 0,
         constructive: 0,
         negative: 0,
         question: 0
       };
       
-      // Check for pattern matches in each category
+      // Check for pattern matches in each category with weighted scoring
       Object.keys(sentimentPatterns).forEach(category => {
         sentimentPatterns[category].forEach(pattern => {
+          // Check for exact matches of phrases (especially important for multi-word patterns)
           if (text.includes(pattern.toLowerCase())) {
-            matches[category]++;
+            // Give more weight to longer patterns (likely more specific)
+            const patternWeight = pattern.includes(" ") ? 1.5 : 1;
+            scores[category] += patternWeight * categoryWeights[category];
           }
         });
       });
       
-      // Check for question marks as additional question indicator
+      // Check for question marks as strong question indicators
       if (text.includes('?')) {
-        matches.question += 2; // Give extra weight to question marks
+        scores.question += 2.5 * categoryWeights.question; // Stronger weight for question marks
       }
       
-      // Determine primary sentiment category
-      if (matches.question >= 2) {
-        categorized.question.push(item);
-      } else if (matches.constructive > 0 && matches.positive > 0) {
-        // Constructive feedback often has both positive elements and suggestions
-        categorized.constructive.push(item);
-      } else if (matches.negative > matches.positive && matches.negative > 0) {
-        categorized.negative.push(item);
-      } else if (matches.positive > 0) {
-        categorized.positive.push(item);
+      // Advanced contextual analysis - check for patterns that might override others
+      // For example, "I love it but..." is constructive despite having positive words
+      if ((text.includes("but") || text.includes("however") || text.includes("although")) && 
+          (scores.positive > 0 && (scores.constructive > 0 || scores.negative > 0))) {
+        scores.constructive += 1.5;  // Boost constructive score for mixed feedback
+      }
+      
+      // Check for strong negation phrases that might flip sentiment
+      const negationPhrases = ["not good", "not great", "not working", "doesn't work", "won't work", "can't use"];
+      negationPhrases.forEach(phrase => {
+        if (text.includes(phrase)) {
+          scores.negative += 2;  // Strongly boost negative for negated positive terms
+          scores.positive = Math.max(0, scores.positive - 1);  // Reduce positive score
+        }
+      });
+      
+      // Determine primary sentiment category based on highest weighted score
+      const highestCategory = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+      
+      // Only categorize as the highest if the score exceeds a minimum threshold
+      if (scores[highestCategory] >= 1) {
+        categorized[highestCategory].push(item);
       } else {
-        categorized.neutral.push(item);
+        categorized.neutral.push(item);  // Default to neutral if no strong sentiment detected
       }
     });
     
