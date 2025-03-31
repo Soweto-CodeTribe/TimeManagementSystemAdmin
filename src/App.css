@@ -7,51 +7,53 @@
 html, body, #root {
   height: 100%;
   width: 100%;
+  overflow: hidden; /* Prevents unwanted scrolling */
+  font-family: Poppins;
 }
+
+
+
+::selection{
+  background:#8CC63F;
+  color:#f2f2f8;
+}
+::-webkit-scrollbar-thumb {
+  background: #eee;
+  border-radius: 10px;
+  transition: all .4s linear
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #bbb;
+}
+::-webkit-scrollbar {
+  width: 10px;
+}
+
 
 .app-container {
   display: flex;
-  margin-top: 60px; /* Push content below navbar */
-  height: 100vh; /* Full viewport height */
+  height: 100vh;
+  width: 100%;
+  font-family: Poppins;
+}
+/* Main Content */
+.main-content {
+  flex-grow: 1;
+  margin-top: 60px; /* Matches navbar height */
+  height: calc(100vh - 60px);
+  display: flex;
+  overflow: hidden;
 }
 
-.sidebar {
-  width: 250px; /* Set a fixed width for the sidebar */
-  height: 100vh; /* Full height */
-  background-color: #083f4f;
-  color: white;
-  padding: 20px;
-  display: flex;
-  border:"1px solid #000";
-  flex-direction: column;
-  font-family: Popins, sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  font-style: normal;
-}
-.sidebar ul {
-  list-style: none;
-  padding: 0;
-}
-
-.sidebar ul li {
-  display: flex;
-  align-items: center;
-  gap: 10px; /* Space between icon and text */
-  margin: 15px 0;
-  padding: 10px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-.sidebar ul li:hover {
-  background-color: #444;
-}
+/* Content Section */
 .content {
   flex-grow: 1;
   padding: 20px;
-  overflow-y: auto; /* Enable scrolling if content is large */
-  background-color: #f4f4f4; /* Light background for better contrast */
+  overflow-y: auto;
+  background-color: #ffffff;
 }
+
+/* Logout Button */
 .logout-btn {
   background-color: #d9534f;
   color: white;
@@ -91,7 +93,7 @@ html, body, #root {
   font-size: small;
   text-align: center;
   width: 400px;
-  font-family: Popins, sans-serif;
+  font-family: Poppins, sans-serif;
 }
 
 .modal-actions {
