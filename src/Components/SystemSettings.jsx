@@ -28,9 +28,9 @@ function SystemSettings() {
     navigate("/location-management"); // Navigate to LocationManagement
   };
 
-  const handleTimeManagement = () => {
-    navigate("/time-management"); // Navigate to Time Management
-  };
+  // const handleTimeManagement = () => {
+  //   navigate("/time-management"); // Navigate to Time Management
+  // };
 
   return (
     <div className={`settings-container ${isDarkMode ? "dark" : "light"}`}>
@@ -43,12 +43,6 @@ function SystemSettings() {
 
       <main className={`settings-content ${isDarkMode ? "dark" : ""}`}>
         <nav className={`settings-nav ${isDarkMode ? "dark" : ""}`}>
-          <div className="nav-item" onClick={handleTimeManagement}>
-            {" "}
-            {/* Time Management Item */}
-            <FiClock className="nav-icon" />
-            <span style={{ color: isDarkMode ? "white" : "black", fontWeight: "bold" }}>Time Management</span>
-          </div>
           <div className="nav-item" onClick={handleLocationManagement}>
             {" "}
             {/* Location Item */}

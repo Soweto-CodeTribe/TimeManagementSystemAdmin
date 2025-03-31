@@ -304,7 +304,7 @@ const TraineeOverview = ({ token }) => {
                         <button onClick={() => openSuspendModal(trainee)}>
                           Suspend Trainee
                         </button>
-                        <button onClick={() => openReinstatementModal(trainee)}>
+                        <button onClick={() => openReinstatementModal(trainee)}  style={{color: "green"}}>
                           Reinstate Trainee
                         </button>
                     </div>
