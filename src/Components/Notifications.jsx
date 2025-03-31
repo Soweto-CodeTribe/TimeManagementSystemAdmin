@@ -121,31 +121,33 @@ const NotificationsPanel = () => {
 
   // Fetch live activities from the backend
   useEffect(() => {
-    const fetchLiveActivities = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  const fetchLiveActivities = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        // Get location from localStorage
-        const location = localStorage.getItem('Location');
+      // Get location from localStorage
+      const location = localStorage.getItem('Location');
 
-        // Determine the endpoint based on location
-        const endpoint = location
-          ? `https://timemanagementsystemserver.onrender.com/api/session/trainees-by-location?location=${encodeURIComponent(location)}`
-          : 'https://timemanagementsystemserver.onrender.com/api/session/live-trainees';
+      // Determine the endpoint based on location
+      const endpoint = location && location !== 'undefined'
+        ? `https://timemanagementsystemserver.onrender.com/api/session/trainees-by-location?location=${encodeURIComponent(location)}`
+        : 'https://timemanagementsystemserver.onrender.com/api/session/live-trainees';
 
-        // Fetch data using axios
-        const response = await axios.get(endpoint);
-        setActivities(response.data.activities || []); // Set activities or an empty array if none
-      } catch (err) {
-        setError(err.response?.data?.error || 'Failed to fetch live activities');
-      } finally {
-        setLoading(false);
-      }
-    };
+      // Fetch data using axios
+      const response = await axios.get(endpoint);
+      setActivities(response.data.activities || []); // Set activities or an empty array if none
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to fetch live activities');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchLiveActivities();
-  }, []); // Empty dependency array ensures this runs once when the component mounts
+  fetchLiveActivities();
+}, []); // Empty dependency a
+
+     
 
   // Clear the search query
   const clearSearch = () => {
