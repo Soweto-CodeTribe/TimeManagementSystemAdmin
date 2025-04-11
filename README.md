@@ -274,6 +274,24 @@ Accessible through `/settings` route after login:
 
 ---
 
+## Screenshots
+![Image](https://github.com/user-attachments/assets/5ce16cfe-2050-410f-97b8-36cdb352fe3c)
+![Image](https://github.com/user-attachments/assets/d3bb326b-05be-4903-aedf-6b2e780cad72)
+![Image](https://github.com/user-attachments/assets/824fb5bc-e958-4ac7-b439-c0dbb13e7ea4)
+![Image](https://github.com/user-attachments/assets/a908ed5f-f96d-49af-9a36-29c1fefe02e6)
+![Image](https://github.com/user-attachments/assets/49b0557b-d29b-4123-b0d0-8380fb464303)
+![Image](https://github.com/user-attachments/assets/2ebcc9a7-dde6-4fa9-b36a-b7f8e98df6b2)
+![Image](https://github.com/user-attachments/assets/71b48254-0685-49b3-9061-9333aed4a32f)
+![Image](https://github.com/user-attachments/assets/4c620206-6a55-4f07-9c11-8cc79d649f7b)
+![Image](https://github.com/user-attachments/assets/11c7f6c3-cc42-4440-a102-19bce4621517)
+![Image](https://github.com/user-attachments/assets/47cdfaab-6f67-4a28-aa9e-eb4474a93346)
+![Image](https://github.com/user-attachments/assets/e122c288-92bd-492c-affc-f60edd233566)
+![Image](https://github.com/user-attachments/assets/11d29d0a-7d53-44c5-aa50-6810e30b2a64)
+![Image](https://github.com/user-attachments/assets/68565072-2ae3-44d7-a559-d6dee865f4c0)
+![Image](https://github.com/user-attachments/assets/9d5a6709-267f-4e45-a8c5-806453ba12d1)
+![Image](https://github.com/user-attachments/assets/f22d85dc-114c-45e8-b983-5228335f247e)
+![Image](https://github.com/user-attachments/assets/6fb11bba-229e-4263-9b04-044e4a3dd0b0)
+
 ## API Documentation
 
 ### Authentication Endpoints
