@@ -33,14 +33,14 @@ Repository: [https://github.com/Soweto-CodeTribe/TimeManagementSystemAdmin](http
 
 This repository contains **6 branches**, each serving a specific purpose in the development lifecycle:
 
-| Branch Name         | Purpose                                                                 |
-|---------------------|-------------------------------------------------------------------------|
-| `main`              | Main production branch with stable release code                         |
-| `DevBranch`         | Integration branch for development and testing                          |
-| `Xoli`              | Developer-specific branch for Xoli's tasks                              |
-| `Eunice`            | Developer-specific branch for Eunice's tasks                            |
-| `Prince`            | Developer-specific branch for Prince's tasks                            |
-| `Nhlakanipho`| Developer-specific branch for Nhlakanipho's tasks                       |
+| Branch Name     | Purpose                                                 |
+|-----------------|--------------------------------------------------------|
+| `main`          | Main production branch with stable release code         |
+| `DevBranch`     | Integration branch for development and testing          |
+| `Xoli`          | Developer-specific branch for Xoli's tasks              |
+| `Eunice`        | Developer-specific branch for Eunice's tasks            |
+| `Prince`        | Developer-specific branch for Prince's tasks            |
+| `Nhlakanipho`   | Developer-specific branch for Nhlakanipho's tasks       |
 
 ---
 
@@ -50,13 +50,9 @@ This repository contains **6 branches**, each serving a specific purpose in the 
 - **Framework**: React 19.0.0
 - **Build Tool**: Vite 6.1.0
 - **State Management**: Redux Toolkit
-- **UI Libraries**:
-  - Material UI (v6.4.6)
-  - Framer Motion
-  - Recharts
+- **UI Libraries**: Material UI (v6.4.6), Framer Motion, Recharts
 - **Authentication**: Firebase Authentication
 - **API Handling**: Axios
-- **Date Handling**: date-fns
 - **PDF Generation**: jsPDF
 - **CSV Parsing**: PapaParse
 - **Notifications**: React-Toastify
@@ -73,11 +69,10 @@ This repository contains **6 branches**, each serving a specific purpose in the 
 ## Installation
 
 ### Prerequisites
-- Node.js v18.x or higher (run `node -v` to check version)
-- npm v9.x or Yarn v1.22+ (run `npm -v` or `yarn -v` to check)
+- Node.js v18.x or higher
+- npm v9.x or Yarn v1.22+
 - Git installed on your system
 - Firebase account for authentication
-- Backend API endpoint (provided by backend team)
 - Code editor (VS Code recommended)
 
 ### Setup Instructions
@@ -100,7 +95,7 @@ This repository contains **6 branches**, each serving a specific purpose in the 
    git checkout Xoli
    git checkout Eunice
    git checkout Prince
-   git checkout "Nhlakanipho Branch"  # Note: Use quotes for branch names with spaces
+   git checkout Nhlakanipho
    ```
 
 3. **Install Dependencies**
@@ -112,7 +107,7 @@ This repository contains **6 branches**, each serving a specific purpose in the 
 
 4. **Environment Configuration**
    
-   Create a `.env` file in the project root and add the following variables:
+   Create a `.env` file in the project root and add your Firebase credentials:
    ```env
    # Firebase Configuration
    VITE_API_KEY=your_firebase_api_key
@@ -126,7 +121,7 @@ This repository contains **6 branches**, each serving a specific purpose in the 
    VITE_API_URL=your_backend_api_url
    ```
    
-   > **Note:** You'll need to replace the placeholder values with your actual Firebase credentials. These can be obtained from your Firebase project settings.
+   > **Note:** You'll need to replace the placeholder values with your actual Firebase credentials from your Firebase project settings.
 
 5. **Start Development Server**
    ```bash
@@ -135,46 +130,39 @@ This repository contains **6 branches**, each serving a specific purpose in the 
    yarn dev
    ```
    
-   This will start the development server on `http://localhost:5173` by default. You can access the application by opening this URL in your browser.
+   This will start the development server on `http://localhost:5173`. Open this URL in your browser to access the application.
 
-6. **Verify Installation**
-   
-   Once the development server is running, you should see:
-   - Console output indicating successful compilation
-   - The login page at `http://localhost:5173`
-   - No console errors in your browser's developer tools
-
-7. **Build for Production**
+6. **Build for Production**
    ```bash
    npm run build
    # or
    yarn build
    ```
    
-   This creates optimized production files in the `dist` directory that can be deployed to a web server.
-
-8. **Preview Production Build**
-   ```bash
-   npm run preview
-   # or
-   yarn preview
-   ```
-   
-   This serves the production build locally for testing before deployment.
+   This creates optimized production files in the `dist` directory for deployment.
 
 ---
 
 ## Configuration
 
-### Firebase Setup
-1. Create a Firebase project at [Firebase Console](https://console.firebase.google.com/).
+### Firebase Setup for Non-Technical Users
+1. Create a Firebase account at [Firebase Console](https://console.firebase.google.com/)
+2. Click "Add project" and follow the setup wizard
+3. Once your project is created:
+   - Click "Authentication" in the left sidebar and enable Email/Password sign-in
+   - Click "Firestore Database" in the sidebar and create a database
+   - Click the web icon (</>) on the project overview page to register your app
+   - Copy the configuration values provided and paste them into your `.env` file
+
+### Firebase Setup for Technical Users
+1. Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
 2. Enable **Email/Password Authentication**:
    - Navigate to Authentication > Sign-in methods
    - Enable Email/Password provider
 3. Set up a **Firestore Database**:
    - Go to Firestore Database
    - Click "Create database"
-   - Start in production mode or test mode (switch to production later)
+   - Start in production mode
 4. Configure security rules:
    ```javascript
    rules_version = '2';
@@ -186,75 +174,87 @@ This repository contains **6 branches**, each serving a specific purpose in the 
      }
    }
    ```
-5. Add a web app to your Firebase project:
-   - Click the web icon (</>) on the project overview page
-   - Register your app with a nickname
-   - Copy the configuration values into the `.env` file
-6. Install Firebase CLI (optional, for advanced deployments):
-   ```bash
-   npm install -g firebase-tools
-   firebase login
-   firebase init
-   ```
+5. Add a web app to your Firebase project and copy the configuration values into your `.env` file
 
 ### System Settings
-Accessible through `/settings` route after login:
-- **Business Hours**: Define workday start/end times.
-- **Attendance Radius**: Set geofencing parameters (meters).
-- **Session Timeout**: Configure inactivity limits (15/30/60 minutes).
-- **Program Dates**: Set valid training periods.
+Accessible through the `/settings` route after login:
+- **Business Hours**: Define workday start/end times
+- **Attendance Radius**: Set geofencing parameters (meters)
+- **Session Timeout**: Configure inactivity limits (15/30/60 minutes)
+- **Program Dates**: Set valid training periods
 
 ---
 
 ## Key Features
 
 ### User Management
-- Add, edit, and delete users (trainees, facilitators, admins, guests).
-- Bulk import/export user data via CSV or PDF.
-- Role-based access control.
+- Add, edit, and delete users (trainees, facilitators, admins, guests)
+- Bulk import/export user data via CSV or PDF
+- Role-based access control
 
 ### Attendance Tracking
-- Real-time session monitoring.
-- Manual override for attendance records.
-- Daily logs and attendance analytics.
+- Real-time session monitoring
+- Manual override for attendance records
+- Daily logs and attendance analytics
 
 ### Reporting System
-- Generate attendance and performance reports.
-- Export reports in PDF or CSV formats.
+- Generate attendance and performance reports
+- Export reports in PDF or CSV formats
 
 ### Event Management
-- Schedule and manage special events.
-- Send notifications to trainees about upcoming events.
+- Schedule and manage special events
+- Send notifications to trainees about upcoming events
 
 ---
 
 ## Usage Guide
 
-### Authentication Flow
+### For Non-Technical Users
+
+#### Getting Started
+1. Access the application using the provided URL
+2. Log in with your email and password
+3. Complete the two-factor authentication (check your email for the code)
+4. You'll be directed to the dashboard showing system overview
+
+#### Common Tasks
+- **Adding a User**: Click "Users" in the sidebar → "Add New User" → Fill in the form → Submit
+- **Viewing Attendance**: Click "Attendance" in the sidebar → Select date range → View report
+- **Exporting Reports**: Click "Reports" in the sidebar → Select report type → Click "Export" (PDF or CSV)
+- **Managing Events**: Click "Events" in the sidebar → "Add Event" or select existing event to modify
+
+### For Technical Users
+
+#### Authentication Flow
 1. **Login**:
-   - Email/Password authentication.
-   - Two-Factor Authentication (2FA) via email OTP.
+   - Email/Password authentication
+   - Two-Factor Authentication (2FA) via email OTP
 2. **Password Recovery**:
-   - OTP validation required.
-   - Temporary password expiration (24 hours).
+   - OTP validation required
+   - Temporary password expiration (24 hours)
 
-### Dashboard Navigation
-- Quick stats include total active users, real-time attendance, and system health metrics.
-- Shortcut actions for quick user search, report generation, and event creation.
+#### Dashboard Navigation
+- Quick stats display total active users, real-time attendance, and system health
+- Shortcut actions for user search, report generation, and event creation
 
-### User Management
+#### User Management
 1. **Add User**:
-   - Navigate to `/users/create`.
-   - Required fields: Name, Email, Role.
+   - Navigate to `/users/create`
+   - Required fields: Name, Email, Role
 2. **Bulk Import**:
-   - Use the provided CSV template (`/templates/users.csv`).
-   - Validate for duplicates and missing fields.
+   - Use the provided CSV template (`/templates/users.csv`)
+   - System validates for duplicates and missing fields
 
 ---
 
 ## Branch Management
 
-### Workflow Guidelines
+### For Non-Technical Users
+- The `main` branch contains the stable, production-ready version
+- The `DevBranch` contains features being tested before release
+- Developer branches contain work-in-progress features
+
+### For Technical Users
 1. Always create a new branch from `DevBranch` for new features:
    ```bash
    git checkout DevBranch
@@ -265,102 +265,87 @@ Accessible through `/settings` route after login:
    ```bash
    git push origin your-branch-name
    ```
-3. Create a Pull Request (PR) targeting the `DevBranch` branch.
+3. Create a Pull Request targeting the `DevBranch` branch
 
 ### Merging to `main`
-- Only merge stable, tested code into `main`.
-- Ensure all CI/CD pipelines pass before merging.
-- PRs to `main` require approval from at least one team lead.
+- Only merge stable, tested code into `main`
+- All PRs to `main` require approval from at least one team lead
 
 ---
 
 ## Screenshots
-![Image](https://github.com/user-attachments/assets/5ce16cfe-2050-410f-97b8-36cdb352fe3c)
-![Image](https://github.com/user-attachments/assets/d3bb326b-05be-4903-aedf-6b2e780cad72)
-![Image](https://github.com/user-attachments/assets/824fb5bc-e958-4ac7-b439-c0dbb13e7ea4)
-![Image](https://github.com/user-attachments/assets/a908ed5f-f96d-49af-9a36-29c1fefe02e6)
-![Image](https://github.com/user-attachments/assets/49b0557b-d29b-4123-b0d0-8380fb464303)
-![Image](https://github.com/user-attachments/assets/2ebcc9a7-dde6-4fa9-b36a-b7f8e98df6b2)
-![Image](https://github.com/user-attachments/assets/71b48254-0685-49b3-9061-9333aed4a32f)
-![Image](https://github.com/user-attachments/assets/4c620206-6a55-4f07-9c11-8cc79d649f7b)
-![Image](https://github.com/user-attachments/assets/11c7f6c3-cc42-4440-a102-19bce4621517)
-![Image](https://github.com/user-attachments/assets/47cdfaab-6f67-4a28-aa9e-eb4474a93346)
-![Image](https://github.com/user-attachments/assets/e122c288-92bd-492c-affc-f60edd233566)
-![Image](https://github.com/user-attachments/assets/11d29d0a-7d53-44c5-aa50-6810e30b2a64)
-![Image](https://github.com/user-attachments/assets/68565072-2ae3-44d7-a559-d6dee865f4c0)
-![Image](https://github.com/user-attachments/assets/9d5a6709-267f-4e45-a8c5-806453ba12d1)
-![Image](https://github.com/user-attachments/assets/f22d85dc-114c-45e8-b983-5228335f247e)
-![Image](https://github.com/user-attachments/assets/6fb11bba-229e-4263-9b04-044e4a3dd0b0)
+
+Here are key screens from the application:
+
+![Dashboard Overview](https://github.com/user-attachments/assets/5ce16cfe-2050-410f-97b8-36cdb352fe3c)
+![User Management](https://github.com/user-attachments/assets/d3bb326b-05be-4903-aedf-6b2e780cad72)
+![Attendance Tracking](https://github.com/user-attachments/assets/824fb5bc-e958-4ac7-b439-c0dbb13e7ea4)
+![Reporting Interface](https://github.com/user-attachments/assets/a908ed5f-f96d-49af-9a36-29c1fefe02e6)
+![Settings Panel](https://github.com/user-attachments/assets/49b0557b-d29b-4123-b0d0-8380fb464303)
+![Mobile View](https://github.com/user-attachments/assets/2ebcc9a7-dde6-4fa9-b36a-b7f8e98df6b2)
+
+---
 
 ## API Documentation
 
-### Authentication Endpoints
-| Method | Endpoint               | Description                  |
-|--------|------------------------|------------------------------|
-| POST   | `/api/auth/login`      | Authenticate users           |
-| POST   | `/api/auth/verify-otp` | Verify two-factor auth       |
-| POST   | `/api/auth/logout`     | End user session             |
+### Main Endpoints
 
-### User Management
-| Method | Endpoint               | Description                  |
-|--------|------------------------|------------------------------|
-| GET    | `/api/users`           | Retrieve all users           |
-| POST   | `/api/users`           | Create new user              |
-| PUT    | `/api/users/:id`       | Update user details          |
-| DELETE | `/api/users/:id`       | Remove user                  |
-
-### Attendance
-| Method | Endpoint               | Description                  |
-|--------|------------------------|------------------------------|
-| GET    | `/api/attendance`      | Get attendance records       |
-| POST   | `/api/attendance`      | Create attendance record     |
-| PUT    | `/api/attendance/:id`  | Update attendance record     |
-
-### Settings
-| Method | Endpoint               | Description                  |
-|--------|------------------------|------------------------------|
-| GET    | `/api/settings`        | Retrieve system settings     |
-| PUT    | `/api/settings`        | Update system settings       |
+| Category       | Endpoint                | Description                         |
+|----------------|-------------------------|-------------------------------------|
+| Authentication | `/api/auth/login`       | Log in with credentials             |
+|                | `/api/auth/verify-otp`  | Verify two-factor code              |
+|                | `/api/auth/logout`      | End user session                    |
+| Users          | `/api/users`            | Get/create users                    |
+|                | `/api/users/:id`        | Update/delete specific user         |
+| Attendance     | `/api/attendance`       | Get/create attendance records       |
+|                | `/api/attendance/:id`   | Update specific attendance record   |
+| Settings       | `/api/settings`         | Get/update system settings          |
 
 ---
 
 ## Troubleshooting
 
-### Common Issues
-1. **Login Failures**:
-   - Verify 2FA code expiration (5 minutes).
-   - Check spam folder for OTP emails.
-   - Ensure account is not suspended.
-   
-2. **Data Export Errors**:
-   - Check storage permissions.
-   - Validate CSV formatting.
-   - Ensure sufficient disk space.
-   
-3. **Installation Issues**:
-   - Clear npm cache: `npm cache clean --force`
-   - Check Node.js version: `node -v` (should be v18.x or higher)
-   - For Vite errors, try: `npm exec vite --version`
-   - If you encounter dependency issues, try: `npm install --legacy-peer-deps`
-   
-4. **Firebase Connection Problems**:
-   - Verify `.env` variables are correctly formatted (no spaces or quotes)
-   - Check Firebase console for service disruptions
-   - Test connectivity with: `curl -X GET https://[YOUR_PROJECT_ID].firebaseio.com/.json`
-   - Ensure your IP is not blocked in Firebase security rules
-   
-5. **Build Failures**:
-   - Check for JavaScript syntax errors in your code
-   - Verify import/export statements
-   - Look for missing dependencies in `package.json`
-   - Try building with verbose output: `npm run build -- --debug`
+### For Non-Technical Users
 
-### Error Codes
+#### Common Issues
+1. **Can't Log In**
+   - Check that you're using the correct email and password
+   - Look in your spam folder for the verification code
+   - Contact an administrator if your account might be suspended
+
+2. **Can't Export Reports**
+   - Check that you have selected a valid date range
+   - Try exporting a smaller date range if dealing with large datasets
+   - Make sure you have sufficient permissions
+
+3. **System Runs Slowly**
+   - Try refreshing the page
+   - Clear your browser cache
+   - Use Chrome or Firefox for best performance
+
+### For Technical Users
+
+#### Installation Issues
+- Clear npm cache: `npm cache clean --force`
+- Check Node.js version: `node -v` (should be v18.x or higher)
+- For dependency issues: `npm install --legacy-peer-deps`
+
+#### Firebase Connection Problems
+- Verify `.env` variables are correctly formatted
+- Check Firebase console for service disruptions
+- Ensure your IP is not blocked in Firebase security rules
+
+#### Build Failures
+- Check for JavaScript syntax errors
+- Verify import/export statements
+- Look for missing dependencies in `package.json`
+
+#### Error Codes
 | Code | Meaning            | Action                          |
 |------|--------------------|----------------------------------|
 | 401  | Unauthorized       | Re-authenticate                 |
 | 403  | Forbidden          | Check user permissions          |
-| 500  | Server Error       | Contact support                 |
+| 500  | Server Error       | Contact support team            |
 | E001 | Database Connection| Verify Firebase credentials     |
 | E002 | Invalid Input      | Check form validation           |
 | E003 | Rate Limited       | Wait and retry later            |
@@ -369,54 +354,47 @@ Accessible through `/settings` route after login:
 
 ## Contributing
 
-### Contribution Workflow
-1. Fork the repository.
-2. Create a feature branch:
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-3. Commit changes using [Conventional Commits](https://www.conventionalcommits.org/):
-   ```bash
-   git commit -m 'feat(auth): add 2FA verification'
-   ```
-4. Push to the branch:
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-5. Open a Pull Request targeting the `DevBranch` branch.
+### For Non-Technical Contributors
+- Report bugs through the issue tracker
+- Suggest features and improvements via email
+- Participate in user testing when requested
+
+### For Technical Contributors
+1. Fork the repository
+2. Create a feature branch from `DevBranch`
+3. Commit changes using descriptive messages
+4. Push to your branch
+5. Open a Pull Request targeting the `DevBranch`
 
 ### Code Review Process
-1. All PRs require at least one review from a team member
+1. All PRs require at least one review
 2. Code must pass all automated tests
-3. Code must meet style guidelines (run `npm run lint` to verify)
-4. Documentation must be updated for any new features
+3. Documentation must be updated for new features
 
 ### Coding Standards
-- Follow [Airbnb JavaScript Style Guide](https://airbnb.io/javascript/react/).
-- Write unit tests for all components and utilities.
-- Maintain minimum 80% test coverage.
+- Follow [Airbnb JavaScript Style Guide](https://airbnb.io/javascript/react/)
+- Write unit tests for all components
+- Maintain minimum 80% test coverage
 - Run linter before committing: `npm run lint`
-- Format code with Prettier: `npm run format`
 
 ---
 
 ## Team
 
 ### Frontend Developers
-- Component Architecture
-- State Management
-- API Integration
-- Performance Optimization
+- [Xoli Nxiweni](https://github.com/Xoli-Nxiweni) - xolinxiweni@gmail.com
+- [Prince Mashumu](https://github.com/Princemashumu)
+- [Eunice](https://github.com/eungobs)
+- [Alson Africa](https://github.com/AlsonAfrica)
 
 ### Backend Developers
-- Authentication System
-- Database Design
-- API Development
-- Security Implementation
+- [Siphelele Zulu](https://github.com/sphllzulu)
+- [Comfort](https://github.com/ComfortN)
+- [Mandlakhe](https://github.com/MandlakheM)
+- [Edward](https://github.com/EdwardCodeTriber)
 
 ### UX/UI Designers
-- Wireframing
-- Component Design
+- Wireframing and Component Design Team (2 members)
 
 ---
 
