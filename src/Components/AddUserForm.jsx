@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import './styling/AddUserForm.css'; // Import the CSS
+import './styling/AddUserForm.css';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const AddUserForm = () => {
     const navigate = useNavigate();
@@ -12,17 +14,16 @@ const AddUserForm = () => {
     const [surname, setSurname] = useState('');
     const [email, setEmail] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
-    const [idNumber, setIdNumber] = useState(''); // State for ID Number
-    const [location, setLocation] = useState(''); // State for Location
-    const [role, setRole] = useState(''); // State for user role
-    const userRole = localStorage.getItem('role')
+    const [idNumber, setIdNumber] = useState('');
+    const [location, setLocation] = useState('');
+    const [role, setRole] = useState('');
+    const userRole = localStorage.getItem('role');
 
     // State for address
     const [street, setStreet] = useState('');
     const [city, setCity] = useState('');
     const [postalCode, setPostalCode] = useState('');
     const [isConfirmed, setIsConfirmed] = useState(false);
-    const [feedbackMessage, setFeedbackMessage] = useState(''); // State for feedback message
 
     // Locations array
     const locations = [
@@ -35,16 +36,90 @@ const AddUserForm = () => {
         'Kimberly'
     ];
 
+    // Toast configuration
+    const notifySuccess = (message) => {
+        toast.success(message, {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            closeButton: false
+        });
+    };
+
+    const notifyError = (message) => {
+        toast.error(message, {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: false,
+            pauseOnHover: true,
+            draggable: true,
+            closeButton: false,
+            style: { boxShadow: 'none' }, // Removes shadow overlay
+            // You can also add this if needed:
+            // className: 'no-overlay' // Add a custom class to further style it via CSS
+        });
+    };
+
     const handleContinue = () => {
-        if (currentScreen === 'basic-info') {
-            setCurrentScreen('physical-address');
+        // Validate basic information fields
+        if (!fullName || !surname || !email || !phoneNumber || !idNumber || !role) {
+            notifyError("Please fill in all required fields");
+            return;
         }
+
+        // Email validation
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(email)) {
+            notifyError("Please enter a valid email address");
+            return;
+        }
+
+        // Phone number validation (basic)
+        const phonePattern = /^\d{10}$/;
+        if (!phonePattern.test(phoneNumber.replace(/\D/g, ''))) {
+            notifyError("Please enter a valid 10-digit phone number");
+            return;
+        }
+
+        // Additional validation for location when required
+        if ((role === 'Trainee' || role === 'Facilitator') && !location) {
+            notifyError("Please select a location");
+            return;
+        }
+
+        // If all validations pass, proceed to next screen
+        setCurrentScreen('physical-address');
+        notifySuccess("Basic information saved");
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        // Validate physical address fields
+        if (!street || !city || !postalCode) {
+            notifyError("Please fill in all address fields");
+            return;
+        }
 
-        // Prepare the user data to send
+        // Validate confirmation checkbox
+        if (!isConfirmed) {
+            notifyError("Please confirm the information is accurate");
+            return;
+        }
+
+        const token = localStorage.getItem('authToken');
+
+        // Check if token exists
+        if (!token) {
+            notifyError("No authorization token found. Please log in again.");
+            return;
+        }
+
+        // Prepare user data
         const userData = { 
             fullName, 
             surname, 
@@ -57,19 +132,11 @@ const AddUserForm = () => {
             location 
         };
 
-        console.log("User Data:", userData); // Log the user data being sent
-
-        const token = localStorage.getItem("authToken");
-        console.log("Authorization Token:", token); // Log the token for debugging
-
-        // Check if the token is present
-        if (!token) {
-            setFeedbackMessage("No authorization token found. Please log in again.");
-            return;
-        }
+        console.log("User Data:", userData);
+        console.log("Authorization Token:", token);
 
         try {
-            // Determine the correct endpoint based on the role
+            // Determine endpoint based on role
             let endpoint = '';
             switch (role) {
                 case 'Trainee':
@@ -82,34 +149,43 @@ const AddUserForm = () => {
                     endpoint = '/api/stakeholder';
                     break;
                 case 'SuperAdmin':
-                    endpoint = '/api/super-admin/create'
+                    endpoint = '/api/super-admin/create';
+                    break;
                 default:
-                    setFeedbackMessage("Please select a role.");
-                    return; // Stop execution if the role is not selected
+                    notifyError("Please select a valid role");
+                    return;
             }
 
-            // Send the user data to the selected endpoint
-            const response = await axios.post(`https://timemanagementsystemserver.onrender.com${endpoint}`, userData, {
-                headers: {
-                    Authorization: `Bearer ${token}`
+            // API request
+            const response = await axios.post(
+                `https://timemanagementsystemserver.onrender.com${endpoint}`, 
+                userData, 
+                {
+                    headers: { Authorization: `Bearer ${token}` }
                 }
-            });
+            );
 
-            // Handle the response from the server
+            // Handle successful response
             if (response.status === 201 || response.status === 200) {
-                setFeedbackMessage("User saved successfully!"); // Show success message
-                navigate('/user-management', { state: { userData } }); // Navigate to UserManagement
+                notifySuccess("User saved successfully!");
+                
+                // Delay navigation to allow toast to be seen
+                setTimeout(() => {
+                    navigate('/user-management', { state: { userData } });
+                }, 1500);
             }
         } catch (error) {
             console.error('Error saving user:', error);
-
-            // Enhanced error logging
+            
+            // Enhanced error handling
             if (error.response) {
                 console.error('Response data:', error.response.data);
-                const errorMessage = error.response.data.error || error.response.data || "An unknown error occurred.";
-                setFeedbackMessage("Failed to save user: " + errorMessage); // Show specific error message
+                const errorMessage = error.response.data.error || error.response.data.message || "An unknown error occurred";
+                notifyError(`Failed to save user: ${errorMessage}`);
+            } else if (error.request) {
+                notifyError("Network error. Please check your connection and try again.");
             } else {
-                setFeedbackMessage("Failed to save user: " + error.message); // Show network or other errors
+                notifyError(`Error: ${error.message}`);
             }
         }
     };
@@ -118,16 +194,15 @@ const AddUserForm = () => {
     if (currentScreen === 'physical-address') {
         return (
             <div className="add-user-form-container">
+                <ToastContainer />
                 <h1>Add New User</h1>
                 <p>Easily register trainees, guests, or facilitators with the required details.</p>
 
-                <div className="navigation">
+                {/* <div className="navigation">
                     <span className="nav-item">Basic Information</span>
-                    {/* {' > '} */}
                     <span className="nav-item active">Physical Address</span>
-                    {/* {' > '} */}
                     <span className="nav-item">Additional Info</span>
-                </div>
+                </div> */}
 
                 <h2>Physical Address <span className="info-icon">ⓘ</span></h2>
 
@@ -140,6 +215,7 @@ const AddUserForm = () => {
                             placeholder="Enter Street"
                             value={street}
                             onChange={(e) => setStreet(e.target.value)}
+                            required
                         />
                     </div>
 
@@ -151,6 +227,7 @@ const AddUserForm = () => {
                             placeholder="Enter City"
                             value={city}
                             onChange={(e) => setCity(e.target.value)}
+                            required
                         />
                     </div>
 
@@ -162,6 +239,7 @@ const AddUserForm = () => {
                             placeholder="Enter postal code"
                             value={postalCode}
                             onChange={(e) => setPostalCode(e.target.value)}
+                            required
                         />
                     </div>
 
@@ -173,23 +251,26 @@ const AddUserForm = () => {
                             onChange={(e) => setIsConfirmed(e.target.checked)}
                         />
                         <label htmlFor="confirm">
-                            I confirm that all the information provided is accurate and agree to the system's terms and conditions.
+                            {`I confirm that all the information provided is accurate and agree to the system's terms and conditions.`}
                         </label>
                     </div>
 
-                    <button 
-                        type="submit" 
-                        className="submit-btn"
-                        disabled={!isConfirmed}
-                    >
-                        Submit
-                    </button>
-
-                    {feedbackMessage && (
-                        <p className={`feedback-message ${feedbackMessage.includes("Failed") ? 'error' : 'success'}`}>
-                            {feedbackMessage}
-                        </p>
-                    )}
+                    <div className="form-buttons">
+                        <button 
+                            type="button" 
+                            className="back-btn"
+                            onClick={() => setCurrentScreen('basic-info')}
+                        >
+                            Back
+                        </button>
+                        <button 
+                            type="submit" 
+                            className="submit-btn"
+                            disabled={!isConfirmed}
+                        >
+                            Submit
+                        </button>
+                    </div>
                 </form>
             </div>
         );
@@ -198,100 +279,86 @@ const AddUserForm = () => {
     // Render basic information screen
     return (
         <div className="add-user-form-container">
+            <ToastContainer />
             <h1>Add New User</h1>
             <p>Easily register trainees, guests, or facilitators with the required details.</p>
 
-            <div className="navigation">
+            {/* <div className="navigation">
                 <span className="nav-item active">Basic Information</span>
-                {/* {' > '} */}
                 <span className="nav-item">Physical Address</span>
-                {/* {' > '} */}
                 <span className="nav-item">Additional Info</span>
-            </div>
+            </div> */}
 
             <h2>Basic Information <span className="info-icon">ⓘ</span></h2>
 
             <form onSubmit={(e) => e.preventDefault()}>
                 <div className="form-group">
-                    <label htmlFor="fullName">Full Name</label>
+                    <label htmlFor="fullName">Full Name <span className="required">*</span></label>
                     <input 
                         type="text" 
                         id="fullName" 
                         placeholder="Enter full name" 
                         value={fullName}
-                        onChange={(e) => setFullName(e.target.value)} 
+                        onChange={(e) => setFullName(e.target.value)}
+                        required
                     />
                 </div>
 
                 <div className="form-group">
-                    <label htmlFor="surname">Surname</label>
+                    <label htmlFor="surname">Surname <span className="required">*</span></label>
                     <input 
                         type="text" 
                         id="surname" 
                         placeholder="Enter surname" 
                         value={surname}
                         onChange={(e) => setSurname(e.target.value)}
+                        required
                     />
                 </div>
 
                 <div className="form-group">
-                    <label htmlFor="email">Email</label>
+                    <label htmlFor="email">Email <span className="required">*</span></label>
                     <input 
                         type="email" 
                         id="email" 
                         placeholder="Enter email" 
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        required
                     />
                 </div>
 
                 <div className="form-group">
-                    <label htmlFor="phoneNumber">Phone number</label>
+                    <label htmlFor="phoneNumber">Phone number <span className="required">*</span></label>
                     <input 
                         type="tel" 
                         id="phoneNumber" 
                         placeholder="Enter phone number" 
                         value={phoneNumber}
                         onChange={(e) => setPhoneNumber(e.target.value)}
+                        required
                     />
                 </div>
 
-                {/* New ID Number input field */}
                 <div className="form-group">
-                    <label htmlFor="idNumber">ID Number</label>
+                    <label htmlFor="idNumber">ID Number <span className="required">*</span></label>
                     <input 
                         type="text" 
                         id="idNumber" 
                         placeholder="Enter ID Number" 
                         value={idNumber}
                         onChange={(e) => setIdNumber(e.target.value)}
+                        required
                     />
                 </div>
 
-                {/* Conditional Location input field */}
-                {/* {(userRole === 'Trainee' || role === 'Facilitator') && (
-                    <div className="form-group">
-                        <label htmlFor="location">Location</label>
-                        <select 
-                            id="location" 
-                            value={location}
-                            onChange={(e) => setLocation(e.target.value)}
-                            required
-                        >
-                            <option value="" disabled>Select Location</option>
-                            {locations.map((loc) => (
-                                <option key={loc} value={loc}>{loc}</option>
-                            ))}
-                        </select>
-                    </div>
-                )} */}
-
                 <div className="form-group">
-                    <label htmlFor="role">Role</label>
+                    <label htmlFor="role">Role <span className="required">*</span></label>
                     <select 
                         id="role" 
                         value={role}
                         onChange={(e) => setRole(e.target.value)}
+                        required
                     >
                         <option value="" disabled>Select role</option>
                         {userRole === 'super_admin' && (
@@ -300,15 +367,14 @@ const AddUserForm = () => {
                             <option value="Stakeholder">Stakeholder</option>
                             <option value="Facilitator">Facilitator</option>
                            </>
-                        ) }
+                        )}
                         <option value="Trainee">Trainee</option>
                     </select>
                 </div>
 
-                {/* Location field shows when Trainee or Facilitator is selected */}
                 {(role === 'Trainee' || role === 'Facilitator') && (
                     <div className="form-group">
-                        <label htmlFor="location">Location</label>
+                        <label htmlFor="location">Location <span className="required">*</span></label>
                         <select 
                             id="location" 
                             value={location}
@@ -323,14 +389,8 @@ const AddUserForm = () => {
                     </div>
                 )}
 
-                <button type="button" onClick={handleContinue}>Continue</button>
+                <button type="button" className="continue-btn" onClick={handleContinue}>Continue</button>
             </form>
-
-            {feedbackMessage && (
-                <p className={`feedback-message ${feedbackMessage.includes("Failed") ? 'error' : 'success'}`}>
-                    {feedbackMessage}
-                </p>
-            )}
         </div>
     );
 };

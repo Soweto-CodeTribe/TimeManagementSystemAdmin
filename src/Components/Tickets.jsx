@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import DataLoader from './dataLoader';
-import './styling/Tickets.css'; // Updated CSS file with prefixed class names
+import { Search, X, Send } from 'lucide-react';
 import axios from 'axios';
-import { Search, RotateCcw  } from 'lucide-react'
+import DataLoader from './dataLoader';
+import './styling/Tickets.css';
 
 const Tickets = () => {
   const [tickets, setTickets] = useState([]);
@@ -15,64 +16,55 @@ const Tickets = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [updateMode, setUpdateMode] = useState(false);
-  const [updatedTicketData, setUpdatedTicketData] = useState({
-    status: '',
-    priority: ''
-  });
+  const [updatedTicketData, setUpdatedTicketData] = useState({});
   const [ticketStats, setTicketStats] = useState(null);
   const [resolutionNote, setResolutionNote] = useState('');
   const [closeNote, setCloseNote] = useState('');
-  const [reassignTarget, setReassignTarget] = useState('');
-  const [facilitators, setFacilitators] = useState([]);
-  
+  const [responseType, setResponseType] = useState('reply');
+  const [responseMessage, setResponseMessage] = useState('');
   const token = useSelector(state => state.auth.token);
   const API_BASE_URL = 'https://timemanagementsystemserver.onrender.com/api';
 
   useEffect(() => {
     fetchTickets();
     fetchTicketStats();
-    
   }, [token]);
 
-  const fetchTickets = async () => {
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  const fetchTickets = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await axios.get(`${API_BASE_URL}/tickets`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` }
       });
       setTickets(response.data);
       setLoading(false);
     } catch (err) {
       setError(err.response?.data?.error || err.message);
-      setLoading(false);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [token]);
 
-  const fetchTicketStats = async () => {
+  const fetchTicketStats = useCallback(async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/tickets/stats`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` }
       });
       setTicketStats(response.data);
     } catch (err) {
-      console.error("Error fetching ticket stats:", err);
+      setError(err.response?.data?.error || err.message);
     }
-  };
+  }, [token]);
 
-
-  const fetchTicketDetails = async (ticketId) => {
+  const fetchTicketDetails = useCallback(async (ticketId) => {
     setIsLoading(true);
     try {
       const response = await axios.get(`${API_BASE_URL}/tickets/${ticketId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` }
       });
       setSelectedTicket(response.data);
       setUpdatedTicketData({
@@ -84,235 +76,214 @@ const Tickets = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [token]);
 
-  const updateTicket = async () => {
+  const updateTicket = useCallback(async () => {
     if (!selectedTicket) return;
     setIsLoading(true);
     try {
       const response = await axios.put(
         `${API_BASE_URL}/tickets/${selectedTicket.id}`,
         updatedTicketData,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      setTickets(prevTickets =>
-        prevTickets.map(ticket =>
-          ticket.id === selectedTicket.id ? { ...ticket, ...response.data } : ticket
-        )
-      );
-      setSelectedTicket({ ...selectedTicket, ...response.data });
+      
+      setTickets(prev => prev.map(t => 
+        t.id === selectedTicket.id ? { ...t, ...response.data } : t
+      ));
+      setSelectedTicket(prev => ({ ...prev, ...response.data }));
       setUpdateMode(false);
-      fetchTickets();
-      fetchTicketStats();
     } catch (err) {
       setError(err.response?.data?.error || err.message);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [selectedTicket, updatedTicketData, token]);
 
-  const resolveTicket = async () => {
+  const resolveTicket = useCallback(async () => {
     if (!selectedTicket) return;
     setIsLoading(true);
     try {
-      const response = await axios.post(
+      await axios.post(
         `${API_BASE_URL}/tickets/${selectedTicket.id}/resolve`,
         { resolution: resolutionNote },
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      setTickets(prevTickets =>
-        prevTickets.map(ticket =>
-          ticket.id === selectedTicket.id ? { ...ticket, status: 'resolved' } : ticket
-        )
-      );
-      setSelectedTicket({ ...selectedTicket, status: 'resolved' });
+      setTickets(prev => prev.map(t => 
+        t.id === selectedTicket.id ? { ...t, status: 'resolved' } : t
+      ));
+      setSelectedTicket(prev => ({ ...prev, status: 'resolved' }));
       setResolutionNote('');
-      fetchTickets();
-      fetchTicketStats();
     } catch (err) {
       setError(err.response?.data?.error || err.message);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [selectedTicket, resolutionNote, token]);
 
-  const closeTicket = async () => {
+  const closeTicket = useCallback(async () => {
     if (!selectedTicket) return;
     setIsLoading(true);
     try {
-      const response = await axios.post(
+      await axios.post(
         `${API_BASE_URL}/tickets/${selectedTicket.id}/close`,
         { notes: closeNote },
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      setTickets(prevTickets =>
-        prevTickets.map(ticket =>
-          ticket.id === selectedTicket.id ? { ...ticket, status: 'closed' } : ticket
-        )
-      );
-      setSelectedTicket({ ...selectedTicket, status: 'closed' });
+      setTickets(prev => prev.map(t => 
+        t.id === selectedTicket.id ? { ...t, status: 'closed' } : t
+      ));
+      setSelectedTicket(prev => ({ ...prev, status: 'closed' }));
       setCloseNote('');
-      fetchTickets();
-      fetchTicketStats();
     } catch (err) {
       setError(err.response?.data?.error || err.message);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [selectedTicket, closeNote, token]);
 
-  
-  const handleDeleteTicket = async () => {
+  const deleteTicket = useCallback(async () => {
     if (!selectedTicket) return;
-    if (!window.confirm('Are you sure you want to delete this ticket? This action cannot be undone.')) {
-      return;
-    }
+    if (!window.confirm('Are you sure? This cannot be undone.')) return;
     
     setIsLoading(true);
     try {
       await axios.delete(`${API_BASE_URL}/tickets/${selectedTicket.id}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` }
       });
-      setTickets(prevTickets => prevTickets.filter(ticket => ticket.id !== selectedTicket.id));
+      setTickets(prev => prev.filter(t => t.id !== selectedTicket.id));
       closeDetailView();
-      fetchTicketStats();
-    } catch (error) {
-      setError(error.response?.data?.error || error.message);
+    } catch (err) {
+      setError(err.response?.data?.error || err.message);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [selectedTicket, token]);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setUpdatedTicketData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+  const sendResponse = useCallback(async () => {
+    if (!selectedTicket || !responseMessage.trim()) return;
+    
+    setIsLoading(true);
+    try {
+      await axios.post(
+        `${API_BASE_URL}/tickets/${selectedTicket.id}/respond`,
+        { type: responseType, message: responseMessage },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      setResponseMessage('');
+      fetchTicketDetails(selectedTicket.id);
+    } catch (err) {
+      setError(err.response?.data?.error || err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [selectedTicket, responseType, responseMessage, token]);
 
-  // Calculate metrics from tickets or use stats from API
-  const totalTickets = ticketStats?.total || tickets.length;
-  const openTickets = ticketStats?.byStatus?.open || tickets.filter(ticket => ticket.status === 'open').length;
-  const closedTickets = ticketStats?.byStatus?.closed || tickets.filter(ticket => ticket.status === 'closed').length;
-  const highPriorityTickets = ticketStats?.byPriority?.high || tickets.filter(ticket => ticket.priority === 'high').length;
+  const handleInputChange = useCallback((e) => {
+    setUpdatedTicketData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  }, []);
 
-  // Filter tickets based on search term
-  const filteredTickets = tickets.filter(ticket =>
-    ticket.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    ticket.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    ticket.status?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    ticket.priority?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    ticket.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    ticket.traineeName?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Pagination logic
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredTickets.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredTickets.length / itemsPerPage);
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
-  // Format date to be more readable
-  const formatDate = (dateString) => {
+  const formatDate = useCallback((dateString) => {
     if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
     });
-  };
+  }, []);
 
-  const handleRowClick = (ticket) => {
+  const filteredTickets = useMemo(() => {
+    return tickets.filter(ticket =>
+      Object.values(ticket).some(val => 
+        String(val).toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+  }, [tickets, searchTerm]);
+
+  const totalPages = Math.ceil(filteredTickets.length / itemsPerPage);
+  const currentItems = useMemo(() => 
+    filteredTickets.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    ), [filteredTickets, currentPage, itemsPerPage]
+  );
+
+  const handleRowClick = useCallback((ticket) => {
     fetchTicketDetails(ticket.id);
-  };
+  }, [fetchTicketDetails]);
 
-  const closeDetailView = () => {
+  const closeDetailView = useCallback(() => {
     setSelectedTicket(null);
     setUpdateMode(false);
     setResolutionNote('');
     setCloseNote('');
-    setReassignTarget('');
-  };
+    setResponseType('reply');
+    setResponseMessage('');
+  }, []);
 
   if (loading && !selectedTicket) return <DataLoader />;
-  if (error) return <div>Error: {error}</div>;
+  if (error) return <div className="error-message">Error: {error}</div>;
 
   return (
     <div className="tickets-session-container">
       {/* Metrics Section */}
       <div className="UM-title-section">
-      <h1>Tickets</h1>
-      <p>Here you can view and manage tickets.</p>
-
+        <h1>Tickets</h1>
+        <p>Manage support tickets and track resolutions</p>
       </div>
-      <br/>
+      
+      {/* Ticket Metrics */}
       <div className="tickets-metrics-grid">
         <div className="tickets-metric-card blue">
           <div className="tickets-metric-header">
             <div className="tickets-metric-icon blue">
               <div className="tickets-metric-dot blue"></div>
             </div>
-            <span className="tickets-metric-label blue">Total Tickets</span>
+            <span className="tickets-metric-label">Total Tickets</span>
           </div>
-          <div className="tickets-metric-value blue">{totalTickets}</div>
+          <div className="tickets-metric-value">{ticketStats?.total || tickets.length}</div>
         </div>
         <div className="tickets-metric-card green">
           <div className="tickets-metric-header">
             <div className="tickets-metric-icon green">
               <div className="tickets-metric-dot green"></div>
             </div>
-            <span className="tickets-metric-label green">Open Tickets</span>
+            <span className="tickets-metric-label">Open Tickets</span>
           </div>
-          <div className="tickets-metric-value green">{openTickets}</div>
+          <div className="tickets-metric-value">{ticketStats?.byStatus?.open || tickets.filter(t => t.status === 'open').length}</div>
         </div>
         <div className="tickets-metric-card red">
           <div className="tickets-metric-header">
             <div className="tickets-metric-icon red">
               <div className="tickets-metric-dot red"></div>
             </div>
-            <span className="tickets-metric-label red">Closed Tickets</span>
+            <span className="tickets-metric-label">Closed Tickets</span>
           </div>
-          <div className="tickets-metric-value red">{closedTickets}</div>
+          <div className="tickets-metric-value">{ticketStats?.byStatus?.closed || tickets.filter(t => t.status === 'closed').length}</div>
         </div>
         <div className="tickets-metric-card yellow">
           <div className="tickets-metric-header">
             <div className="tickets-metric-icon yellow">
               <div className="tickets-metric-dot yellow"></div>
             </div>
-            <span className="tickets-metric-label yellow">High Priority</span>
+            <span className="tickets-metric-label">High Priority</span>
           </div>
-          <div className="tickets-metric-value yellow">{highPriorityTickets}</div>
+          <div className="tickets-metric-value">{ticketStats?.byPriority?.high || tickets.filter(t => t.priority === 'high').length}</div>
         </div>
       </div>
 
       {/* Detail View */}
       {selectedTicket && (
         <div className="tickets-ticket-detail-overlay">
-          <div className="My-tickets-ticket-detail-container">
+          <div className="tickets-ticket-detail-container">
             <div className="tickets-ticket-detail-header">
-              <h3>Ticket Details</h3>
-              <button onClick={closeDetailView} className="tickets-close-button">X</button>
+              <h3>Ticket #{selectedTicket.id}</h3>
+              <button onClick={closeDetailView} className="tickets-close-button">
+                <X size={20} />
+              </button>
             </div>
+            
             {isLoading ? (
               <div className="tickets-detail-loading"><DataLoader /></div>
             ) : (
@@ -348,16 +319,6 @@ const Tickets = () => {
                         <option value="urgent">Urgent</option>
                       </select>
                     </div>
-                    <div className="tickets-form-group">
-                      <label>Notes:</label>
-                      <textarea
-                        name="notes"
-                        value={updatedTicketData.notes || ''}
-                        onChange={handleInputChange}
-                        className="tickets-form-textarea"
-                        placeholder="Add notes..."
-                      ></textarea>
-                    </div>
                     <div className="tickets-form-actions">
                       <button onClick={() => setUpdateMode(false)} className="tickets-cancel-button">
                         Cancel
@@ -380,17 +341,13 @@ const Tickets = () => {
                     </div>
                     <div className="tickets-detail-row">
                       <strong>Status:</strong>
-                      <span
-                        className={`tickets-status-badge ${selectedTicket.status}`}
-                      >
+                      <span className={`tickets-status-badge ${selectedTicket.status}`}>
                         {selectedTicket.status}
                       </span>
                     </div>
                     <div className="tickets-detail-row">
                       <strong>Priority:</strong>
-                      <span
-                        className={`tickets-priority-badge ${selectedTicket.priority}`}
-                      >
+                      <span className={`tickets-priority-badge ${selectedTicket.priority}`}>
                         {selectedTicket.priority}
                       </span>
                     </div>
@@ -398,102 +355,78 @@ const Tickets = () => {
                       <strong>Category:</strong> {selectedTicket.category?.replace('_', ' ')}
                     </div>
                     <div className="tickets-detail-row">
-                      <strong>Submitted By:</strong> {selectedTicket.traineeDetails?.name || selectedTicket.submittedBy || selectedTicket.traineeName}
+                      <strong>Submitted By:</strong> {selectedTicket.traineeDetails?.name || selectedTicket.traineeName}
                     </div>
-                    
                     <div className="tickets-detail-row">
                       <strong>Created:</strong> {formatDate(selectedTicket.createdAt)}
                     </div>
                     <div className="tickets-detail-row">
                       <strong>Updated:</strong> {formatDate(selectedTicket.updatedAt)}
                     </div>
-                    
-                    {/* Ticket History Section */}
-                    {selectedTicket.history && selectedTicket.history.length > 0 && (
-                      <div className="tickets-history-section">
-                        <h4>Ticket History</h4>
-                        <div className="tickets-history-list">
-                          {selectedTicket.history.map((entry, index) => (
-                            <div key={index} className="tickets-history-item">
-                              <div className="tickets-history-timestamp">
-                                {formatDate(entry.timestamp)}
-                              </div>
-                              <div className="tickets-history-facilitator">
-                                {entry.facilitatorName}
-                              </div>
-                              <div className="tickets-history-changes">
-                                {Object.entries(entry.changes).map(([field, change], i) => (
-                                  <div key={i} className="tickets-history-change">
-                                    <span className="tickets-change-field">{field}:</span> 
-                                    <span className="tickets-change-from">{change.from || 'none'}</span> → 
-                                    <span className="tickets-change-to">{change.to}</span>
-                                  </div>
-                                ))}
-                                {entry.resolution && (
-                                  <div className="tickets-history-resolution">
-                                    Resolution: {entry.resolution}
-                                  </div>
-                                )}
-                                {entry.closingNotes && (
-                                  <div className="tickets-history-closing-notes">
-                                    Closing Notes: {entry.closingNotes}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Action Tabs */}
                     <div className="tickets-action-tabs">
                       <div className="tickets-tab-container">
                         <button className="tickets-tab-button" onClick={() => setUpdateMode(true)}>
                           Update
                         </button>
-                        
-                        {/* Resolve Ticket Section */}
                         {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
                           <div className="tickets-action-section">
                             <h4>Resolve Ticket</h4>
-                            <div className="tickets-form-group">
-                              <textarea
-                                placeholder="Resolution notes..."
-                                value={resolutionNote}
-                                onChange={(e) => setResolutionNote(e.target.value)}
-                                className="tickets-form-textarea"
-                              ></textarea>
-                            </div>
+                            <textarea
+                              placeholder="Resolution notes..."
+                              value={resolutionNote}
+                              onChange={(e) => setResolutionNote(e.target.value)}
+                              className="tickets-form-textarea"
+                            />
                             <button onClick={resolveTicket} className="tickets-resolve-button">
                               Mark as Resolved
                             </button>
                           </div>
                         )}
-                        
-                        {/* Close Ticket Section */}
                         {selectedTicket.status !== 'closed' && (
                           <div className="tickets-action-section">
                             <h4>Close Ticket</h4>
-                            <div className="tickets-form-group">
-                              <textarea
-                                placeholder="Closing notes..."
-                                value={closeNote}
-                                onChange={(e) => setCloseNote(e.target.value)}
-                                className="tickets-form-textarea"
-                              ></textarea>
-                            </div>
+                            <textarea
+                              placeholder="Closing notes..."
+                              value={closeNote}
+                              onChange={(e) => setCloseNote(e.target.value)}
+                              className="tickets-form-textarea"
+                            />
                             <button onClick={closeTicket} className="tickets-close-ticket-button">
                               Close Ticket
                             </button>
                           </div>
                         )}
-                        
-                        
-                        {/* Delete Button */}
                         <div className="tickets-action-section">
-                          <button onClick={handleDeleteTicket} className="tickets-delete-button">
+                          <button onClick={deleteTicket} className="tickets-delete-button">
                             Delete Ticket
+                          </button>
+                        </div>
+                        <div className="tickets-action-section">
+                          <h4>Respond</h4>
+                          <div className="tickets-form-group">
+                            <select
+                              value={responseType}
+                              onChange={(e) => setResponseType(e.target.value)}
+                              className="tickets-form-select"
+                            >
+                              <option value="reply">Reply</option>
+                              <option value="escalate">Escalate</option>
+                              <option value="note">Internal Note</option>
+                              <option value="request_info">Request Info</option>
+                            </select>
+                          </div>
+                          <textarea
+                            placeholder="Type your response..."
+                            value={responseMessage}
+                            onChange={(e) => setResponseMessage(e.target.value)}
+                            className="tickets-form-textarea"
+                          />
+                          <button 
+                            onClick={sendResponse} 
+                            className="tickets-respond-button"
+                            disabled={!responseMessage.trim()}
+                          >
+                            <Send size={16} /> Send
                           </button>
                         </div>
                       </div>
@@ -512,7 +445,7 @@ const Tickets = () => {
           <h3 className="tickets-table-title">Support Tickets</h3>
           <div className="tickets-table-actions">
             <div className="tickets-search-wrapper">
-            <Search className="search-icon" />
+              <Search className="search-icon" />
               <input
                 type="text"
                 className="tickets-search-input"
@@ -521,10 +454,6 @@ const Tickets = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            {/* <button className="tickets-btn" onClick={() => fetchTickets()}>
-              <RotateCcw />
-              Refresh
-            </button> */}
           </div>
         </div>
         <div className="tickets-table-wrapper">
@@ -554,28 +483,18 @@ const Tickets = () => {
                       <span
                         className={`tickets-status-badge ${ticket.status}`}
                         style={{
-                          padding: '4px 8px',
-                          borderRadius: '4px',
-                          fontSize: '12px',
-                          fontWeight: '500',
-                          backgroundColor: (() => {
-                            switch(ticket.status) {
-                              case 'open': return '#e6fff0';
-                              case 'inProgress': return '#e6f7ff';
-                              case 'resolved': return '#fff9e6';
-                              case 'closed': return '#ffe6e6';
-                              default: return '#e6fff0';
-                            }
-                          })(),
-                          color: (() => {
-                            switch(ticket.status) {
-                              case 'open': return '#34a853';
-                              case 'inProgress': return '#4285f4';
-                              case 'resolved': return '#fbbc05';
-                              case 'closed': return '#ea4335';
-                              default: return '#34a853';
-                            }
-                          })(),
+                          backgroundColor: {
+                            open: '#e6fff0',
+                            inProgress: '#e6f7ff',
+                            resolved: '#fff9e6',
+                            closed: '#ffe6e6'
+                          }[ticket.status] || '#e6fff0',
+                          color: {
+                            open: '#34a853',
+                            inProgress: '#4285f4',
+                            resolved: '#fbbc05',
+                            closed: '#ea4335'
+                          }[ticket.status] || '#34a853'
                         }}
                       >
                         {ticket.status}
@@ -585,28 +504,18 @@ const Tickets = () => {
                       <span
                         className={`tickets-priority-badge ${ticket.priority}`}
                         style={{
-                          padding: '4px 8px',
-                          borderRadius: '4px',
-                          fontSize: '12px',
-                          fontWeight: '500',
-                          backgroundColor: (() => {
-                            switch(ticket.priority) {
-                              case 'low': return '#e6f0ff';
-                              case 'medium': return '#e6f7ff';
-                              case 'high': return '#fff9e6';
-                              case 'urgent': return '#ffe6e6';
-                              default: return '#e6f0ff';
-                            }
-                          })(),
-                          color: (() => {
-                            switch(ticket.priority) {
-                              case 'low': return '#4285f4';
-                              case 'medium': return '#34a853';
-                              case 'high': return '#fbbc05';
-                              case 'urgent': return '#ea4335';
-                              default: return '#4285f4';
-                            }
-                          })(),
+                          backgroundColor: {
+                            low: '#e6f0ff',
+                            medium: '#e6f7ff',
+                            high: '#fff9e6',
+                            urgent: '#ffe6e6'
+                          }[ticket.priority] || '#e6f0ff',
+                          color: {
+                            low: '#4285f4',
+                            medium: '#34a853',
+                            high: '#fbbc05',
+                            urgent: '#ea4335'
+                          }[ticket.priority] || '#4285f4'
                         }}
                       >
                         {ticket.priority}
@@ -627,33 +536,31 @@ const Tickets = () => {
             </tbody>
           </table>
         </div>
-
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="tickets-pagination-container">
             <div className="tickets-pagination-controls">
               <button
                 className="tickets-pagination-arrow"
-                onClick={() => paginate(currentPage - 1)}
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
               >
-                ◀
+                ‹
               </button>
-              {[...Array(totalPages).keys()].map(number => (
+              {[...Array(totalPages)].map((_, i) => (
                 <button
-                  key={number + 1}
-                  onClick={() => paginate(number + 1)}
-                  className={`tickets-pagination-number ${currentPage === number + 1 ? 'active' : ''}`}
+                  key={i + 1}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={`tickets-pagination-number ${currentPage === i + 1 ? 'active' : ''}`}
                 >
-                  {number + 1}
+                  {i + 1}
                 </button>
               ))}
               <button
                 className="tickets-pagination-arrow"
-                onClick={() => paginate(currentPage + 1)}
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
               >
-                ▶
+                ›
               </button>
             </div>
           </div>
