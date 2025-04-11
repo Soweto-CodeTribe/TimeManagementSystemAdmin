@@ -35,12 +35,12 @@ This repository contains **6 branches**, each serving a specific purpose in the 
 
 | Branch Name         | Purpose                                                                 |
 |---------------------|-------------------------------------------------------------------------|
-| `main`              | Production-ready code. Only stable releases are merged here.           |
-| `develop`           | Integration branch for all feature branches before merging to `main`. |
-| `feature/auth`      | Authentication-related features (e.g., login, 2FA, password reset).    |
-| `feature/attendance`| Attendance tracking and reporting functionalities.                    |
-| `feature/user-mgmt` | User management features (e.g., CRUD operations, bulk imports).        |
-| `bugfixes`          | Dedicated branch for resolving bugs and issues reported by users.      |
+| `main`              | Main production branch with stable release code                         |
+| `DevBranch`         | Integration branch for development and testing                          |
+| `Xoli`              | Developer-specific branch for Xoli's tasks                              |
+| `Eunice`            | Developer-specific branch for Eunice's tasks                            |
+| `Prince`            | Developer-specific branch for Prince's tasks                            |
+| `Nhlakanipho Branch`| Developer-specific branch for Nhlakanipho's tasks                       |
 
 ---
 
@@ -96,8 +96,11 @@ This repository contains **6 branches**, each serving a specific purpose in the 
    # To use the integration branch with all features
    git checkout DevBranch
    
-   # Or to work on a specific branch
-   git checkout name of the branch        
+   # Or to work on a specific developer branch
+   git checkout Xoli
+   git checkout Eunice
+   git checkout Prince
+   git checkout "Nhlakanipho Branch"  # Note: Use quotes for branch names with spaces
    ```
 
 3. **Install Dependencies**
@@ -125,6 +128,14 @@ This repository contains **6 branches**, each serving a specific purpose in the 
    
    > **Note:** You'll need to replace the placeholder values with your actual Firebase credentials. These can be obtained from your Firebase project settings.
 
+5. **Start Development Server**
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
+   
+   This will start the development server on `http://localhost:5173` by default. You can access the application by opening this URL in your browser.
 
 6. **Verify Installation**
    
@@ -141,6 +152,17 @@ This repository contains **6 branches**, each serving a specific purpose in the 
    ```
    
    This creates optimized production files in the `dist` directory that can be deployed to a web server.
+
+8. **Preview Production Build**
+   ```bash
+   npm run preview
+   # or
+   yarn preview
+   ```
+   
+   This serves the production build locally for testing before deployment.
+
+---
 
 ## Configuration
 
@@ -233,21 +255,22 @@ Accessible through `/settings` route after login:
 ## Branch Management
 
 ### Workflow Guidelines
-1. Always create a new branch from `develop` for feature development:
+1. Always create a new branch from `DevBranch` for new features:
    ```bash
-   git checkout develop
-   git pull origin develop
-   git checkout -b feature/your-feature-name
+   git checkout DevBranch
+   git pull origin DevBranch
+   git checkout -b your-branch-name
    ```
 2. Push your changes to the remote branch:
    ```bash
-   git push origin feature/your-feature-name
+   git push origin your-branch-name
    ```
-3. Create a Pull Request (PR) targeting the `develop` branch.
+3. Create a Pull Request (PR) targeting the `DevBranch` branch.
 
 ### Merging to `main`
 - Only merge stable, tested code into `main`.
 - Ensure all CI/CD pipelines pass before merging.
+- PRs to `main` require approval from at least one team lead.
 
 ---
 
@@ -300,16 +323,19 @@ Accessible through `/settings` route after login:
    - Clear npm cache: `npm cache clean --force`
    - Check Node.js version: `node -v` (should be v18.x or higher)
    - For Vite errors, try: `npm exec vite --version`
+   - If you encounter dependency issues, try: `npm install --legacy-peer-deps`
    
 4. **Firebase Connection Problems**:
    - Verify `.env` variables are correctly formatted (no spaces or quotes)
    - Check Firebase console for service disruptions
    - Test connectivity with: `curl -X GET https://[YOUR_PROJECT_ID].firebaseio.com/.json`
+   - Ensure your IP is not blocked in Firebase security rules
    
 5. **Build Failures**:
    - Check for JavaScript syntax errors in your code
    - Verify import/export statements
    - Look for missing dependencies in `package.json`
+   - Try building with verbose output: `npm run build -- --debug`
 
 ### Error Codes
 | Code | Meaning            | Action                          |
@@ -339,7 +365,13 @@ Accessible through `/settings` route after login:
    ```bash
    git push origin feature/your-feature-name
    ```
-5. Open a Pull Request targeting the `develop` branch.
+5. Open a Pull Request targeting the `DevBranch` branch.
+
+### Code Review Process
+1. All PRs require at least one review from a team member
+2. Code must pass all automated tests
+3. Code must meet style guidelines (run `npm run lint` to verify)
+4. Documentation must be updated for any new features
 
 ### Coding Standards
 - Follow [Airbnb JavaScript Style Guide](https://airbnb.io/javascript/react/).
