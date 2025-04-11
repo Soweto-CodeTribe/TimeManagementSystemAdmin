@@ -14,7 +14,7 @@ export const initializeSocket = (token) => {
     return null;
   }
 
-  const apiUrl = 'https://timemanagementsystemserver.onrender.com';
+  const apiUrl = 'https://timemanagementsystemserver.onrender.com/';
   
   try {
     socket = io(apiUrl, {
@@ -22,7 +22,7 @@ export const initializeSocket = (token) => {
       withCredentials: true,
       transports: ['websocket'],
       reconnection: true,
-      reconnectionAttempts: 5,
+      reconnectionAttempts: 15,
       reconnectionDelay: 1000,
       timeout: 5000
     });
