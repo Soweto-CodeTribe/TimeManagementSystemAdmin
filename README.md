@@ -382,7 +382,7 @@ Here are key screens from the application:
 ## Team
 
 ### Frontend Developers
-- [Xoli Nxiweni](https://github.com/Xoli-Nxiweni) - xolinxiweni@gmail.com
+- [Xoli Nxiweni](https://github.com/Xoli-Nxiweni)
 - [Prince Mashumu](https://github.com/Princemashumu)
 - [Eunice](https://github.com/eungobs)
 - [Alson Africa](https://github.com/AlsonAfrica)
