@@ -40,7 +40,7 @@ This repository contains **6 branches**, each serving a specific purpose in the 
 | `Xoli`              | Developer-specific branch for Xoli's tasks                              |
 | `Eunice`            | Developer-specific branch for Eunice's tasks                            |
 | `Prince`            | Developer-specific branch for Prince's tasks                            |
-| `Nhlakanipho Branch`| Developer-specific branch for Nhlakanipho's tasks                       |
+| `Nhlakanipho`| Developer-specific branch for Nhlakanipho's tasks                       |
 
 ---
 
