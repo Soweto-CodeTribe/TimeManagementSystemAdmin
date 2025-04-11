@@ -1,4 +1,3 @@
-
 # Time Management System Admin
 
 A modern web-based application designed for administrators to efficiently manage trainee attendance tracking and program management. This system replaces traditional paper timesheets with a fully automated digital solution, improving efficiency, accuracy, and transparency.
@@ -30,7 +29,6 @@ Repository: [https://github.com/Soweto-CodeTribe/TimeManagementSystemAdmin](http
 
 ---
 
-```
 ## Repository Structure
 
 This repository contains **6 branches**, each serving a specific purpose in the development lifecycle:
@@ -75,27 +73,42 @@ This repository contains **6 branches**, each serving a specific purpose in the 
 ## Installation
 
 ### Prerequisites
-- Node.js v18.x
-- npm v9.x or Yarn v1.22+
+- Node.js v18.x or higher (run `node -v` to check version)
+- npm v9.x or Yarn v1.22+ (run `npm -v` or `yarn -v` to check)
+- Git installed on your system
 - Firebase account for authentication
 - Backend API endpoint (provided by backend team)
+- Code editor (VS Code recommended)
 
 ### Setup Instructions
 
 1. **Clone Repository**
    ```bash
-   git clone https://github.com/Soweto-CodeTribe/TimeManagementSystemAdmin
+   git clone https://github.com/Soweto-CodeTribe/TimeManagementSystemAdmin.git
    cd TimeManagementSystemAdmin
    ```
 
-2. **Install Dependencies**
+2. **Select Branch**
+   
+   By default, you'll be on the `main` branch (production code). To switch to a development branch:
+   
+   ```bash
+   # To use the integration branch with all features
+   git checkout DevBranch
+   
+   # Or to work on a specific branch
+   git checkout name of the branch        
+   ```
+
+3. **Install Dependencies**
    ```bash
    npm install
    # or
    yarn install
    ```
 
-3. **Environment Configuration**
+4. **Environment Configuration**
+   
    Create a `.env` file in the project root and add the following variables:
    ```env
    # Firebase Configuration
@@ -109,29 +122,38 @@ This repository contains **6 branches**, each serving a specific purpose in the 
    # Backend API
    VITE_API_URL=your_backend_api_url
    ```
+   
+   > **Note:** You'll need to replace the placeholder values with your actual Firebase credentials. These can be obtained from your Firebase project settings.
 
-4. **Start Development Server**
-   ```bash
-   npm run dev
-   # or
-   yarn dev
-   ```
 
-5. **Build for Production**
+6. **Verify Installation**
+   
+   Once the development server is running, you should see:
+   - Console output indicating successful compilation
+   - The login page at `http://localhost:5173`
+   - No console errors in your browser's developer tools
+
+7. **Build for Production**
    ```bash
    npm run build
    # or
    yarn build
    ```
-
----
+   
+   This creates optimized production files in the `dist` directory that can be deployed to a web server.
 
 ## Configuration
 
 ### Firebase Setup
 1. Create a Firebase project at [Firebase Console](https://console.firebase.google.com/).
-2. Enable **Email/Password Authentication**.
-3. Set up a **Firestore Database** and configure security rules:
+2. Enable **Email/Password Authentication**:
+   - Navigate to Authentication > Sign-in methods
+   - Enable Email/Password provider
+3. Set up a **Firestore Database**:
+   - Go to Firestore Database
+   - Click "Create database"
+   - Start in production mode or test mode (switch to production later)
+4. Configure security rules:
    ```javascript
    rules_version = '2';
    service cloud.firestore {
@@ -142,7 +164,16 @@ This repository contains **6 branches**, each serving a specific purpose in the 
      }
    }
    ```
-4. Add a web app to your Firebase project and copy the configuration values into the `.env` file.
+5. Add a web app to your Firebase project:
+   - Click the web icon (</>) on the project overview page
+   - Register your app with a nickname
+   - Copy the configuration values into the `.env` file
+6. Install Firebase CLI (optional, for advanced deployments):
+   ```bash
+   npm install -g firebase-tools
+   firebase login
+   firebase init
+   ```
 
 ### System Settings
 Accessible through `/settings` route after login:
@@ -259,10 +290,26 @@ Accessible through `/settings` route after login:
    - Verify 2FA code expiration (5 minutes).
    - Check spam folder for OTP emails.
    - Ensure account is not suspended.
+   
 2. **Data Export Errors**:
    - Check storage permissions.
    - Validate CSV formatting.
    - Ensure sufficient disk space.
+   
+3. **Installation Issues**:
+   - Clear npm cache: `npm cache clean --force`
+   - Check Node.js version: `node -v` (should be v18.x or higher)
+   - For Vite errors, try: `npm exec vite --version`
+   
+4. **Firebase Connection Problems**:
+   - Verify `.env` variables are correctly formatted (no spaces or quotes)
+   - Check Firebase console for service disruptions
+   - Test connectivity with: `curl -X GET https://[YOUR_PROJECT_ID].firebaseio.com/.json`
+   
+5. **Build Failures**:
+   - Check for JavaScript syntax errors in your code
+   - Verify import/export statements
+   - Look for missing dependencies in `package.json`
 
 ### Error Codes
 | Code | Meaning            | Action                          |
@@ -270,6 +317,9 @@ Accessible through `/settings` route after login:
 | 401  | Unauthorized       | Re-authenticate                 |
 | 403  | Forbidden          | Check user permissions          |
 | 500  | Server Error       | Contact support                 |
+| E001 | Database Connection| Verify Firebase credentials     |
+| E002 | Invalid Input      | Check form validation           |
+| E003 | Rate Limited       | Wait and retry later            |
 
 ---
 
@@ -295,6 +345,8 @@ Accessible through `/settings` route after login:
 - Follow [Airbnb JavaScript Style Guide](https://airbnb.io/javascript/react/).
 - Write unit tests for all components and utilities.
 - Maintain minimum 80% test coverage.
+- Run linter before committing: `npm run lint`
+- Format code with Prettier: `npm run format`
 
 ---
 
@@ -323,12 +375,3 @@ Accessible through `/settings` route after login:
 Copyright © 2025 Codetribe. All rights reserved.
 
 This project is proprietary software. Unauthorized copying, modification, or distribution is prohibited.
-```
-
-### Key Improvements:
-1. **Branch Management Section**: Added detailed information about the 6 branches and their purposes.
-2. **Repository-Specific Links**: Included the repository URL for clarity.
-3. **Structured Sections**: Organized content into clear, logical sections for easy navigation.
-4. **Detailed Instructions**: Provided step-by-step guidance for installation, configuration, and contribution.
-5. **Error Handling**: Added troubleshooting tips for common issues.
-6. **Professional Tone**: Maintained a formal yet approachable tone throughout the document.
