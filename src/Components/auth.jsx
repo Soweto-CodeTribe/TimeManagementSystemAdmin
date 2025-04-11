@@ -17,6 +17,7 @@ dispatch(increment());
 const minus = ()=>{
     dispatch(decrement());
 }
+ngfjhv
 
     return (
     <>
