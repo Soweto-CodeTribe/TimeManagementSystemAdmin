@@ -90,6 +90,8 @@ const UserManagement = () => {
     }
   }, [location.state]);
 
+
+
   // Fetch Online People
   const fetchOnlinePeople = async () => {
     try {
@@ -106,6 +108,15 @@ const UserManagement = () => {
       setFeedbackMessage("Failed to fetch online trainees data.");
     }
   };
+
+useEffect(() => {
+  const timer = setInterval(() => {
+    setFeedbackMessage(null);
+  }, 5000);
+
+  return () => clearTimeout(timer); // Always clean up timers in useEffect
+}, []);
+
 
 
   // Fetch Guests
@@ -528,6 +539,8 @@ const UserManagement = () => {
       return <div className="no-data-message">No {tabName.toLowerCase()} found.</div>;
     }
 
+    
+
     return (
       <div className="users-table-wrapper">
         <table className="users-table">
@@ -683,27 +696,23 @@ const UserManagement = () => {
         />
       )}
       {/* Header */}
-      <div className="header">
-        <div className="UM-title-section">
-          <h1>User Management</h1>
-          <p className="UM-subtitle">
-            {`Manage trainees${
-              userRole === "facilitator" ? "" : ", facilitators, stakeholders"
-            } and guests`}
-          </p>
-          {feedbackMessage && (
-            <p className="feedback-message">{feedbackMessage}</p>
-          )}
-          {fetchError && <p className="error-message">{fetchError}</p>}
-        </div>
-        <button
-          className="add-user-btn"
-          onClick={() => navigate("/add-user")}
-        >
-          <UserPlus size={16} />
-          <span>Add user</span>
-        </button>
-      </div>
+<div className="header">
+  <div className="UM-title-section">
+    <h1>User Management</h1>
+    <p className="UM-subtitle">
+      {`Manage trainees${
+        userRole === "facilitator" ? "" : ", facilitators, stakeholders"
+      } and guests`}
+    </p>
+    {feedbackMessage && <p className="feedback-message">{feedbackMessage}</p>}
+    {fetchError && <p className="error-message">{fetchError}</p>}
+  </div>
+  <button className="add-user-btn" onClick={() => navigate("/add-user")}>
+    <UserPlus size={16} />
+    <span>Add user</span>
+  </button>
+</div>
+
       {/* Tabs and Controls */}
       <div className="UMtabs-container">
         <div className="UMtabs-navigation">
