@@ -23,7 +23,7 @@ import ErrorPage from "./Components/ErrorPage";
 import Loader from "./Components/Loader";
 import Notifications from "./Components/Notifications";
 import Feedback from "./Components/Feedback";
-import { generateFCMToken, setupFCMListener, fetchUnreadCount } from './Slices/notificationsSlice';
+import { generateFCMToken, setupFCMListener, fetchUnreadCount } from "./Slices/notificationsSlice";
 import EventManagement from "./Components/EventManagement";
 import LocationManagement from "./Components/LocationManagement";
 import TimeManagement from "./Components/TimeManagement";
@@ -32,31 +32,29 @@ import ManageTrainees from "./Components/ManageTrainees";
 function App() {
   const location = useLocation();
   const dispatch = useDispatch();
-  const { isAuthenticated, isLoading } = useSelector((state) => state.auth);
+  const { isAuthenticated, isLoading, user } = useSelector((state) => state.auth);
   const [authChecked, setAuthChecked] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(localStorage.getItem("sidebarState") === "true");
-  const { user } = useSelector(state => state.auth);
-  
-  // Get traineeId from localStorage
-  const traineeId = localStorage.getItem('userId');
 
-  // First useEffect
+  // Get traineeId from localStorage
+  const traineeId = localStorage.getItem("userId");
+
+  // Fetch unread notifications count when authenticated and traineeId available
   useEffect(() => {
     if (isAuthenticated && traineeId) {
-      dispatch(fetchUnreadCount(traineeId))
-        .catch((error) => {
-          console.error("Error fetching unread count:", error);
-        });
+      dispatch(fetchUnreadCount(traineeId)).catch((error) => {
+        console.error("Error fetching unread count:", error);
+      });
     }
   }, [dispatch, isAuthenticated, traineeId]);
 
-  // Second useEffect
+  // Setup FCM token and listeners on user change
   useEffect(() => {
     if (user?.id) {
       dispatch(generateFCMToken());
       dispatch(setupFCMListener());
 
-      const userId = user.id || localStorage.getItem('userId');
+      const userId = user.id || localStorage.getItem("userId");
       if (userId) {
         dispatch(fetchUnreadCount(userId));
       }
@@ -79,22 +77,22 @@ function App() {
     verifyAuth();
   }, [dispatch]);
 
-  // Persist sidebar state in local storage
+  // Persist sidebar open state in localStorage
   useEffect(() => {
     localStorage.setItem("sidebarState", isSidebarOpen);
   }, [isSidebarOpen]);
 
-  // Show loading state until auth check completes
+  // Show loading spinner while auth is loading or not yet checked
   if (isLoading || !authChecked) {
     return (
       <div className="loading-overlay">
         <Loader />
-      </div> 
+      </div>
     );
   }
 
-  // Determine current screen name for Navbar
-const getScreenName = (path) => {
+  // Map pathnames to screen names for Navbar display
+  const getScreenName = (path) => {
     switch (path) {
       case "/dashboard":
         return "Dashboard";
@@ -122,14 +120,14 @@ const getScreenName = (path) => {
         return "CombinedNotifications";
       case "/EventManagement":
         return "EventManagement";
-        case "/location-management": // New case for Location Management
-        return "Location Management"; // New screen name
-      case "/manage-trainees": // New case for Manage Trainees
-        return "Manage Trainees"; // New screen name
-      case "/time-management": // New case for Time Management
-        return "Time Management"; // New screen name
+      case "/location-management":
+        return "Location Management";
+      case "/manage-trainees":
+        return "Manage Trainees";
+      case "/time-management":
+        return "Time Management";
       default:
-        return "";
+        return "/dashboard";
     }
   };
 
@@ -137,19 +135,19 @@ const getScreenName = (path) => {
 
   return (
     <Routes>
-      {/* Default route redirects to login */}
+      {/* Redirect root to login */}
       <Route path="/" element={<Navigate to="/login" />} />
 
-      {/* Public routes */}
+      {/* Public Routes */}
       <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login />} />
       <Route path="/forgotPassword" element={<ForgotPassword />} />
       <Route path="/TwoFactorAuth" element={<TwoFactorAuth />} />
-      
-      {/* Error page routes */}
+
+      {/* Error Pages */}
       <Route path="/error/404" element={<ErrorPage errorType="404" />} />
       <Route path="/error/500" element={<ErrorPage errorType="500" />} />
-      
-      {/* Protected routes */}
+
+      {/* Protected Routes */}
       <Route
         path="/*"
         element={
@@ -158,10 +156,7 @@ const getScreenName = (path) => {
               <div className="main-content">
                 <Sidebar isOpen={isSidebarOpen} />
                 <div className="content">
-                  <Navbar
-                    currentScreen={currentScreen}
-                    toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-                  />
+                  <Navbar currentScreen={currentScreen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
                   <Routes>
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/user-management" element={<UserManagement />} />
@@ -176,11 +171,11 @@ const getScreenName = (path) => {
                     <Route path="/Feedback" element={<Feedback />} />
                     <Route path="/location-management" element={<LocationManagement />} />
                     <Route path="/time-management" element={<TimeManagement />} />
-                    <Route path="/EventManagement" element={<EventManagement/>} />
+                    <Route path="/EventManagement" element={<EventManagement />} />
                     <Route path="/manage-trainees" element={<ManageTrainees />} />
                     <Route path="/logout" element={<Logout />} />
                     <Route path="/add-user" element={<AddUserForm />} />
-                    
+
                     {/* Catch-all route for authenticated users */}
                     <Route path="*" element={<ErrorPage errorType="404" />} />
                   </Routes>
@@ -188,7 +183,7 @@ const getScreenName = (path) => {
               </div>
             </div>
           ) : (
-            // For unauthenticated users trying to access protected routes
+            // Redirect unauthenticated users to login
             <Navigate to="/login" replace />
           )
         }
