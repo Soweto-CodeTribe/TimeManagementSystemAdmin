@@ -1,6 +1,7 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client"
 import axios from "axios"
-import { ChevronLeft, ChevronRight, FileText, Filter, Info, Search } from "lucide-react"
+import { Check, ChevronLeft, ChevronRight, Clock, FileText, Filter, Info, Search, User, UserX,  } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useSelector } from 'react-redux'
 import DataLoader from "./dataLoader"
@@ -51,7 +52,6 @@ const SessionMonitoring = () => {
 
   useEffect(() => {
     fetchData(currentPage)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, currentPage, itemsPerPage, debouncedSearchTerm, filterStatus, filterDate, 
     ...(userRole === 'super_admin' ?  [filterLocation]: [])
   ])
@@ -176,24 +176,26 @@ const SessionMonitoring = () => {
         Monitor check-ins, check-outs, and lunch breaks. Add time logs, update session attendance and activity.
       </p>
 
-      <div className="metrics-grid">
-        {[
-          { label: 'Present', value: summaryData?.presentCount, color: 'blue' },
-          { label: 'Total Trainees', value: summaryData?.totalTrainees, color: 'green' },
-          { label: 'Absent', value: summaryData?.absentCount, color: 'red' },
-          { label: 'Late Check-Ins', value: summaryData?.lateCount, color: 'yellow' }
-        ].map((metric, index) => (
-          <div className={`metric-card ${metric.color}`} key={index}>
-            <div className="metric-header">
-              <div className={`metric-icon ${metric.color}`}>
-                <div className={`metric-dot ${metric.color}`}></div>
-              </div>
-              <span className="metric-label">{metric.label}</span>
-            </div>
-            <div className={`metric-value ${metric.color}`}>{metric.value || 0}</div>
-          </div>
-        ))}
+<div className="metrics-grid">
+  {[
+    { label: 'Total Check-ins', value: summaryData?.presentCount, color: 'blue', icon: Check, iconColor: '#0000ff' },
+    { label: 'Total Trainees', value: summaryData?.totalTrainees, color: 'green', icon: User , iconColor: '#00ff00'  }, 
+    { label: 'Missed Check-Ins', value: summaryData?.absentCount, color: 'red', icon: UserX , iconColor: '#ff0000'  },
+    { label: 'Late Check-Ins', value: summaryData?.lateCount, color: 'yellow', icon: Clock, iconColor: '#ffff00'  }, 
+  ].map((metric, index) => (
+    <div className={`metric-card ${metric.color}`} key={index}>
+      <div className="metric-header">
+        <div className={`metric-icon ${metric.color}`}>
+          {/* <div className={`metric-dot ${metric.color}`}> */}
+            <metric.icon className="metric-session-icon" style={{ color: metric.iconColor }} />
+          {/* </div> */}
+        </div>
+        <span className="metric-label">{metric.label}</span>
       </div>
+      <div className={`metric-value ${metric.color}`}>{metric.value || 0}</div>
+    </div>
+  ))}
+</div>
 
       <div className="table-container">
         <div className="table-header">
