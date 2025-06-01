@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+/* eslint-disable no-unused-vars */
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser, loginStakeholder, clearError } from "../Slices/authSlice";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
@@ -17,73 +18,6 @@ const Login = () => {
   const { isLoading, error } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
-
-  // const handleLogin = async (e) => {
-  //   e.preventDefault();
-  //   setDebugInfo("");
-
-  //   if (!email || !password) {
-  //     alert("Please enter both email and password.");
-  //     return;
-  //   }
-
-  //   dispatch(clearError());
-  //   localStorage.setItem("Email", email);
-
-  //   try {
-  //     // Choose the appropriate login action based on user type
-  //     const loginAction = userType === "stakeholder" ? loginStakeholder : loginUser;
-  //     const apiEndpoint = userType === "stakeholder" 
-  //       ? "https://timemanagementsystemserver.onrender.com/api/auth/login-stakeholder" 
-  //       : "https://timemanagementsystemserver.onrender.com/api/auth/login";
-
-  //     const response = await fetch(apiEndpoint, {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({ email, password }),
-  //     });
-
-  //     const data = await response.json();
-  //     // console.log(`${userType} data:`, data);
-      
-  //     if (data.verificationId) {
-  //       localStorage.setItem("verificationID", data.verificationId);
-  //       // console.log("Stored verificationID:", localStorage.getItem("verificationID"));
-  //     }
-
-  //     if (!response.ok) {
-  //       alert(data.message || "Invalid credentials!");
-  //       return;
-  //     }
-
-  //     setDebugInfo("Attempting login...");
-  //     // console.log("Login attempt with:", { email, password: "********", userType });
-
-  //     const resultAction = await dispatch(loginAction({ email, password }));
-  //     // console.log("Login result:", resultAction);
-      
-  //     if (loginAction.fulfilled.match(resultAction)) {
-  //       setDebugInfo("Login successful!");
-  //       navigate("/TwoFactorAuth");
-  //       // console.log("Login successful:", resultAction.payload);
-        
-  //       if (resultAction.payload.verificationId) {
-  //         localStorage.setItem("verificationID", resultAction.payload.verificationId);
-  //         // console.log("Stored verificationID:", localStorage.getItem("verificationID"));
-  //       }
-  //     } else if (loginAction.rejected.match(resultAction)) {
-  //       const errorMessage = resultAction.payload || resultAction.error.message || "Unknown error";
-  //       setDebugInfo(`Login failed: ${errorMessage}`);
-  //       console.error("Login rejected:", errorMessage);
-  //     }
-  //   } catch (err) {
-  //     const errorMessage = err.message || "Unknown error";
-  //     setDebugInfo(`Login error: ${errorMessage}`);
-  //     console.error("Login error:", err);
-  //   }
-  // };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -135,26 +69,6 @@ const Login = () => {
           </div>
 
           <form onSubmit={handleLogin} className="login-form">
-            {/* User type selection */}
-            {/* <div className="form-group">
-              <label>Login as</label>
-              <div className="user-type-selector">
-                <button 
-                  type="button" 
-                  className={`user-type-btn ${userType === 'user' ? 'active' : ''}`}
-                  onClick={() => setUserType('user')}
-                >
-                  Admin or Facillitator
-                </button>
-                <button 
-                  type="button" 
-                  className={`user-type-btn ${userType === 'stakeholder' ? 'active' : ''}`}
-                  onClick={() => setUserType('stakeholder')}
-                >
-                  Stakeholder
-                </button>
-              </div>
-            </div> */}
 
             <div className="form-group">
               <label htmlFor="email">Email</label>
@@ -204,7 +118,7 @@ const Login = () => {
               </div>
             </div>
 
-            {error && <p className="error-message">{error}</p>}
+            {error && <p className="error-message">{`Oops! Something went wrong, please check credentials and try again!`}</p>}
             {debugInfo && <p className="debug-info" style={{ fontSize: "12px", color: "#666" }}>{debugInfo}</p>}
 
             <button type="submit" className="continue-btn" disabled={isLoading}>
