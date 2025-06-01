@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+/* eslint-disable no-unused-vars */
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser, loginStakeholder, clearError } from "../Slices/authSlice";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
@@ -108,7 +109,7 @@ const Login = () => {
         // Store verification ID only once, from the payload
         if (resultAction.payload.verificationId) {
           localStorage.setItem("verificationID", resultAction.payload.verificationId);
-          // console.log('login results' , resultAction)
+          console.log('login results' , resultAction)
         }
       } else if (loginAction.rejected.match(resultAction)) {
         const errorMessage = resultAction.payload || resultAction.error.message || "Unknown error";
@@ -204,7 +205,7 @@ const Login = () => {
               </div>
             </div>
 
-            {error && <p className="error-message">{error}</p>}
+            {error && <p className="error-message">{`Oops! Something went wrong, please check credentials and try again!`}</p>}
             {debugInfo && <p className="debug-info" style={{ fontSize: "12px", color: "#666" }}>{debugInfo}</p>}
 
             <button type="submit" className="continue-btn" disabled={isLoading}>

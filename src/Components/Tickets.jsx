@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { Search, X, Send } from 'lucide-react';
+import { Search, X, Send, Ticket, FolderClosed, FolderOpen, Flag } from 'lucide-react';
 import axios from 'axios';
 import DataLoader from './dataLoader';
 import './styling/Tickets.css';
@@ -238,8 +238,10 @@ const Tickets = () => {
         <div className="tickets-metric-card blue">
           <div className="tickets-metric-header">
             <div className="tickets-metric-icon blue">
-              <div className="tickets-metric-dot blue"></div>
-            </div>
+              {/* <div className="tickets-metric-dot blue"> */}
+                <Ticket size={16} color="#4285f4" />
+              </div>
+            {/* </div> */}
             <span className="tickets-metric-label">Total Tickets</span>
           </div>
           <div className="tickets-metric-value">{ticketStats?.total || tickets.length}</div>
@@ -247,7 +249,8 @@ const Tickets = () => {
         <div className="tickets-metric-card green">
           <div className="tickets-metric-header">
             <div className="tickets-metric-icon green">
-              <div className="tickets-metric-dot green"></div>
+              {/* <div className="tickets-metric-dot green"></div> */}
+              <FolderOpen size={16} color="#34a853" />
             </div>
             <span className="tickets-metric-label">Open Tickets</span>
           </div>
@@ -255,8 +258,9 @@ const Tickets = () => {
         </div>
         <div className="tickets-metric-card red">
           <div className="tickets-metric-header">
-            <div className="tickets-metric-icon red">
-              <div className="tickets-metric-dot red"></div>
+            <div className="tickets-metric-icon yellow">
+              {/* <div className="tickets-metric-dot red"></div> */}
+              <FolderClosed size={16} color="#fbbc05" />
             </div>
             <span className="tickets-metric-label">Closed Tickets</span>
           </div>
@@ -264,8 +268,9 @@ const Tickets = () => {
         </div>
         <div className="tickets-metric-card yellow">
           <div className="tickets-metric-header">
-            <div className="tickets-metric-icon yellow">
-              <div className="tickets-metric-dot yellow"></div>
+            <div className="tickets-metric-icon red">
+              {/* <div className="tickets-metric-dot yellow"></div> */}
+              <Flag size={16} color="#ea4335" />
             </div>
             <span className="tickets-metric-label">High Priority</span>
           </div>
