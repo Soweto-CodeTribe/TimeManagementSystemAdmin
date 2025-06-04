@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './styling/LocationManagement.css';
+import { ArrowLeft, ChevronLeft } from 'lucide-react';
 
 const LocationManagement = () => {
   const navigate = useNavigate();
@@ -183,7 +184,7 @@ const LocationManagement = () => {
   return (
     <div className="location-management">
       <button className="back" onClick={() => navigate('/settings')}>
-        ← {/* This can be replaced by a back arrow icon */}
+       <ChevronLeft /> <span style={{ fontSize: ".5em"}}>Back To Settings</span>
       </button>
 
       {message.text && (

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './styling/ManageTrainees.css';
+import { ChevronLeft } from 'lucide-react';
 
 const ManageTrainees = () => {
   const navigate = useNavigate();
@@ -325,8 +326,8 @@ const ManageTrainees = () => {
 
   return (
     <div className="program-manager-container">
-      <button className="back-arrow" onClick={() => navigate('/settings')}>
-        ← {/* This can be replaced with an icon if desired */}
+      <button className="back" onClick={() => navigate('/settings')}>
+       <ChevronLeft /> <span style={{ fontSize: ".5em"}}>Back To Settings</span>
       </button>
       <h2 className="program-title">Manage Trainee Program Dates</h2>
 

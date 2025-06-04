@@ -63,12 +63,13 @@ const ForgotPassword = () => {
     }, 3000);
   };
 
-  const handleEmailSubmit = (e) => {
+  const handleEmailSubmit = async (e) => {
     e.preventDefault();
     if (!email) {
       showNotification('Please enter your email address');
       return;
     }
+    await handleForgotPassword(); // Actually send the email to backend
     showNotification('Verification email sent');
     setCurrentStep(2);
   };
@@ -92,7 +93,7 @@ const ForgotPassword = () => {
     showNotification('Password reset successfully');
     // Redirect to login page after 2 seconds
     setTimeout(() => {
-      window.location.href = '/login'; // Change this to your login route
+      window.location.href = '/login'; // Or navigate to a custom screen if needed
     }, 2000);
   };
 

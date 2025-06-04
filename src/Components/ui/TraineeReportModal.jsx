@@ -263,6 +263,11 @@ const TraineeReportModal = ({ selectedTrainee, onClose }) => {
     }
   }, [selectedTrainee, selectedMonth, selectedYear]);
 
+  // Ensure tabValue is always valid
+  useEffect(() => {
+    if (tabValue > 3) setTabValue(0);
+  }, [tabValue]);
+
   return (
     <div className="modal-overlay">
       <div className="modal-content" ref={modalRef}>
@@ -273,9 +278,9 @@ const TraineeReportModal = ({ selectedTrainee, onClose }) => {
           </button>
         </div>
 
-        {reportLoading && tabValue !== 4 ? (
+        {reportLoading && tabValue !== 3 ? (
           <DataLoader />
-        ) : reportError && tabValue !== 4 ? (
+        ) : reportError && tabValue !== 3 ? (
           <div className="error-message">Error loading report: {reportError}</div>
         ) : reportData ? (
           <>
@@ -288,7 +293,7 @@ const TraineeReportModal = ({ selectedTrainee, onClose }) => {
                   onChange={(e) => setSelectedMonth(e.target.value)}
                 >
                   {[...Array(12).keys()].map((month) => (
-                    <option key={month + 1} value={String(month + 1).padStart(2, "0")}>
+                    <option key={month + 1} value={String(month + 1).padStart(2, "0")}> 
                       {new Date(0, month).toLocaleString("default", { month: "long" })}
                     </option>
                   ))}
@@ -334,20 +339,6 @@ const TraineeReportModal = ({ selectedTrainee, onClose }) => {
                   </p>
                 </div>
                 <div className="summary-item">
-                  <p className="summary-label">Punctuality Rate</p>
-                  <p
-                    className="summary-value"
-                    style={{
-                      color: getPerformanceColor(
-                        "punctuality",
-                        parseFloat(reportData.monthlyStats.punctualityRate)
-                      ),
-                    }}
-                  >
-                    {reportData.monthlyStats.punctualityRate}%
-                  </p>
-                </div>
-                <div className="summary-item">
                   <p className="summary-label">Total Working Hours</p>
                   <p className="summary-value">
                     {parseFloat(reportData.monthlyStats.totalWorkingHours).toFixed(1)} hrs
@@ -365,57 +356,29 @@ const TraineeReportModal = ({ selectedTrainee, onClose }) => {
                 className={`tab-button ${tabValue === 0 ? "active" : ""}`}
                 onClick={() => setTabValue(0)}
               >
-                Attendance Overview
+                Hours Worked
               </button>
               <button
                 className={`tab-button ${tabValue === 1 ? "active" : ""}`}
                 onClick={() => setTabValue(1)}
               >
-                Hours Worked
+                Status Distribution
               </button>
               <button
                 className={`tab-button ${tabValue === 2 ? "active" : ""}`}
                 onClick={() => setTabValue(2)}
               >
-                Status Distribution
+                Attendance Records
               </button>
               <button
                 className={`tab-button ${tabValue === 3 ? "active" : ""}`}
                 onClick={() => setTabValue(3)}
-              >
-                Attendance Records
-              </button>
-              <button
-                className={`tab-button ${tabValue === 4 ? "active" : ""}`}
-                onClick={() => setTabValue(4)}
               >
                 Absenteeism Proofs
               </button>
             </div>
 
             {tabValue === 0 && (
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={prepareAttendanceData()}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={renderCustomizedLabel}
-                    outerRadius={100}
-                    dataKey="value"
-                  >
-                    {prepareAttendanceData().map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            )}
-
-            {tabValue === 1 && (
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={prepareHoursWorkedData()}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -428,7 +391,7 @@ const TraineeReportModal = ({ selectedTrainee, onClose }) => {
               </ResponsiveContainer>
             )}
 
-            {tabValue === 2 && (
+            {tabValue === 1 && (
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
@@ -450,7 +413,7 @@ const TraineeReportModal = ({ selectedTrainee, onClose }) => {
               </ResponsiveContainer>
             )}
 
-            {tabValue === 3 && (
+            {tabValue === 2 && (
               <div className="table-container">
                 <table className="data-table">
                   <thead>
@@ -494,7 +457,7 @@ const TraineeReportModal = ({ selectedTrainee, onClose }) => {
               </div>
             )}
 
-            {tabValue === 4 && (
+            {tabValue === 3 && (
               <div className="absenteeism-container">
                 {uploadsLoading ? (
                   <DataLoader />

@@ -542,10 +542,10 @@ const Tickets = () => {
           </table>
         </div>
         {totalPages > 1 && (
-          <div className="tickets-pagination-container">
-            <div className="tickets-pagination-controls">
+          <div className="pagination-container">
+            <div className="pagination-controls">
               <button
-                className="tickets-pagination-arrow"
+                className="pagination-arrow"
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
               >
@@ -555,13 +555,13 @@ const Tickets = () => {
                 <button
                   key={i + 1}
                   onClick={() => setCurrentPage(i + 1)}
-                  className={`tickets-pagination-number ${currentPage === i + 1 ? 'active' : ''}`}
+                  className={`pagination-number ${currentPage === i + 1 ? 'active' : ''}`}
                 >
                   {i + 1}
                 </button>
               ))}
               <button
-                className="tickets-pagination-arrow"
+                className="pagination-arrow"
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
               >
