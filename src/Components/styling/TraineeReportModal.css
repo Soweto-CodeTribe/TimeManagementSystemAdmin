@@ -14,8 +14,7 @@
 .modal-content {
     background-color: #fff;
     border-radius: 12px;
-    max-width: 900px;
-    max-height: 85vh;
+    max-width: 1200px;
     overflow-y: auto;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
     padding: 30px;
@@ -100,7 +99,7 @@
 }
 
 .apply-filters:hover {
-    background-color: #2d2d2d;
+    background-color: #222;
 }
 
 .report-summary {
@@ -245,7 +244,10 @@
     margin-top: 20px;
     overflow-x: auto;
     border-radius: 8px;
+    text-align: center;
 }
+
+
 
 .data-table {
     width: 100%;
@@ -256,7 +258,7 @@
 
 .data-table th {
     padding: 15px;
-    text-align: left;
+    text-align: center;
     font-weight: 600;
     color: #2d2d2d;
     border-bottom: 2px solid #e0e0e0;
@@ -312,7 +314,7 @@
 }
 
 .view-document {
-    background-color: #424242;
+    background-color: #000;
     color: white;
     padding: 6px 12px;
     border-radius: 4px;
@@ -321,7 +323,7 @@
 }
 
 .view-document:hover {
-    background-color: #2d2d2d;
+    background-color: #222;
 }
 
 .download-document {
@@ -345,6 +347,39 @@
     margin: 25px 0;
     text-align: center;
     font-weight: 600;
+}
+
+/* Unified Search Bar Styles */
+.search-wrapper {
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 12px 8px 36px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #f9fafb;
+  color: #222;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-input:focus, .search-input:active {
+  outline: none;
+  border-color: #bbb;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.10);
+  background-color: #fff;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #b0b0b0;
+  font-size: 16px;
 }
 
 @media (max-width: 768px) {
@@ -458,17 +493,17 @@
 }
 
 .status-button.approve {
-    background-color: #4CAF50;
+    background-color: #000;
     color: white;
 }
 
 .status-button.reject {
-    background-color: #F44336;
+    background-color: #000;
     color: white;
 }
 
 .status-button.pending {
-    background-color: #FF9800;
+    background-color: #000;
     color: white;
 }
 
@@ -519,26 +554,13 @@
     font-size: 14px;
     cursor: pointer;
     text-decoration: none;
-  }
-  
-  .download-button {
-    background-color: #4CAF50;
+    background-color: #000;
     color: white;
     border: none;
   }
   
-  .download-button:hover {
-    background-color: #45a049;
-  }
-  
-  .views-button {
-    background-color: black;
-    color: white;
-    border: none;
-  }
-  
-  .views-button:hover {
-    background-color: black;
+  .download-button:hover, .views-button:hover {
+    background-color: #222;
   }
   
   .document-preview-container {

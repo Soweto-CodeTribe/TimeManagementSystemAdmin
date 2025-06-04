@@ -161,9 +161,29 @@
   }
 }
 
+/* Unified Search Bar Styles */
 .tickets-search-wrapper {
   position: relative;
-  flex-grow: 1;
+  width: 100%;
+}
+
+.tickets-search-input {
+  padding: 6px 12px 6px 36px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9fafb;
+  width: 100%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  color: #222;
+}
+
+.tickets-search-input:focus, .tickets-search-input:active {
+  outline: none;
+  border-color: #bbb;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.10);
+  background-color: #fff;
 }
 
 .search-icon {
@@ -171,27 +191,10 @@
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
-  color: #666;
+  color: #b0b0b0;
+  font-size: 16px;
 }
 
-.tickets-search-input {
-  padding: 6px 12px 6px 36px;
-  font-size: 14px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  width: 100%;
-  transition: border-color 0.2s ease;
-}
-
-.tickets-search-input:focus {
-  outline: none;
-  border-color: #4285f4;
-  box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.1);
-}
-
-/* Table Styles */
 .tickets-table-wrapper {
   overflow-x: auto;
 }
@@ -245,8 +248,8 @@
 
 /* Status colors are applied inline in the component */
 
-/* Pagination */
-.tickets-pagination-container {
+/* Pagination Styles - Unified */
+.pagination-container {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -254,13 +257,13 @@
   padding: 0.5rem 0;
 }
 
-.tickets-pagination-controls {
+.pagination-controls {
   display: flex;
   align-items: center;
   gap: 0.25rem;
 }
 
-.tickets-pagination-arrow {
+.pagination-arrow {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -273,17 +276,17 @@
   transition: all 0.2s ease;
 }
 
-.tickets-pagination-arrow:hover:not(:disabled) {
-  background-color: #f3f4f6;
-  border-color: #d1d5db;
-}
-
-.tickets-pagination-arrow:disabled {
+.pagination-arrow:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.tickets-pagination-number {
+.pagination-arrow:hover:not(:disabled) {
+  background-color: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.pagination-number {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -293,15 +296,16 @@
   border-radius: 0.375rem;
   background-color: white;
   cursor: pointer;
+  font-size: 14px;
   transition: all 0.2s ease;
 }
 
-.tickets-pagination-number:hover:not(.active) {
+.pagination-number:hover:not(.active) {
   background-color: #f3f4f6;
   border-color: #d1d5db;
 }
 
-.tickets-pagination-number.active {
+.pagination-number.active {
   background-color: #000000;
   color: white;
   border-color: #000000;
@@ -417,8 +421,8 @@
 }
 
 .tickets-tab-button {
-  background-color: #4285f4;
-  color: white;
+  background-color: #000;
+  color: #fff;
   border: none;
   padding: 8px 16px;
   border-radius: 4px;
@@ -429,7 +433,7 @@
 }
 
 .tickets-tab-button:hover {
-  background-color: #3367d6;
+  background-color: #222;
 }
 
 .tickets-action-section {
@@ -520,8 +524,8 @@
 }
 
 .tickets-save-button {
-  background-color: #34a853;
-  color: white;
+  background-color: #000;
+  color: #fff;
   border: none;
   padding: 8px 16px;
   border-radius: 4px;
@@ -531,7 +535,7 @@
 }
 
 .tickets-save-button:hover {
-  background-color: #2d9249;
+  background-color: #222;
 }
 
 .tickets-resolve-button {
@@ -580,8 +584,8 @@
 }
 
 .tickets-respond-button {
-  background-color: #4285f4;
-  color: white;
+  background-color: #000;
+  color: #fff;
   border: none;
   padding: 8px 16px;
   border-radius: 4px;
@@ -594,7 +598,7 @@
 }
 
 .tickets-respond-button:hover {
-  background-color: #3367d6;
+  background-color: #222;
 }
 
 .tickets-respond-button:disabled {
@@ -631,6 +635,9 @@
   font-size: 14px;
   animation: tickets-fadeIn 0.3s ease;
 }
+
+/* Remove legacy/duplicate tickets-pagination styles if present */
+/* .tickets-pagination-container, .tickets-pagination-controls, .tickets-pagination-arrow, .tickets-pagination-number, etc. are now replaced by unified pagination classes above. */
 
 /* Responsive Adjustments */
 @media (max-width: 640px) {

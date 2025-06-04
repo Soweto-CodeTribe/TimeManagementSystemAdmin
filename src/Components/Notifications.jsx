@@ -208,12 +208,12 @@ const NotificationsPanel = () => {
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <div className="notifications-panel">
-      <div className="notifications-header">
+    <div className="notifications-panel modern-panel">
+      <div className="notifications-header modern-header">
         <h2>Live Activities</h2>
       </div>
 
-      <div className="search-bar">
+      <div className="search-bar modern-search-bar">
         <div className="search-icon">
           <FiSearch />
         </div>
@@ -231,20 +231,24 @@ const NotificationsPanel = () => {
         )}
       </div>
 
-      {filteredActivities.length === 0 ? (
-        <div className="empty-state">No live activities found.</div>
+      {loading ? (
+        <div className="modern-loader">Loading live activities...</div>
+      ) : error ? (
+        <div className="modern-error">{error}</div>
+      ) : filteredActivities.length === 0 ? (
+        <div className="modern-empty-state">No live activities found.</div>
       ) : (
-        <ul className="notifications-list">
+        <ul className="notifications-list modern-list">
           {filteredActivities.map((activity) => (
-            <li key={activity.traineeId} className="notification-item">
-              <div className="notification-content">
-                <div className="notification-title">
-                  {activity.name} - {activity.location}
+            <li key={activity.traineeId} className="notification-item modern-item">
+              <div className="notification-content modern-content">
+                <div className="notification-title modern-title">
+                  {activity.name} <span className="modern-location">- {activity.location}</span>
                 </div>
-                <p className="notification-message">
+                <p className="notification-message modern-message">
                   {activity.lunchStatus || 'Working'} at {formatTime(activity.lastUpdated)}
                 </p>
-                <div className="notification-meta">
+                <div className="notification-meta modern-meta">
                   <span>{activity.currentDate}</span>
                 </div>
               </div>

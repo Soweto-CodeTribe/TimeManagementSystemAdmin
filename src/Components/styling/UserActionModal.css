@@ -1,0 +1,194 @@
+/* Overlay */
+.action-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.25);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+
+/* Modal Box */
+.action-modal-content.wide {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  padding: 2.5rem 2.5rem 2rem 2.5rem;
+  min-width: 420px;
+  max-width: 50%;
+  width: 100%;
+  position: relative;
+  animation: modalIn 0.2s cubic-bezier(.4,0,.2,1);
+}
+@keyframes modalIn {
+  from { transform: translateY(40px) scale(0.98); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+/* Close Button */
+.action-modal-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: none;
+  border: none;
+  font-size: 1.7rem;
+  color: #444;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.action-modal-close:hover {
+  color: #e74c3c;
+}
+
+/* Title */
+.modal-title {
+  font-size: 1.45rem;
+  font-weight: 600;
+  margin-bottom: 1.2rem;
+  color: #222;
+  text-align: center;
+}
+.highlighted {
+  color: #222;
+  font-weight: 700;
+}
+
+/* Tabs */
+.action-modal-tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  gap: 0.5rem;
+}
+.modal-tab-btn {
+  background: #f4f4f4;
+  border: none;
+  border-radius: 6px 6px 0 0;
+  padding: 0.6rem 1.5rem;
+  font-size: 1rem;
+  color: #444;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.modal-tab-btn.active {
+  background: #222;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Section Header */
+.section-header {
+  font-size: 1.08rem;
+  font-weight: 500;
+  color: #222;
+  margin-bottom: 1.1rem;
+  margin-top: 0.2rem;
+  text-align: left;
+}
+
+/* Form Layout */
+.manual-form, .edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+.form-row {
+  display: flex;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 180px;
+  min-width: 160px;
+  gap: 0.3rem;
+}
+.form-label {
+  font-size: 0.98rem;
+  color: #222;
+  margin-bottom: 0.2rem;
+}
+.form-input {
+  padding: 0.5rem 0.7rem;
+  border: 1px solid #dbe3ea;
+  border-radius: 5px;
+  font-size: 1rem;
+  background: #fafafa;
+  transition: border 0.15s;
+  color: #222;
+}
+.form-input:focus {
+  border-color: #222;
+  outline: none;
+}
+
+/* Buttons */
+.myBtns {
+  /* margin-top: 0.5rem; */
+  padding: 0.45rem ;
+  background: #f4f4f4;
+  width: unset;
+  color: #222;
+  border: 1px solid #dbe3ea;
+  border-radius: 5px;
+  /* font-size: 1rem; */
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border 0.15s;
+}
+.myBtns.primary {
+  background: #222;
+  color: #fff;
+  border: 1px solid #222;
+}
+.myBtns:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.myBtns:not(:disabled):hover {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+/* Feedback Messages */
+.modal-feedback {
+  margin-bottom: 1rem;
+  padding: 0.7rem 1rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  text-align: center;
+}
+.success-message {
+  background: #e8f8ee;
+  color: #27ae60;
+  border: 1px solid #b7eedc;
+}
+.error-message {
+  background: #fdeaea;
+  color: #e74c3c;
+  border: 1px solid #f5c6cb;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .action-modal-content.wide {
+    min-width: 90vw;
+    max-width: 98vw;
+    padding: 1.2rem 0.7rem 1.2rem 0.7rem;
+  }
+  .form-row {
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+}

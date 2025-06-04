@@ -14,6 +14,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import "./styling/UserManagement.css";
 import jsPDF from "jspdf";
 import Modal from "./Modal";
+import UserActionModal from "./ui/UserActionModal";
 import axios from "axios";
 import DataLoader from "./dataLoader";
 import CsvConfigModal from "./ui/CsvConfigModal";
@@ -538,9 +539,7 @@ useEffect(() => {
     if (data.length === 0) {
       return <div className="no-data-message">No {tabName.toLowerCase()} found.</div>;
     }
-
     
-
     return (
       <div className="users-table-wrapper">
         <table className="users-table">
@@ -676,15 +675,23 @@ useEffect(() => {
 
   return (
     <div className="user-management-container">
-      {/* Action Modal */}
-      <Modal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onExportCSV={handleExportCSV}
-        onExportPDF={exportPDF}
-        onDelete={handleDeleteUser}
-        user={selectedUser}
-      />
+      {/* Action Modal: Use UserActionModal for trainees, Modal for others if needed */}
+      {activeTab === "Trainees" ? (
+        <UserActionModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          trainee={selectedUser}
+        />
+      ) : (
+        <Modal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          onExportCSV={handleExportCSV}
+          onExportPDF={exportPDF}
+          onDelete={handleDeleteUser}
+          user={selectedUser}
+        />
+      )}
       {/* CSV Configuration Modal */}
       {openCsvConfig && (
         <CsvConfigModal

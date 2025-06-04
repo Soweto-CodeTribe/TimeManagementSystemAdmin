@@ -40,7 +40,8 @@
     "redux-toolkit": "^1.1.2",
     "router-dom": "^3.0.1",
     "socket.io-client": "^4.8.1",
-    "timemanagementsystemadmin": "file:"
+    "timemanagementsystemadmin": "file:",
+    "use-debounce": "^10.0.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.19.0",
