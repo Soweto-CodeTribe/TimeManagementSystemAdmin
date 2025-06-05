@@ -3,90 +3,80 @@
 "use client";
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
-import "./styling/SystemSettings.css"; // Ensure to have .css extension
-import { FiSettings, FiClock, FiMapPin } from "react-icons/fi"; // Importing icons, added FiMapPin for location
+import { useNavigate } from "react-router-dom";
+import "./styling/SystemSettings.css";
+import { FiMapPin, FiBell, FiUserCheck, FiUsers } from "react-icons/fi";
+import { ChevronRight } from "lucide-react";
 
 function SystemSettings() {
-  const navigate = useNavigate(); // Get the navigate function for navigation
-  const [isDarkMode, setIsDarkMode] = useState(false); // State for dark mode
-  const [emailNotifications, setEmailNotifications] = useState(true); // State for email notifications
-
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode); // Toggle the dark mode state
-  };
-
-  const toggleEmailNotifications = () => {
-    setEmailNotifications(!emailNotifications); // Toggle email notifications
-  };
+  const navigate = useNavigate();
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [pushNotifications, setPushNotifications] = useState(true);
 
   const handleManageTrainees = () => {
-    navigate("/manage-trainees"); // Directly navigate to ManageTrainees
+    navigate("/manage-trainees");
   };
-
   const handleLocationManagement = () => {
-    navigate("/location-management"); // Navigate to LocationManagement
+    navigate("/location-management");
   };
-
-  // const handleTimeManagement = () => {
-  //   navigate("/time-management"); // Navigate to Time Management
-  // };
 
   return (
-    <div className={`settings-container ${isDarkMode ? "dark" : "light"}`}>
-      <header className={isDarkMode ? "dark" : ""}>
-        <h1 style={{ color: isDarkMode ? "white" : "black", fontWeight: "bold" }}>Settings</h1>
-        <p style={{ color: isDarkMode ? "white" : "black", fontWeight: "bold" }}>
-          Manage system preferences, user roles, and security settings.
-        </p>
-      </header>
-
-      <main className={`settings-content ${isDarkMode ? "dark" : ""}`}>
-        <nav className={`settings-nav ${isDarkMode ? "dark" : ""}`}>
-          <div className="nav-item" onClick={handleLocationManagement}>
-            {" "}
-            {/* Location Item */}
-            <FiMapPin className="nav-icon" />
-            <span style={{ color: isDarkMode ? "white" : "black", fontWeight: "bold" }}>Location</span>
-          </div>
-          <div className="nav-item active" onClick={handleManageTrainees}>
-            <FiSettings className="nav-icon" />
-            <span style={{ color: isDarkMode ? "white" : "black", fontWeight: "bold" }}>Manage Trainees</span>
-          </div>
-        </nav>
-
-        <section className={`settings-panel ${isDarkMode ? "dark" : ""}`}>
-          <div className="setting-row">
-            <label htmlFor="emailNotifications" style={{ color: isDarkMode ? "white" : "black", fontWeight: "bold" }}>
-              Email and Push notification
+    <div className="settings-root">
+      <div className="settings-card">
+        <header className="settings-header">
+          <h1>Settings</h1>
+          <p>Manage system preferences, notifications, and navigation.</p>
+        </header>
+        <section className="settings-section">
+          <h2 className="settings-section-title">
+            <FiBell className="settings-section-icon" /> Notifications
+          </h2>
+          <div className="settings-row">
+            <span className="settings-label">Email Notifications</span>
+            <label className="switch">
+              <input
+                type="checkbox"
+                checked={emailNotifications}
+                onChange={() => setEmailNotifications(!emailNotifications)}
+              />
+              <span className="slider round"></span>
             </label>
-            <Toggle id="emailNotifications" checked={emailNotifications} onChange={toggleEmailNotifications} />
+          </div>
+          <div className="settings-row">
+            <span className="settings-label">Push Notifications</span>
+            <label className="switch">
+              <input
+                type="checkbox"
+                checked={pushNotifications}
+                onChange={() => setPushNotifications(!pushNotifications)}
+              />
+              <span className="slider round"></span>
+            </label>
           </div>
         </section>
-      </main>
-
-      {/* Modal Styles (Removed since modal is no longer used) */}
-      <style jsx>{`
-        .dark {
-          background-color: #121212; /* Dark mode background */
-          color: white; /* Default text color in dark mode */
-        }
-
-        .light {
-          color: black; /* Default text color in light mode */
-        }
-      `}</style>
+        <section className="settings-section">
+          <h2 className="settings-section-title">
+            <FiMapPin className="settings-section-icon" /> Navigation
+          </h2>
+          <div className="settings-nav-list">
+            <button
+              className="settings-nav-btn"
+              onClick={handleLocationManagement}
+            >
+              <FiMapPin className="nav-icon" />
+              <span>Location Management</span>
+              <ChevronRight className="myIcon"/>
+            </button>
+            <button className="settings-nav-btn" onClick={handleManageTrainees}>
+              <FiUsers className="nav-icon" />
+              <span>Manage Trainees</span>
+              <ChevronRight className="myIcon"/>
+            </button>
+          </div>
+        </section>
+      </div>
     </div>
   );
 }
-
-const Toggle = ({ id, checked, onChange }) => {
-  return (
-    <label className="switch">
-      <input type="checkbox" id={id} checked={checked} onChange={onChange} />
-      <span className="slider round"></span>
-    </label>
-  );
-};
 
 export default SystemSettings;

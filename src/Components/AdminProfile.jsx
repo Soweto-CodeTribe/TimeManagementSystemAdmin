@@ -239,6 +239,8 @@ const AdminProfile = () => {
     window.location.href = '/login';
   };
 
+  const userRole = localStorage.getItem('role');
+
   return (
     <div className="profile-container">
       <div className="profile-sidebar">
@@ -318,9 +320,9 @@ const AdminProfile = () => {
               <label>Role:</label>
               <input
                 type="text"
-                name="role"
-                value={userData.role || ''}
-                onChange={handleInputChange}
+                value={userData.role}
+                readOnly={userRole !== 'super_admin'}
+                disabled={userRole !== 'super_admin'}
               />
               <label>Email:</label>
               <input

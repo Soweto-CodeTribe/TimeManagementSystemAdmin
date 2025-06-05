@@ -13,13 +13,21 @@ const toggleUserStatus = async (userId, fetchData) => {
 const TraineesTab = ({ data, searchTerm, fetchData }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [statusFilter, setStatusFilter] = useState("");
+  const [cohortFilter, setCohortFilter] = useState("");
+
+  // Get unique cohort years for dropdown
+  const cohortYears = Array.from(new Set(data.map((t) => t.cohortYear).filter(Boolean)));
 
   // Filter and paginate data
-  const filteredData = data.filter(
-    (trainee) =>
+  const filteredData = data.filter((trainee) => {
+    const matchesSearch =
       trainee.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      trainee.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+      trainee.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter ? trainee.status === statusFilter : true;
+    const matchesCohort = cohortFilter ? trainee.cohortYear === cohortFilter : true;
+    return matchesSearch && matchesStatus && matchesCohort;
+  });
 
   const paginatedData = filteredData.slice(
     (currentPage - 1) * itemsPerPage,
@@ -28,6 +36,27 @@ const TraineesTab = ({ data, searchTerm, fetchData }) => {
 
   return (
     <div>
+      <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
+        <label>
+          Status:
+          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+            <option value="">All</option>
+            <option value="active">Active</option>
+            <option value="deactive">Deactive</option>
+          </select>
+        </label>
+        <label>
+          Cohort Year:
+          <select value={cohortFilter} onChange={(e) => setCohortFilter(e.target.value)}>
+            <option value="">All</option>
+            {cohortYears.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
       <table className="users-table">
         <thead>
           <tr>

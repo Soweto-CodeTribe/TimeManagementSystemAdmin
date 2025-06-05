@@ -1,37 +1,40 @@
 /* eslint-disable react/prop-types */
-// import { useState } from 'react'
+import { useEffect, useRef } from 'react';
 
 const CsvConfigModal = ({ 
-  columns, 
+  columns: columnsProp, 
   setColumns, 
   onClose, 
   onExport, 
   exportStatus 
 }) => {
-  // Function to check if all columns are selected
-  const areAllColumnsSelected = () => {
-    return Object.values(columns).every(value => value === true);
-  };
+  const selectAllRef = useRef(null);
 
-  // Handle select all functionality
+  // Check if all columns are selected
+  const areAllColumnsSelected = () => Object.values(columnsProp).every(Boolean);
+
+  // Indeterminate state for select all
+  useEffect(() => {
+    if (selectAllRef.current) {
+      const values = Object.values(columnsProp);
+      selectAllRef.current.indeterminate = values.some(Boolean) && !values.every(Boolean);
+    }
+  }, [columnsProp]);
+
+  // Handle select all
   const handleSelectAll = (e) => {
     const isChecked = e.target.checked;
-    const updatedColumns = {};
-    
-    Object.keys(columns).forEach(key => {
-      updatedColumns[key] = isChecked;
+    const updated = {};
+    Object.keys(columnsProp).forEach(key => {
+      updated[key] = isChecked;
     });
-    
-    setColumns(updatedColumns);
+    setColumns(updated);
   };
-  
+
   // Handle individual column change
   const handleColumnChange = (e) => {
     const { id, checked } = e.target;
-    setColumns({
-      ...columns,
-      [id]: checked
-    });
+    setColumns({ ...columnsProp, [id]: checked });
   };
 
   // Render configuration view
@@ -70,6 +73,7 @@ const CsvConfigModal = ({
             <input 
               type="checkbox" 
               id="selectAll" 
+              ref={selectAllRef}
               checked={areAllColumnsSelected()}
               onChange={handleSelectAll}
             />
@@ -87,7 +91,7 @@ const CsvConfigModal = ({
                     <input 
                       type="checkbox" 
                       id={col} 
-                      checked={columns[col]} 
+                      checked={!!columnsProp[col]} 
                       onChange={handleColumnChange} 
                     />
                     <label htmlFor={col}>
@@ -105,7 +109,7 @@ const CsvConfigModal = ({
           <button 
             className="exportButton" 
             onClick={onExport}
-            disabled={!Object.values(columns).some(value => value)}
+            disabled={!Object.values(columnsProp).some(Boolean)}
           >
             <span>Export CSV</span>
           </button>
@@ -128,7 +132,7 @@ const CsvConfigModal = ({
           </div>
           <p>Please wait while we generate your CSV file...</p>
           <p className="exportDetail">
-            Processing {Object.keys(columns).filter(key => columns[key]).length} columns of data
+            Processing {Object.keys(columnsProp).filter(key => columnsProp[key]).length} columns of data
           </p>
         </div>
       </>
@@ -147,7 +151,7 @@ const CsvConfigModal = ({
           <div className="successIcon">✓</div>
           <p>Your CSV file has been successfully generated!</p>
           <p className="exportDetail">
-            Included {Object.keys(columns).filter(key => columns[key]).length} columns of data
+            Included {Object.keys(columnsProp).filter(key => columnsProp[key]).length} columns of data
           </p>
         </div>
         <div className="modalActions">

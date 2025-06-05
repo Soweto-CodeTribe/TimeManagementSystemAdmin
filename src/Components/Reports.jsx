@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import { useState, useEffect } from "react";
 import { FileText, Search, Filter, Info, ChevronLeft, ChevronRight } from "lucide-react";
@@ -65,8 +66,7 @@ const ReportsScreen = () => {
     if (allReports.length === 0) {
       fetchAllReportsForStats();
     }
-  }, [token, currentPage, itemsPerPage, debouncedSearchTerm, filterStatus, filterDate, 
-    ...(userRole === 'super_admin' ?  [filterLocation]: [])]);
+  }, [token, currentPage, itemsPerPage, debouncedSearchTerm, filterStatus, filterDate, filterLocation]);
 
   // Function to fetch all reports for accurate statistics calculation
   const fetchAllReportsForStats = async () => {
@@ -87,30 +87,6 @@ const ReportsScreen = () => {
       console.error("Error fetching all reports for stats:", err);
       // This is a silent failure - we'll still try to calculate stats from paginated data
     }
-  };
-
-  // Calculate metrics dynamically based on available reports
-  const calculateMetrics = () => {
-    // Use all reports if available, otherwise use current page reports
-    const dataSource = allReports.length > 0 ? allReports : reports;
-    
-    // If we have API-provided summary, use it
-    if (summaryData && Object.keys(summaryData).length > 0) {
-      return {
-        totalReports: summaryData.totalReports || dataSource.length,
-        resolvedReports: summaryData.resolvedReports || dataSource.filter(r => r.status?.toLowerCase() === 'resolved').length,
-        pendingReports: summaryData.pendingReports || dataSource.filter(r => r.status?.toLowerCase() === 'pending').length,
-        rejectedReports: summaryData.rejectedReports || dataSource.filter(r => r.status?.toLowerCase() === 'rejected').length
-      };
-    }
-    
-    // Otherwise calculate from available data
-    return {
-      totalReports: dataSource.length,
-      resolvedReports: dataSource.filter(r => r.status?.toLowerCase() === 'resolved').length,
-      pendingReports: dataSource.filter(r => r.status?.toLowerCase() === 'pending').length,
-      rejectedReports: dataSource.filter(r => r.status?.toLowerCase() === 'rejected').length
-    };
   };
 
   const fetchData = async (page = 1) => {
@@ -191,6 +167,16 @@ const ReportsScreen = () => {
     }
   };
 
+  // Helper to render date
+  const renderDate = () => {
+    if (!summaryData?.date) return "";
+    try {
+      return new Date(summaryData.date).toLocaleDateString();
+    } catch {
+      return "";
+    }
+  };
+
   // Render Pagination Numbers
   const renderPaginationNumbers = () => {
     const pageNumbers = [];
@@ -214,8 +200,33 @@ const ReportsScreen = () => {
     return pageNumbers;
   };
 
-  // Get current metrics
-  const metrics = calculateMetrics();
+  // Filtered reports based on all filters
+  const statusMap = {
+    present: ["present", "early", "on time", "within grace period"],
+    absent: ["absent"],
+    late: ["late"],
+    resolved: ["resolved"],
+    pending: ["pending"],
+    rejected: ["rejected"],
+  };
+  const filteredReports = reports.filter((report) => {
+    let matchesStatus = true;
+    if (filterStatus) {
+      const normalized = (report.status || "").toLowerCase();
+      if (statusMap[filterStatus]) {
+        matchesStatus = statusMap[filterStatus].includes(normalized);
+      } else {
+        matchesStatus = normalized === filterStatus;
+      }
+    }
+    const matchesDate = filterDate ? new Date(report.date).toLocaleDateString() === new Date(filterDate).toLocaleDateString() : true;
+    const matchesLocation = filterLocation ? (report.location?.toLowerCase() === filterLocation.toLowerCase()) : true;
+    const matchesSearch = debouncedSearchTerm
+      ? (report.traineeId?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+         report.name?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()))
+      : true;
+    return matchesStatus && matchesDate && matchesLocation && matchesSearch;
+  });
 
   // Loading State
   if (isLoading) return <DataLoader />;
@@ -231,7 +242,10 @@ const ReportsScreen = () => {
       {/* Table Container */}
       <div className="table-container">
         <div className="table-header">
-          <h2 className="table-title">Issue Management Table</h2>
+          <h2 className="table-title">
+            Reports Table
+            {summaryData && <span className="table-date"> - {renderDate()}</span>}
+          </h2>
           <div className="table-actions">
             {/* Filter Dropdown */}
             <div className="filter-wrapper">
@@ -248,13 +262,12 @@ const ReportsScreen = () => {
                     <label>Status:</label>
                     <select
                       value={filterStatus}
-                      // onChange={(e) => setFilterStatus(e.target.value)}
                       onChange={(e) => handleStatusChange(e.target.value)}
                     >
                       <option value="">All</option>
-                      <option value="resolved">Resolved</option>
-                      <option value="pending">Pending</option>
-                      <option value="rejected">Rejected</option>
+                      <option value="present">Present</option>
+                      <option value="absent">Absent</option>
+                      <option value="late">Late</option>
                     </select>
                   </div>
                   <div className="filter-group">
@@ -292,7 +305,7 @@ const ReportsScreen = () => {
               <Search className="search-icon" />
               <input
                 type="text"
-                placeholder="Search by ID, Name, or Status"
+                placeholder="Search by name or ID"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="search-input"
@@ -334,7 +347,7 @@ const ReportsScreen = () => {
                 </tr>
               </thead>
               <tbody>
-                {reports.map((report, index) => (
+                {filteredReports.map((report, index) => (
                   <tr key={index} onClick={() => setSelectedTrainee(report)}>
                     <td>{report.traineeId || "-"}</td>
                     <td>{report.name || "N/A"}</td>
