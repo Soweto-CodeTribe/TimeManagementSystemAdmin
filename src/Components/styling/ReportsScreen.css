@@ -184,6 +184,7 @@
 /* Table */
 .table-container {
   /* padding: 0 16px; */
+  text-align: left;
   border: 0;
 }
 

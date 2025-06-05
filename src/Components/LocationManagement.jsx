@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './styling/LocationManagement.css';
 import { ArrowLeft, ChevronLeft } from 'lucide-react';
@@ -17,11 +17,18 @@ const LocationManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
+  const formRef = useRef(null);
 
   // Fetch all locations when component mounts
   useEffect(() => {
     fetchLocations();
   }, []);
+
+  useEffect(() => {
+    if (editingId && formRef.current) {
+      formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [editingId]);
 
   const fetchLocations = async () => {
     setIsLoading(true);
@@ -200,7 +207,7 @@ const LocationManagement = () => {
       )}
       <div className="location-form-container">
         <h2>{editingId ? 'Edit Location' : 'Add New Location'}</h2>
-        <form onSubmit={handleSubmit} className="location-form">
+        <form ref={formRef} onSubmit={handleSubmit} className="location-form">
           <div className="form-group">
             <label htmlFor="name">Location Name*</label>
             <input

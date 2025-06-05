@@ -158,6 +158,7 @@ useEffect(() => {
     let allUserResults = [];
     try {
       let traineesData = [];
+      let paginationFromApi = false;
       if (userRole === "facilitator") {
         try {
           const traineesUrl = userLocation
@@ -171,6 +172,11 @@ useEffect(() => {
           if (traineesResponse.data.pagination) {
             setTotalPages(traineesResponse.data.pagination.totalPages);
             setCurrentPage(traineesResponse.data.pagination.currentPage);
+            paginationFromApi = true;
+          } else {
+            // If no pagination info, calculate totalPages from data length
+            const total = traineesData.length;
+            setTotalPages(Math.ceil(total / itemsPerPage) || 1);
           }
         } catch (error) {
           console.error("Failed to fetch trainees for facilitator:", error);
@@ -186,6 +192,7 @@ useEffect(() => {
           if (traineesResponse.data.pagination) {
             setTotalPages(traineesResponse.data.pagination.totalPages);
             setCurrentPage(traineesResponse.data.pagination.currentPage);
+            paginationFromApi = true;
           }
         } catch (error) {
           console.error("Failed to fetch trainees for admin:", error);
@@ -193,7 +200,6 @@ useEffect(() => {
         }
       }
 
-      // console.log('traineesData', traineesData)
       const formattedTrainees = traineesData.map((trainee) => ({
         id: trainee._id || trainee.id || `trainee-${crypto.randomUUID()}`,
         fullName:
@@ -205,8 +211,10 @@ useEffect(() => {
         status: trainee.status,
         lastCheckIn: trainee.lastCheckInDate || "N/A",
       }));
+      // --- FIX: Always use paginated data for display, not allTrainees ---
+      setAllTrainees(formattedTrainees); // Store for export
       allUserResults = [...formattedTrainees];
-      // console.log('formattedTrainees', formattedTrainees)
+      // --- END FIX ---
 
       if (userRole === "super_admin" || userRole === "admin") {
         try {
@@ -350,7 +358,8 @@ useEffect(() => {
     const selectedColumns = Object.keys(columns).filter((key) => columns[key]);
     setTimeout(() => {
       try {
-        const data = getTabData(activeTab).map((user) => {
+        // Use filteredAllTrainees for export (all, not just paginated)
+        const data = filteredAllTrainees.map((user) => {
           return selectedColumns
             .map((col) => {
               switch (col) {
@@ -360,14 +369,23 @@ useEffect(() => {
                   return user.fullName?.split(" ").pop() || "";
                 case "codeTribeId":
                   return user.id || "";
+                case "email":
                 case "emailAddress":
                   return user.email || "";
                 case "phoneNumber":
                   return user.phoneNumber || "";
                 case "lastCheckInDate":
                   return user.lastCheckIn || "";
+                case "location":
+                  return user.location || "";
+                case "idNumber":
+                  return user.idNumber || "";
+                case "postalAddress":
+                  return user.postalAddress || "";
+                case "cohortYear":
+                  return user.cohortYear || "";
                 default:
-                  return "";
+                  return user[col] || "";
               }
             })
             .join(",");
@@ -397,11 +415,12 @@ useEffect(() => {
   // PDF Export
   const exportPDF = () => {
     const doc = new jsPDF();
-    const data = getTabData(activeTab);
+    // Use filteredAllTrainees for export (all, not just paginated)
+    const data = filteredAllTrainees;
     doc.text(`${activeTab} Management`, 10, 10);
     doc.text("Full Name, Email, Role", 10, 20);
     data.forEach((user, index) => {
-      if (index < 30) {
+      if (index < 100) {
         doc.text(
           `${user.fullName?.substring(0, 30) || ""}, ${
             user.email?.substring(0, 30) || ""
@@ -436,7 +455,22 @@ useEffect(() => {
     }
   };
 
-  // Data Filtering
+  // Data Filtering (always filter the full list, not just paginated)
+  const [allTrainees, setAllTrainees] = useState([]); // Store all trainees for export
+
+  // Data Filtering (for export: always use allTrainees, not paginated)
+  const filteredAllTrainees = useMemo(() => {
+    return allTrainees.filter(
+      (user) =>
+        user.fullName
+          .toLowerCase()
+          .includes(debouncedSearchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        user.role.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+    );
+  }, [allTrainees, debouncedSearchTerm]);
+
+  // Data Filtering (for display)
   const filteredUsersData = useMemo(() => {
     return users.filter(
       (user) =>
@@ -447,7 +481,6 @@ useEffect(() => {
         user.role.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
     );
   }, [users, debouncedSearchTerm]);
-
   const filteredGuestsData = useMemo(() => {
     return guests.filter(
       (guest) =>
@@ -461,7 +494,6 @@ useEffect(() => {
             .includes(debouncedSearchTerm.toLowerCase()))
     );
   }, [guests, debouncedSearchTerm]);
-
   const filteredOnlinePeopleData = useMemo(() => {
     return onlinePeople.filter(
       (person) =>
@@ -476,11 +508,24 @@ useEffect(() => {
     );
   }, [onlinePeople, debouncedSearchTerm]);
 
+  // Paginate trainees for display
+  const paginatedTrainees = useMemo(() => {
+    // For super_admin/admin, API already paginates, so just use filteredUsersData
+    if (userRole === "super_admin" || userRole === "admin") {
+      return filteredUsersData.filter((u) => u.role === "Trainee");
+    }
+    // For facilitator and other roles, do frontend pagination on allTrainees
+    const filtered = filteredAllTrainees;
+    const startIdx = (currentPage - 1) * itemsPerPage;
+    const endIdx = startIdx + itemsPerPage;
+    return filtered.slice(startIdx, endIdx);
+  }, [filteredAllTrainees, filteredUsersData, currentPage, itemsPerPage, userRole]);
+
   // Get Tab Data
   const getTabData = (tabName) => {
     switch (tabName) {
       case "Trainees":
-        return filteredUsersData.filter((u) => u.role === "Trainee");
+        return paginatedTrainees;
       case "Facilitators":
         return filteredUsersData.filter((u) => u.role === "Facilitator");
       case "Stakeholders":

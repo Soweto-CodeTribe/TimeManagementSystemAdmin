@@ -334,7 +334,7 @@ const Tickets = () => {
                     </div>
                   </div>
                 ) : (
-                  <>
+                  <div className='tickets-detail-view'>
                     <div className="tickets-detail-row">
                       <strong>ID:</strong> {selectedTicket.id}
                     </div>
@@ -436,7 +436,7 @@ const Tickets = () => {
                         </div>
                       </div>
                     </div>
-                  </>
+                  </div>
                 )}
               </div>
             )}

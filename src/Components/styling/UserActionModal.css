@@ -103,7 +103,6 @@
 .form-group {
   display: flex;
   flex-direction: column;
-  flex: 1 1 180px;
   min-width: 160px;
   gap: 0.3rem;
 }

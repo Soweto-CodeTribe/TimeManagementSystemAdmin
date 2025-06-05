@@ -167,6 +167,30 @@ const SessionMonitoring = () => {
     }
   }
 
+  // Filtered reports based on all filters (frontend, after API fetch)
+  const statusMap = {
+    present: ["present", "early", "on time", "within grace period"],
+    absent: ["absent"],
+    late: ["late"],
+  };
+  const filteredReports = reports.filter((report) => {
+    let matchesStatus = true;
+    if (filterStatus) {
+      const normalized = (report.status || "").toLowerCase();
+      if (statusMap[filterStatus]) {
+        matchesStatus = statusMap[filterStatus].includes(normalized);
+      } else {
+        matchesStatus = normalized === filterStatus;
+      }
+    }
+    const matchesSearch = debouncedSearchTerm
+      ? (report.traineeId?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+         report.name?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()))
+      : true;
+    const matchesDate = filterDate ? new Date(report.date).toLocaleDateString() === new Date(filterDate).toLocaleDateString() : true;
+    return matchesStatus && matchesSearch && matchesDate;
+  });
+
   if (isLoading) return <DataLoader />
 
   return (
@@ -285,7 +309,7 @@ const SessionMonitoring = () => {
           <div className="error-container">
             <p className="error-message">{error}</p>
           </div>
-        ) : reports.length === 0 ? (
+        ) : filteredReports.length === 0 ? (
           <div className="noDataContainer">
             <Info size={48} />
             <h3>No Attendance Records</h3>
@@ -312,7 +336,7 @@ const SessionMonitoring = () => {
                 </tr>
               </thead>
               <tbody>
-                {reports.map((report, index) => (
+                {filteredReports.map((report, index) => (
                   <tr key={index}>
                     <td>{report.traineeId || "-"}</td>
                     <td>{report.name || "N/A"}</td>
