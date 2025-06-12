@@ -1,10 +1,11 @@
-/* eslint-disable react/prop-types */
-"use client"
+// /* eslint-disable react/prop-types */
+// "use client"
 
-import { useState, useEffect } from "react"
 import axios from "axios"
-import "./styling/EventManagement.css"
+import { useEffect, useState } from "react"
 import DataLoader from "./dataLoader"
+import "./styling/EventManagement.css"
+import EventStatsModal from "./ui/EventsStatsModal"
 
 const role = localStorage.getItem('role')
 // Alert Component for confirmations
@@ -165,6 +166,8 @@ const EventTable = ({ data, refreshData }) => {
   const [showDeleteAlert, setShowDeleteAlert] = useState(false)
   const [eventToDelete, setEventToDelete] = useState(null)
   const [toast, setToast] = useState(null)
+  const [showStatsModal, setShowStatsModal] = useState(false)
+  const [selectedEventForStats, setSelectedEventForStats] = useState(null)
 
   if (!data || !Array.isArray(data.eventsWithGuests)) {
     return <div className="error-message">No data available or data format is incorrect.</div>
@@ -188,6 +191,12 @@ const EventTable = ({ data, refreshData }) => {
     e.stopPropagation()
     setCurrentEvent(event)
     setShowEventModal(true)
+  }
+
+  const handleViewStats = (event, e) => {
+    e.stopPropagation()
+    setSelectedEventForStats(event)
+    setShowStatsModal(true)
   }
 
   // const handleDeleteEvent = (event, e) => {
@@ -353,7 +362,18 @@ const EventTable = ({ data, refreshData }) => {
                 </div>
 
                 <h3 className="guest-list-title">Guest List</h3>
+                <button
+                  className="stats-button"
+                  onClick={(e) => handleViewStats(event, e)}
+                  title="View Statistics"
+                >
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                  </svg>
+                  Event Stats
+                </button>
                 {event.guestDetails && event.guestDetails.length > 0 ? (
+                  
                   <div className="guest-table-wrapper">
                     <table className="guest-table">
                       <thead>
@@ -394,6 +414,17 @@ const EventTable = ({ data, refreshData }) => {
       {showEventModal && (
         <EventModal event={currentEvent} onClose={() => setShowEventModal(false)} onSave={handleSaveEvent} />
       )}
+
+      {/* STATS MODAL */}
+    {showStatsModal && (
+      <EventStatsModal 
+        event={selectedEventForStats} 
+        onClose={() => {
+          setShowStatsModal(false);
+          setSelectedEventForStats(null);
+        }} 
+      />
+    )}
 
       {showDeleteAlert && (
         <AlertDialog
@@ -446,15 +477,3 @@ const EventManagement = () => {
 }
 
 export default EventManagement
-
-
-
-/*
-For adding an event: api/guests/generate-event-QR
-
-For closing an event: api/guests/events/close
-
-Post method 
-
-Body {eventId: "pass the event id here "}
-*/
