@@ -75,13 +75,21 @@ const EventStatsModal = ({ event, onClose }) => {
       }));
   };
 
+  const formatHourTo12Hour = (hour) => {
+    const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    const ampm = hour < 12 ? 'AM' : 'PM';
+    return `${hour12}:00 ${ampm}`;
+  };
+
   const calculateCheckInTimeStats = (guests) => {
     const timeSlots = {};
     
     guests.forEach(guest => {
       if (guest.checkInTime) {
         const hour = parseInt(guest.checkInTime.split(':')[0]);
-        const timeSlot = `${hour}:00-${hour + 1}:00`;
+        const startTime = formatHourTo12Hour(hour);
+        const endTime = formatHourTo12Hour((hour + 1) % 24);
+        const timeSlot = `${startTime}-${endTime}`;
         timeSlots[timeSlot] = (timeSlots[timeSlot] || 0) + 1;
       }
     });
@@ -90,7 +98,19 @@ const EventStatsModal = ({ event, onClose }) => {
       time,
       count,
       percentage: ((count / guests.length) * 100).toFixed(1)
-    })).sort((a, b) => a.time.localeCompare(b.time));
+    })).sort((a, b) => {
+      // Sort by the starting hour for proper chronological order
+      const aHour = parseInt(a.time.split(':')[0]);
+      const aAmPm = a.time.includes('PM') ? 'PM' : 'AM';
+      const bHour = parseInt(b.time.split(':')[0]);
+      const bAmPm = b.time.includes('PM') ? 'PM' : 'AM';
+      
+      // Convert to 24-hour for proper sorting
+      const a24Hour = aAmPm === 'AM' ? (aHour === 12 ? 0 : aHour) : (aHour === 12 ? 12 : aHour + 12);
+      const b24Hour = bAmPm === 'AM' ? (bHour === 12 ? 0 : bHour) : (bHour === 12 ? 12 : bHour + 12);
+      
+      return a24Hour - b24Hour;
+    });
   };
 
   const calculateAgeStats = (guests) => {
