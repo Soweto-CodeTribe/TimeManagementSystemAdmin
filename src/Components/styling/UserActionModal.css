@@ -17,8 +17,10 @@
   box-shadow: 0 8px 32px rgba(0,0,0,0.18);
   padding: 2.5rem 2.5rem 2rem 2.5rem;
   min-width: 420px;
-  max-width: 50%;
-  width: 100%;
+  max-height: 620px;
+  /* max-width: 50%; */
+  overflow: scroll;
+  width: 80%;
   position: relative;
   animation: modalIn 0.2s cubic-bezier(.4,0,.2,1);
 }
@@ -67,7 +69,7 @@
   background: #f4f4f4;
   border: none;
   border-radius: 6px 6px 0 0;
-  padding: 0.6rem 1.5rem;
+  padding: 0.4rem 0.4rem;
   font-size: 1rem;
   color: #444;
   cursor: pointer;
@@ -116,7 +118,7 @@
   border: 1px solid #dbe3ea;
   border-radius: 5px;
   font-size: 1rem;
-  background: #fafafa;
+  /* background: #fafafa; */
   transition: border 0.15s;
   color: #222;
 }
@@ -128,13 +130,12 @@
 /* Buttons */
 .myBtns {
   /* margin-top: 0.5rem; */
-  padding: 0.45rem ;
   background: #f4f4f4;
   width: unset;
   color: #222;
   border: 1px solid #dbe3ea;
   border-radius: 5px;
-  /* font-size: 1rem; */
+  font-size: .5rem;
   font-weight: 500;
   cursor: pointer;
   transition: background 0.15s, color 0.15s, border 0.15s;
@@ -142,7 +143,7 @@
 .myBtns.primary {
   background: #222;
   color: #fff;
-  border: 1px solid #222;
+  /* border: 1px solid #222; */
 }
 .myBtns:disabled {
   opacity: 0.6;

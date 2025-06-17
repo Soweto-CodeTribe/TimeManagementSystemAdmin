@@ -17,12 +17,13 @@ import fetchSessions from "../utils/fetchSessions";
 import TraineeOverview from "./ui/TraineeOverview";
 import "./styling/Dashboard.css";
 import useFacilitatorCount from "../utils/fetchFacilitators";
-import useAbsenceCount from "./hooks/useAbsenceCount";
+import { fetchWeeklyStats, fetchFacilitatorsStats } from "../utils/fetchStatsMetrix";
 
 function Dashboard() {
   // Get user details from localStorage
   const name = localStorage.getItem("name");
   const role = localStorage.getItem("role");
+  const userLocation = localStorage.getItem('Location');
   const currentDate = new Date().toDateString();
 
   // State for loading, check-ins, dashboard stats, and attendance data
@@ -33,6 +34,7 @@ function Dashboard() {
     totalFacilitators: 0,
     attendancePercentage: "0%",
     missedCheckInsPercentage: "0%",
+    absentCount: 0,
   });
   const [attendanceData, setAttendanceData] = useState([]);
   const [facilitatorStats, setFacilitatorStats] = useState([]);
@@ -40,6 +42,49 @@ function Dashboard() {
   // API configuration
   const BASE_URL = "https://timemanagementsystemserver.onrender.com";
   const token = useSelector((state) => state.auth.token);
+  const userRole = useSelector((state) => state.auth.role);
+
+  // Fetch session monitoring data (same as Session Monitoring component)
+  const fetchSessionMonitoringData = async () => {
+    try {
+      // Determine location filter based on user role
+      const locationFilter = 
+        userRole === 'super_admin' 
+          ? undefined // For super admin, get all locations
+          : userLocation; // For facilitators, use their own location
+
+      const response = await axios.get(`${BASE_URL}/api/super-admin/daily`, {
+        params: {
+          page: 1,
+          limit: 10,
+          location: locationFilter,
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const { summary = {} } = response.data;
+
+      // Update dashboard stats with session monitoring data
+      setDashboardStats(prevStats => ({
+        ...prevStats,
+        totalTrainees: summary.totalTrainees || 0,
+        absentCount: summary.absentCount || 0,
+        attendancePercentage: summary.attendancePercentage || "0%",
+      }));
+
+    } catch (error) {
+      console.error("Error fetching session monitoring data:", error);
+      // Set default values on error
+      setDashboardStats(prevStats => ({
+        ...prevStats,
+        totalTrainees: 0,
+        absentCount: 0,
+        attendancePercentage: "0%",
+      }));
+    }
+  };
 
   // Fetch facilitator check-ins
   const fetchFacilitatorCheckIns = async () => {
@@ -51,17 +96,17 @@ function Dashboard() {
             "Content-Type": "application/json",
           },
         });
-  
+
         // Handle 404 or empty response
         if (response.status === 404 || !response.data) {
           console.error("Check-ins endpoint not found or returned no data");
           setCheckIns([]);
           return;
         }
-  
+
         // Extract the reports array from response data
         const checkInsArray = response.data.reports || [];
-  
+
         // Process the check-ins data
         const processedCheckIns = checkInsArray
           .filter((checkIn) => checkIn.checkInTime) // Only include entries with checkInTime
@@ -75,9 +120,7 @@ function Dashboard() {
             };
           })
           .filter((checkIn) => checkIn.name !== "Unknown");
-  
-        // console.log("Processed Check-ins:", processedCheckIns);
-  
+
         // Update the state with processed data
         setCheckIns(processedCheckIns);
       }
@@ -94,7 +137,7 @@ function Dashboard() {
         console.error("No authorization token found.");
         return;
       }
-  
+
       const response = await axios.get(
         "https://timemanagementsystemserver.onrender.com/api/facilitators",
         {
@@ -104,14 +147,13 @@ function Dashboard() {
           },
         }
       );
-  
+
       // Extract facilitators array from the response
       const facilitatorsArray = response.data.facilitators || response.data || [];
-  
+
       // Calculate the total number of facilitators
       const totalFacilitators = Array.isArray(facilitatorsArray) ? facilitatorsArray.length : 0;
-  
-      // console.log("Total Facilitators:", totalFacilitators); // Log the count for debugging
+
        setFacilitatorStats(totalFacilitators) 
     } catch (error) {
       console.error("Error fetching facilitators:", error);
@@ -136,7 +178,6 @@ function Dashboard() {
           value: parseFloat(day.attendanceRate || 0), // Convert attendance rate to number, default to 0
         }));
         
-        // console.log("Processed Attendance Data:", processedData);
         setAttendanceData(processedData);
       } else {
         console.error("Invalid response format for attendance data");
@@ -148,65 +189,9 @@ function Dashboard() {
     }
   };
 
-  // Fetch dashboard stats (trainees, facilitators, attendance, etc.)
-  const fetchDashboardStats = async () => {
-    try {
-      const sessionsResponse = await fetchSessions(token);
-
-      if (sessionsResponse && sessionsResponse.summaryData) {
-        const { summaryData } = sessionsResponse;
-
-        // Update dashboard stats
-        setDashboardStats({
-          totalTrainees: summaryData.totalTrainees,
-          totalFacilitators: summaryData.totalFacilitators,
-          attendancePercentage: summaryData.attendancePercentage,
-          missedCheckInsPercentage: summaryData.missedCheckInsPercentage,
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching dashboard stats:", error.message);
-      // Set default values on error
-      setDashboardStats({
-        totalTrainees: 0,
-        totalFacilitators: 0,
-        attendancePercentage: "0%",
-        missedCheckInsPercentage: "0%",
-      });
-    }
-  };
-
-  // const fetchAbsentData = async () => {
-  //   try {
-  //     const response = await axios.get(
-  //       `${BASE_URL}/api/session/daily-report?pages=2&limit=4`,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //           "Content-Type": "application/json",
-  //         },
-  //       }
-  //     );
-
-  //     if (response.data && response.data.summary) {
-  //       const { absentCount } = response.data.summary;
-  //       // console.log("Fetched Absent Count:", absentCount);
-  //       setAbsentCount(absentCount);
-  //     } else {
-  //       console.error("Invalid response format for absent data");
-  //       setAbsentCount(0);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching absent data:", error);
-  //     setAbsentCount(0);
-  //   }
-  // };
-
   // Use the useFacilitatorCount hook
   const { facilitatorCount, loading: facilitatorsLoading, error: facilitatorsError } =
     useFacilitatorCount();
-
-    const { absentCount } = useAbsenceCount();
 
   // Update dashboardStats with facilitator count
   useEffect(() => {
@@ -224,7 +209,7 @@ function Dashboard() {
       setLoading(true);
       try {
         await Promise.all([
-          fetchDashboardStats(),
+          fetchSessionMonitoringData(), // Use session monitoring data instead
           fetchFacilitatorCheckIns(),
           fetchGraphData(),
           fetchFacilitators(),
@@ -239,7 +224,22 @@ function Dashboard() {
     if (token) {
       loadData();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, role, userRole, userLocation]);
+
+  // Fetch facilitator stats separately
+  useEffect(() => {
+    const fetchFacilitatorStats = async () => {
+      try {
+        const facilitatorsStats = await fetchFacilitatorsStats(token);
+        setFacilitatorStats(facilitatorsStats.facilitators.length);
+      } catch (error) {
+        console.error("Error fetching facilitator stats:", error);
+      }
+    };
+
+    if (token && role === "super_admin") {
+      fetchFacilitatorStats();
+    }
   }, [token, role]);
 
   // Show loader while data is being fetched
@@ -253,16 +253,11 @@ function Dashboard() {
   // Prepare chart data (use real data or fallback to defaults)
   const chartData =
     attendanceData.length > 0
-      ? attendanceData
-      : [
-          { name: "Mon", value: 100 },
-          { name: "Tue", value: 10 },
-          { name: "Wed", value: 100 },
-          { name: "Thu", value: 20 },
-          { name: "Fri", value: 100 },
-        ];
+      && attendanceData.map((item) => ({
+        name: item.name,
+        value: item.value,
+      }));
 
-        
   return (
     <div className="dashboard">
       {/* Header Section */}
@@ -288,53 +283,34 @@ function Dashboard() {
         </div>
 
         {role === "super_admin" && (
-          // <div className="stat-card">
-          //   <div className="stat-header">
-          //     <h4>Total Facilitators</h4>
-          //     <UserCheck className="stat-icon" />
-          //   </div>
-          //   <div className="stat-content">
-          //     <div className="stat-value">{facilitatorStats}</div>
-          //   </div>
-          // </div>
-                  <div className="stat-card">
-                  <div className="stat-header">
-                    
-                    <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
-                    <GraduationCap  className="stat-icon" style={{color: '#72FF3A', background: '#72FF3A33', padding: '4px', borderRadius: '50%', height: '30px', width: '30px'}} />
-                    <h4>Total Facilitators</h4>
-                    </div>
-                    <AlertCircle className="stat-icon" style={{color: '#ccc'}}/>
-                  </div>
-                  <div className="stat-content">
-                  <div className="stat-value">{facilitatorStats}</div>
-                  </div>
-                </div>
+          <div className="stat-card">
+            <div className="stat-header">
+              
+              <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
+              <GraduationCap  className="stat-icon" style={{color: '#72FF3A', background: '#72FF3A33', padding: '4px', borderRadius: '50%', height: '30px', width: '30px'}} />
+              <h4>Total Facilitators</h4>
+              </div>
+              <AlertCircle className="stat-icon" style={{color: '#ccc'}}/>
+            </div>
+            <div className="stat-content">
+            <div className="stat-value">{facilitatorStats}</div>
+            </div>
+          </div>
         )}
 
-        {/* <div className="stat-card">
+        <div className="stat-card">
           <div className="stat-header">
+            
+            <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
+            <ChartColumnBig  className="stat-icon" style={{color: '#494FBF', background: '#494FBF33', padding: '4px', borderRadius: '50%', height: '30px', width: '30px'}} />
             <h4>Daily Attendance Rate</h4>
-            <BarChart2 className="stat-icon" />
+            </div>
+            <AlertCircle className="stat-icon" style={{color: '#ccc'}}/>
           </div>
           <div className="stat-content">
-            <div className="stat-value">{dashboardStats.attendancePercentage}</div>
+          <div className="stat-value">{dashboardStats.attendancePercentage}</div>
           </div>
-        </div> */}
-
-        <div className="stat-card">
-                  <div className="stat-header">
-                    
-                    <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
-                    <ChartColumnBig  className="stat-icon" style={{color: '#494FBF', background: '#494FBF33', padding: '4px', borderRadius: '50%', height: '30px', width: '30px'}} />
-                    <h4>Daily Attendance Rate</h4>
-                    </div>
-                    <AlertCircle className="stat-icon" style={{color: '#ccc'}}/>
-                  </div>
-                  <div className="stat-content">
-                  <div className="stat-value">{dashboardStats.attendancePercentage}</div>
-                  </div>
-                </div>
+        </div>
 
         <div className="stat-card">
           <div className="stat-header">
@@ -345,24 +321,10 @@ function Dashboard() {
           <AlertCircle className="stat-icon" style={{color: '#ccc'}}/>
           </div>
           <div className="stat-content">
-            <div className="stat-value">{absentCount}</div>
+            <div className="stat-value">{dashboardStats.absentCount}</div>
           </div>
         </div>
       </div>
-
-      {/* <div className="stat-card">
-                  <div className="stat-header">
-                    
-                    <div style={{display: 'flex', gap: '10px'}}>
-                    <Users className="stat-icon" style={{color: '#3A86FF', background: '#3A86FF33', padding: '4px', borderRadius: '50%', height: '30px', width: '30px'}} />
-                    <h4>Daily Attendance Rate</h4>
-                    </div>
-                    <AlertCircle className="stat-icon" style={{color: '#ccc'}}/>
-                  </div>
-                  <div className="stat-content">
-                  <div className="stat-value">{dashboardStats.attendancePercentage}</div>
-                  </div>
-                </div> */}
 
       {/* Charts Section */}
       <div className="chart-grid">

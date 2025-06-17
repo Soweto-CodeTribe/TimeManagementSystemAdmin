@@ -25,6 +25,8 @@ const SessionMonitoring = () => {
   const [filterLocation, setFilterLocation] = useState("") // State for location filter
   const [isFilterOpen, setIsFilterOpen] = useState(false) // State for filter visibility
 
+
+
   // Locations array
   const LOCATIONS = [
     "TIH", 
@@ -40,6 +42,8 @@ const SessionMonitoring = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [itemsPerPage] = useState(10)
+
+
 
   // Debounce logic
   useEffect(() => {
@@ -72,7 +76,6 @@ const SessionMonitoring = () => {
           search: debouncedSearchTerm, // Use debounced search term
           status: filterStatus || undefined,
           date: filterDate || undefined,
-          // location: filterLocation || undefined,
           location: locationFilter,
         },
         headers: {
@@ -133,6 +136,31 @@ const SessionMonitoring = () => {
     setIsFilterOpen(false);
   };
 
+  // Filtered reports based on all filters (frontend, after API fetch)
+  const statusMap = {
+    present: ["present", "early", "on time", "within grace period", "late"],
+    absent: ["absent"],
+    late: ["late"],
+  };
+  
+  const filteredReports = reports.filter((report) => {
+    let matchesStatus = true;
+    if (filterStatus) {
+      const normalized = (report.status || "").toLowerCase();
+      if (statusMap[filterStatus]) {
+        matchesStatus = statusMap[filterStatus].includes(normalized);
+      } else {
+        matchesStatus = normalized === filterStatus;
+      }
+    }
+    const matchesSearch = debouncedSearchTerm
+      ? (report.traineeId?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+         report.name?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()))
+      : true;
+    const matchesDate = filterDate ? new Date(report.date).toLocaleDateString() === new Date(filterDate).toLocaleDateString() : true;
+    return matchesStatus && matchesSearch && matchesDate;
+  });
+
   const renderPaginationNumbers = () => {
     const pageNumbers = []
     const maxVisiblePages = 5
@@ -167,29 +195,7 @@ const SessionMonitoring = () => {
     }
   }
 
-  // Filtered reports based on all filters (frontend, after API fetch)
-  const statusMap = {
-    present: ["present", "early", "on time", "within grace period"],
-    absent: ["absent"],
-    late: ["late"],
-  };
-  const filteredReports = reports.filter((report) => {
-    let matchesStatus = true;
-    if (filterStatus) {
-      const normalized = (report.status || "").toLowerCase();
-      if (statusMap[filterStatus]) {
-        matchesStatus = statusMap[filterStatus].includes(normalized);
-      } else {
-        matchesStatus = normalized === filterStatus;
-      }
-    }
-    const matchesSearch = debouncedSearchTerm
-      ? (report.traineeId?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-         report.name?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()))
-      : true;
-    const matchesDate = filterDate ? new Date(report.date).toLocaleDateString() === new Date(filterDate).toLocaleDateString() : true;
-    return matchesStatus && matchesSearch && matchesDate;
-  });
+
 
   if (isLoading) return <DataLoader />
 
@@ -210,9 +216,7 @@ const SessionMonitoring = () => {
     <div className={`metric-card ${metric.color}`} key={index}>
       <div className="metric-header">
         <div className={`metric-icon ${metric.color}`}>
-          {/* <div className={`metric-dot ${metric.color}`}> */}
-            <metric.icon className="metric-session-icon" style={{ color: metric.iconColor }} />
-          {/* </div> */}
+          <metric.icon className="metric-session-icon" style={{ color: metric.iconColor }} />
         </div>
         <span className="metric-label">{metric.label}</span>
       </div>
@@ -243,7 +247,6 @@ const SessionMonitoring = () => {
                     <label>Status:</label>
                     <select
                       value={filterStatus}
-                      // onChange={(e) => setFilterStatus(e.target.value)}
                       onChange={(e) => handleStatusChange(e.target.value)}
                     >
                       <option value="">All</option>
@@ -257,7 +260,6 @@ const SessionMonitoring = () => {
                     <input
                       type="date"
                       value={filterDate}
-                      // onChange={(e) => setFilterDate(e.target.value)}
                       onChange={(e) => handleDateChange(e.target.value)}
                     />
                   </div>
@@ -267,7 +269,6 @@ const SessionMonitoring = () => {
                     <label>Location:</label>
                     <select
                       value={filterLocation}
-                      // onChange={(e) => setFilterLocation(e.target.value)}
                       onChange={(e) => handleLocationChange(e.target.value)}
                     >
                       <option value="">All Locations</option>

@@ -89,6 +89,12 @@ const ReportsScreen = () => {
     }
   };
 
+  const generateReportForTrainee = (trainee) =>{
+    setSelectedTrainee(trainee);
+    // Open the report modal or perform any action needed
+
+  }
+
   const fetchData = async (page = 1) => {
     setIsLoading(true);
     try {

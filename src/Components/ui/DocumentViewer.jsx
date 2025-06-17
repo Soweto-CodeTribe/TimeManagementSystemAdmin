@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { FaFilePdf, FaFileWord, FaFileExcel, FaFileImage, FaFile, FaEye } from "react-icons/fa";
