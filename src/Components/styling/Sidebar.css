@@ -42,12 +42,12 @@
   display: flex;
   position: absolute;
   top: 1%;
-  padding: 20px 0;
-  justify-content: center;
+  padding: 20px 25px;
+  /* justify-content: center; */
   z-index: 2000;
   align-items: center;
-  margin-bottom: 20px; /* Adds spacing between logo and sidebar items */
-  width: 100%; /* Ensures logo takes up full width */
+  /* margin-bottom: 20px;  */
+  width: 100%;
 }
 
 /* Logo Styling */
