@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import CustomDropdown from '../ui/CustomDropdown';
 
 // Local implementation of toggleUserStatus (if utils file is missing)
 const toggleUserStatus = async (userId, fetchData) => {
@@ -37,24 +38,30 @@ const TraineesTab = ({ data, searchTerm, fetchData }) => {
   return (
     <div>
       <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
-        <label>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           Status:
-          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-            <option value="">All</option>
-            <option value="active">Active</option>
-            <option value="deactive">Deactive</option>
-          </select>
+          <CustomDropdown
+            options={[
+              { value: '', label: 'All' },
+              { value: 'active', label: 'Active' },
+              { value: 'deactive', label: 'Deactive' },
+            ]}
+            value={statusFilter}
+            onChange={setStatusFilter}
+            placeholder="All"
+          />
         </label>
-        <label>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           Cohort Year:
-          <select value={cohortFilter} onChange={(e) => setCohortFilter(e.target.value)}>
-            <option value="">All</option>
-            {cohortYears.map((year) => (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            ))}
-          </select>
+          <CustomDropdown
+            options={[
+              { value: '', label: 'All' },
+              ...cohortYears.map(year => ({ value: year, label: year }))
+            ]}
+            value={cohortFilter}
+            onChange={setCohortFilter}
+            placeholder="All"
+          />
         </label>
       </div>
       <table className="users-table">

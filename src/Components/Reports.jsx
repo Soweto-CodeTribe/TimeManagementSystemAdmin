@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import DataLoader from "../Components/dataLoader";
 import TraineeReportModal from "../Components/ui/TraineeReportModal";
+import CustomDropdown from './ui/CustomDropdown';
 
 const ReportsScreen = () => {
   const BASE_URL = "https://timemanagementsystemserver.onrender.com/";
@@ -266,22 +267,23 @@ const ReportsScreen = () => {
                 <div className="filter-dropdown">
                   <div className="filter-group">
                     <label>Status:</label>
-                    <select
+                    <CustomDropdown
+                      options={[
+                        { value: '', label: 'All' },
+                        { value: 'present', label: 'Present' },
+                        { value: 'absent', label: 'Absent' },
+                        { value: 'late', label: 'Late' },
+                      ]}
                       value={filterStatus}
-                      onChange={(e) => handleStatusChange(e.target.value)}
-                    >
-                      <option value="">All</option>
-                      <option value="present">Present</option>
-                      <option value="absent">Absent</option>
-                      <option value="late">Late</option>
-                    </select>
+                      onChange={handleStatusChange}
+                      placeholder="All"
+                    />
                   </div>
                   <div className="filter-group">
                     <label>Date:</label>
                     <input
                       type="date"
                       value={filterDate}
-                      // onChange={(e) => setFilterDate(e.target.value)}
                       onChange={(e) => handleDateChange(e.target.value)}
                     />
                   </div>
@@ -289,18 +291,15 @@ const ReportsScreen = () => {
                   {userRole === 'super_admin' && (
                   <div className="filter-group">
                     <label>Location:</label>
-                    <select
+                    <CustomDropdown
+                      options={[
+                        { value: '', label: 'All Locations' },
+                        ...LOCATIONS.map(location => ({ value: location, label: location }))
+                      ]}
                       value={filterLocation}
-                      // onChange={(e) => setFilterLocation(e.target.value)}
-                      onChange={(e) => handleLocationChange(e.target.value)}
-                    >
-                      <option value="">All Locations</option>
-                      {LOCATIONS.map((location) => (
-                        <option key={location} value={location}>
-                          {location}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={handleLocationChange}
+                      placeholder="All Locations"
+                    />
                   </div>
                   )}
                 </div>

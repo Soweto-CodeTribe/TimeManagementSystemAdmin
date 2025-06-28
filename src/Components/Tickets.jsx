@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import { Search, X, Send, Ticket, FolderClosed, FolderOpen, Flag } from 'lucide-react';
 import axios from 'axios';
 import DataLoader from './dataLoader';
+import CustomDropdown from './ui/CustomDropdown';
 import './styling/Tickets.css';
 
 const Tickets = () => {
@@ -298,31 +299,31 @@ const Tickets = () => {
                     <h4>Update Ticket</h4>
                     <div className="tickets-form-group">
                       <label>Status:</label>
-                      <select
-                        name="status"
+                      <CustomDropdown
+                        options={[
+                          { value: 'open', label: 'Open' },
+                          { value: 'inProgress', label: 'In Progress' },
+                          { value: 'resolved', label: 'Resolved' },
+                          { value: 'closed', label: 'Closed' },
+                        ]}
                         value={updatedTicketData.status}
-                        onChange={handleInputChange}
-                        className="tickets-form-select"
-                      >
-                        <option value="open">Open</option>
-                        <option value="inProgress">In Progress</option>
-                        <option value="resolved">Resolved</option>
-                        <option value="closed">Closed</option>
-                      </select>
+                        onChange={val => handleInputChange({ target: { name: 'status', value: val } })}
+                        placeholder="Select Status"
+                      />
                     </div>
                     <div className="tickets-form-group">
                       <label>Priority:</label>
-                      <select
-                        name="priority"
+                      <CustomDropdown
+                        options={[
+                          { value: 'low', label: 'Low' },
+                          { value: 'medium', label: 'Medium' },
+                          { value: 'high', label: 'High' },
+                          { value: 'urgent', label: 'Urgent' },
+                        ]}
                         value={updatedTicketData.priority}
-                        onChange={handleInputChange}
-                        className="tickets-form-select"
-                      >
-                        <option value="low">Low</option>
-                        <option value="medium">Medium</option>
-                        <option value="high">High</option>
-                        <option value="urgent">Urgent</option>
-                      </select>
+                        onChange={val => handleInputChange({ target: { name: 'priority', value: val } })}
+                        placeholder="Select Priority"
+                      />
                     </div>
                     <div className="tickets-form-actions">
                       <button onClick={() => setUpdateMode(false)} className="tickets-cancel-button">
@@ -409,16 +410,17 @@ const Tickets = () => {
                         <div className="tickets-action-section">
                           <h4>Respond</h4>
                           <div className="tickets-form-group">
-                            <select
+                            <CustomDropdown
+                              options={[
+                                { value: 'reply', label: 'Reply' },
+                                { value: 'escalate', label: 'Escalate' },
+                                { value: 'note', label: 'Internal Note' },
+                                { value: 'request_info', label: 'Request Info' },
+                              ]}
                               value={responseType}
-                              onChange={(e) => setResponseType(e.target.value)}
-                              className="tickets-form-select"
-                            >
-                              <option value="reply">Reply</option>
-                              <option value="escalate">Escalate</option>
-                              <option value="note">Internal Note</option>
-                              <option value="request_info">Request Info</option>
-                            </select>
+                              onChange={setResponseType}
+                              placeholder="Select Response Type"
+                            />
                           </div>
                           <textarea
                             placeholder="Type your response..."

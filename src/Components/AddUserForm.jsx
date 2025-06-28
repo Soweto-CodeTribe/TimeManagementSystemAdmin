@@ -4,6 +4,7 @@ import axios from 'axios';
 import './styling/AddUserForm.css';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import CustomDropdown from './ui/CustomDropdown';
 
 const AddUserForm = () => {
     const navigate = useNavigate();
@@ -354,38 +355,33 @@ const AddUserForm = () => {
 
                 <div className="form-group">
                     <label htmlFor="role">Role <span className="required">*</span></label>
-                    <select 
-                        id="role" 
+                    <CustomDropdown
+                        options={[
+                            ...(userRole === 'super_admin' ? [
+                                { value: 'SuperAdmin', label: 'Super Admin' },
+                                { value: 'Stakeholder', label: 'Stakeholder' },
+                                { value: 'Facilitator', label: 'Facilitator' },
+                            ] : []),
+                            { value: 'Trainee', label: 'Trainee' },
+                        ]}
                         value={role}
-                        onChange={(e) => setRole(e.target.value)}
-                        required
-                    >
-                        <option value="" disabled>Select role</option>
-                        {userRole === 'super_admin' && (
-                           <>
-                            <option value="SuperAdmin">Super Admin</option>
-                            <option value="Stakeholder">Stakeholder</option>
-                            <option value="Facilitator">Facilitator</option>
-                           </>
-                        )}
-                        <option value="Trainee">Trainee</option>
-                    </select>
+                        onChange={setRole}
+                        placeholder="Select role"
+                    />
                 </div>
 
                 {(role === 'Trainee' || role === 'Facilitator') && (
                     <div className="form-group">
                         <label htmlFor="location">Location <span className="required">*</span></label>
-                        <select 
-                            id="location" 
+                        <CustomDropdown
+                            options={[
+                                { value: '', label: 'Select Location', disabled: true },
+                                ...locations.map(loc => ({ value: loc, label: loc }))
+                            ]}
                             value={location}
-                            onChange={(e) => setLocation(e.target.value)}
-                            required
-                        >
-                            <option value="" disabled>Select Location</option>
-                            {locations.map((loc) => (
-                                <option key={loc} value={loc}>{loc}</option>
-                            ))}
-                        </select>
+                            onChange={setLocation}
+                            placeholder="Select Location"
+                        />
                     </div>
                 )}
 
