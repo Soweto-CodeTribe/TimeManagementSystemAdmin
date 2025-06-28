@@ -6,6 +6,7 @@ import { useEffect, useState } from "react"
 import { useSelector } from 'react-redux'
 import DataLoader from "./dataLoader"
 import "./styling/Session.css"
+import CustomDropdown from './ui/CustomDropdown';
 
 const SessionMonitoring = () => {
   const BASE_URL = "https://timemanagementsystemserver.onrender.com/"
@@ -245,15 +246,17 @@ const SessionMonitoring = () => {
                 <div className="filter-dropdown">
                   <div className="filter-group">
                     <label>Status:</label>
-                    <select
+                    <CustomDropdown
+                      options={[
+                        { value: '', label: 'All' },
+                        { value: 'present', label: 'Present' },
+                        { value: 'absent', label: 'Absent' },
+                        { value: 'late', label: 'Late' },
+                      ]}
                       value={filterStatus}
-                      onChange={(e) => handleStatusChange(e.target.value)}
-                    >
-                      <option value="">All</option>
-                      <option value="present">Present</option>
-                      <option value="absent">Absent</option>
-                      <option value="late">Late</option>
-                    </select>
+                      onChange={handleStatusChange}
+                      placeholder="All"
+                    />
                   </div>
                   <div className="filter-group">
                     <label>Date:</label>
@@ -267,17 +270,15 @@ const SessionMonitoring = () => {
                   {userRole === 'super_admin' && (
                   <div className="filter-group">
                     <label>Location:</label>
-                    <select
+                    <CustomDropdown
+                      options={[
+                        { value: '', label: 'All Locations' },
+                        ...LOCATIONS.map(location => ({ value: location, label: location }))
+                      ]}
                       value={filterLocation}
-                      onChange={(e) => handleLocationChange(e.target.value)}
-                    >
-                      <option value="">All Locations</option>
-                      {LOCATIONS.map((location) => (
-                        <option key={location} value={location}>
-                          {location}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={handleLocationChange}
+                      placeholder="All Locations"
+                    />
                   </div>
                   )}
                 </div>

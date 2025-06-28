@@ -3,6 +3,7 @@ import axios from 'axios';
 import PropTypes from 'prop-types';
 import { toast } from 'react-toastify';
 import '../styling/UserActionModal.css';
+import CustomDropdown from './CustomDropdown';
 
 const API_BASE_URL = 'https://timemanagementsystemserver.onrender.com/api/trainees';
 const SESSION_API_BASE = 'https://timemanagementsystemserver.onrender.com/api/session';
@@ -396,35 +397,33 @@ const UserActionModal = ({ isOpen, onClose, trainee, onActionComplete }) => {
                   </div>
                   <div className="form-group">
                     <label>Role</label>
-                    <select
-                      name="role"
-                      className="form-input"
+                    <CustomDropdown
+                      options={[
+                        { value: '', label: 'Select Role', disabled: true },
+                        { value: 'Trainee', label: 'Trainee' },
+                        { value: 'Facilitator', label: 'Facilitator' },
+                        { value: 'Stakeholder', label: 'Stakeholder' },
+                        { value: 'SuperAdmin', label: 'Super Admin' },
+                      ]}
                       value={formData.role}
-                      onChange={handleChange}
-                    >
-                      <option value="">Select Role</option>
-                      <option value="Trainee">Trainee</option>
-                      <option value="Facilitator">Facilitator</option>
-                      <option value="Stakeholder">Stakeholder</option>
-                      <option value="SuperAdmin">Super Admin</option>
-                    </select>
+                      onChange={val => handleChange({ target: { name: 'role', value: val } })}
+                      placeholder="Select Role"
+                    />
                   </div>
                 </div>
                 {(formData.role === 'Trainee' || formData.role === 'Facilitator') && (
                   <div className="form-row">
                     <div className="form-group">
                       <label>Location</label>
-                      <select
-                        name="location"
-                        className="form-input"
+                      <CustomDropdown
+                        options={[
+                          { value: '', label: 'Select Location', disabled: true },
+                          ...["Soweto", "Ga-rankuwa", "KZN", "Limpopo", "Tembisa", "TIH", "Kimberly"].map(loc => ({ value: loc, label: loc }))
+                        ]}
                         value={formData.location}
-                        onChange={handleChange}
-                      >
-                        <option value="">Select Location</option>
-                        {["Soweto", "Ga-rankuwa", "KZN", "Limpopo", "Tembisa", "TIH", "Kimberly"].map((loc) => (
-                          <option key={loc} value={loc}>{loc}</option>
-                        ))}
-                      </select>
+                        onChange={val => handleChange({ target: { name: 'location', value: val } })}
+                        placeholder="Select Location"
+                      />
                     </div>
                   </div>
                 )}

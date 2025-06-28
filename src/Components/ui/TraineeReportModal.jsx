@@ -21,6 +21,7 @@ import {
 import { FaTimes, FaFilePdf, FaFileWord, FaFileExcel } from "react-icons/fa";
 import "../styling/TraineeReportModal.css";
 import DocumentViewer from "./DocumentViewer";
+import CustomDropdown from './CustomDropdown';
 
 // Constants
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
@@ -288,34 +289,27 @@ const TraineeReportModal = ({ selectedTrainee, onClose }) => {
             <div className="filters">
               <div className="filter-item">
                 <label htmlFor="month-select">Month:</label>
-                <select
-                  id="month-select"
+                <CustomDropdown
+                  options={Array.from({ length: 12 }, (_, month) => ({
+                    value: String(month + 1).padStart(2, '0'),
+                    label: new Date(0, month).toLocaleString('default', { month: 'long' })
+                  }))}
                   value={selectedMonth}
-                  onChange={(e) => setSelectedMonth(e.target.value)}
-                >
-                  {[...Array(12).keys()].map((month) => (
-                    <option key={month + 1} value={String(month + 1).padStart(2, "0")}> 
-                      {new Date(0, month).toLocaleString("default", { month: "long" })}
-                    </option>
-                  ))}
-                </select>
+                  onChange={setSelectedMonth}
+                  placeholder="Select Month"
+                />
               </div>
               <div className="filter-item">
                 <label htmlFor="year-select">Year:</label>
-                <select
-                  id="year-select"
-                  value={selectedYear}
-                  onChange={(e) => setSelectedYear(e.target.value)}
-                >
-                  {[...Array(10).keys()].map((i) => {
+                <CustomDropdown
+                  options={Array.from({ length: 10 }, (_, i) => {
                     const year = new Date().getFullYear() - 5 + i;
-                    return (
-                      <option key={year} value={year}>
-                        {year}
-                      </option>
-                    );
+                    return { value: String(year), label: String(year) };
                   })}
-                </select>
+                  value={selectedYear}
+                  onChange={setSelectedYear}
+                  placeholder="Select Year"
+                />
               </div>
               <button className="apply-filters" onClick={fetchTraineeReport}>
                 Apply
