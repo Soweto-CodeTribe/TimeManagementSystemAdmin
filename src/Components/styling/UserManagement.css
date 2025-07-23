@@ -406,7 +406,7 @@
 }
 
 .UMtab-button.active {
-  color: #123;
+  color: #8bc34a;
   background-color: #fff;
 }
 
@@ -417,7 +417,7 @@
   left: 0;
   width: 100%;
   height: 2px;
-  background-color: #8CC63F;
+  background-color: #8bc34a;
 }
 
 .tab-count {
@@ -431,7 +431,7 @@
 }
 
 .UMtab-button.active .tab-count {
-  background-color: #8CC63F;
+  background-color: #8bc34a;
   color: white;
 }
 
@@ -981,4 +981,46 @@ importCsvModalButton */
   padding: 0.5rem;
   border: 1px solid #dc3545;
   border-radius: 4px;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+.status-dot.active {
+  background-color: #8bc34a;
+  /* system green */
+}
+.status-dot.suspended {
+  background-color: #e53935;
+  /* red */
+}
+
+.snackbar-message {
+  position: fixed;
+  left: 50%;
+  bottom: 40px;
+  transform: translateX(-50%);
+  background: #323232;
+  color: #fff;
+  padding: 16px 32px;
+  border-radius: 8px;
+  font-size: 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  z-index: 2000;
+  opacity: 0.98;
+  animation: snackbar-fadein 0.3s, snackbar-fadeout 0.3s 4.7s;
+  pointer-events: none;
+}
+@keyframes snackbar-fadein {
+  from { opacity: 0; bottom: 0; }
+  to { opacity: 0.98; bottom: 40px; }
+}
+@keyframes snackbar-fadeout {
+  from { opacity: 0.98; }
+  to { opacity: 0; }
 }

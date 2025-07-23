@@ -5,7 +5,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./styling/SystemSettings.css";
-import { FiMapPin, FiBell, FiUserCheck, FiUsers } from "react-icons/fi";
+import { FiMapPin, FiBell, FiUsers } from "react-icons/fi";
 import { ChevronRight } from "lucide-react";
 
 function SystemSettings() {
@@ -22,7 +22,7 @@ function SystemSettings() {
 
   return (
     <div className="settings-root">
-      <div className="settings-card">
+      <div className="settings-card redesigned-settings">
         <header className="settings-header">
           <h1>Settings</h1>
           <p>Manage system preferences, notifications, and navigation.</p>
@@ -33,7 +33,7 @@ function SystemSettings() {
           </h2>
           <div className="settings-row">
             <span className="settings-label">Email Notifications</span>
-            <label className="switch">
+            <label className="switch green-switch">
               <input
                 type="checkbox"
                 checked={emailNotifications}
@@ -44,7 +44,7 @@ function SystemSettings() {
           </div>
           <div className="settings-row">
             <span className="settings-label">Push Notifications</span>
-            <label className="switch">
+            <label className="switch green-switch">
               <input
                 type="checkbox"
                 checked={pushNotifications}
@@ -60,14 +60,14 @@ function SystemSettings() {
           </h2>
           <div className="settings-nav-list">
             <button
-              className="settings-nav-btn"
+              className="settings-nav-btn green-nav-btn"
               onClick={handleLocationManagement}
             >
               <FiMapPin className="nav-icon" />
               <span>Location Management</span>
               <ChevronRight className="myIcon"/>
             </button>
-            <button className="settings-nav-btn" onClick={handleManageTrainees}>
+            <button className="settings-nav-btn green-nav-btn" onClick={handleManageTrainees}>
               <FiUsers className="nav-icon" />
               <span>Manage Trainees</span>
               <ChevronRight className="myIcon"/>

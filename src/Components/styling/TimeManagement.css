@@ -1,52 +1,64 @@
-.time-management-container {
-  /* max-width: 600px; */
+/* Card layout for Time Management */
+.time-management-root {
+  min-height: 100vh;
+  background: #f4f6fa;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2.5rem 0 2rem 0;
+}
+.time-management-card {
+  box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+  border-radius: 20px;
+  padding: 2.5rem 2.2rem 2.2rem 2.2rem;
+  max-width: 480px;
+  width: 100%;
   margin: 0 auto;
-  /* padding: 20px; */
-  font-family: Arial, sans-serif;
-  color: #333;
+  background: #fff;
   position: relative;
 }
 
 .title {
-  font-size: 20px;
-  text-align: right;
-  font-weight: bold;
-  margin-bottom: 10px;
-  color: #000;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 0.2rem;
+  text-align: left;
 }
-
 .subtitle {
-  font-size: 18px;
-  font-weight: bold;
-  margin-top: 20px;
-  margin-bottom: 10px;
-  color: #000;
+  font-size: 1.1rem;
+  color: #666;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
 }
-
+.section-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 1.3rem;
+  margin-top: 2rem;
+}
 .divider {
   height: 1px;
   background-color: #e0e0e0;
-  margin: 10px 0 20px 0;
+  margin: 18px 0 24px 0;
 }
-
 .time-input-group {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 18px;
 }
-
 .time-input-group label {
-  font-size: 14px;
-  color: #333;
+  font-size: 1.05rem;
+  color: #444;
+  font-weight: 500;
 }
-
 .time-input {
   position: relative;
   width: 220px;
   cursor: pointer;
 }
-
 .time-input input {
   width: 100%;
   padding: 8px 30px 8px 10px;
@@ -55,8 +67,12 @@
   font-size: 14px;
   color: #333;
   cursor: pointer;
+  background: #f9f9f9;
+  transition: border-color 0.2s;
 }
-
+.time-input input:focus {
+  border-color: #8bc34a;
+}
 .clock-icon {
   position: absolute;
   right: 10px;
@@ -65,88 +81,79 @@
   color: #999;
   pointer-events: none;
 }
-
 .timeout-section {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
-
 .timeout-label {
-  font-size: 14px;
+  font-size: 1rem;
   margin-bottom: 10px;
   color: #333;
 }
-
 .radio-group {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
-
 .radio-label {
   display: flex;
   align-items: center;
   position: relative;
   cursor: pointer;
-  padding-left: 25px;
+  padding-left: 28px;
+  font-size: 1rem;
 }
-
 .radio-label input {
   position: absolute;
   opacity: 0;
   cursor: pointer;
 }
-
 .radio-custom {
   position: absolute;
   left: 0;
-  height: 16px;
-  width: 16px;
+  height: 18px;
+  width: 18px;
   background-color: #fff;
-  border: 1px solid #ccc;
+  border: 1.5px solid #ccc;
   border-radius: 50%;
+  transition: border-color 0.2s;
 }
-
-.radio-label input:checked ~ .radio-custom {
-  border: 1px solid #8bc34a;
+.green-radio input:checked ~ .radio-custom {
+  border: 2px solid #8bc34a;
 }
-
-.radio-label input:checked ~ .radio-custom:after {
+.green-radio input:checked ~ .radio-custom:after {
   content: "";
   position: absolute;
   display: block;
-  top: 3px;
-  left: 3px;
+  top: 4px;
+  left: 4px;
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background: #8bc34a;
 }
-
 .radio-text {
-  margin-left: 5px;
-  font-size: 14px;
+  margin-left: 8px;
+  font-size: 1rem;
 }
-
-.save-button {
-  background:#000;
+.save-button.green-save {
+  background: #8bc34a;
   border-radius: 14px;
   color: #fff;
-  width: 92px;
-  height: 34px;
-  font-size: 12px;
-  color: white;
+  width: 120px;
+  height: 38px;
+  font-size: 1.08rem;
   border: none;
-  border-radius: 4px;
   cursor: pointer;
   display: block;
   margin: 0 auto;
+  margin-top: 18px;
+  font-weight: 600;
   transition: background-color 0.3s;
+  box-shadow: 0 1px 4px rgba(139,195,74,0.08);
 }
-
-.save-button:hover {
+.save-button.green-save:hover {
   background-color: #7cb342;
 }
-
 /* Time Picker Styles */
 .time-picker {
   position: absolute;
@@ -154,82 +161,72 @@
   left: 50%;
   transform: translate(-50%, -50%);
   background-color: white;
-  border-radius: 8px;
+  border-radius: 10px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  padding: 20px;
+  padding: 24px;
   z-index: 1000;
   display: flex;
   flex-direction: column;
-  width: 300px;
+  width: 320px;
 }
-
 .time-picker-section {
-  margin-bottom: 15px;
+  margin-bottom: 18px;
 }
-
 .time-picker-label {
-  font-size: 14px;
+  font-size: 1rem;
   font-weight: bold;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   color: #333;
 }
-
 .time-picker-options {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
 }
-
 .time-picker-options.period {
   justify-content: flex-start;
 }
-
 .time-picker-option {
-  padding: 8px 12px;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
+  padding: 10px 16px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 5px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 1rem;
   transition: all 0.2s;
+  background: #f9f9f9;
 }
-
 .time-picker-option:hover {
-  background-color: #f5f5f5;
+  background-color: #e6f5d6;
+  border-color: #8bc34a;
 }
-
-.time-picker-option.selected {
+.time-picker-option.selected.green-selected {
   background-color: #8bc34a;
   color: white;
   border-color: #8bc34a;
 }
-
-.time-picker-done {
-  background-color: #8bc34a;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 8px 16px;
-  font-size: 14px;
-  cursor: pointer;
-  margin-top: 10px;
-  align-self: flex-end;
-  transition: background-color 0.3s;
-}
-
-.time-picker-done:hover {
-  background-color: #7cb342;
-}
 .back-button {
-  background: none; /* No background for the button */
-  border: none; /* No border */
-  cursor: pointer; /* Pointer cursor */
-  font-size: 1.5em; /* Size */
-  margin-bottom: 1em; /* Spacing below */
-  position: absolute; /* Absolute positioning */
-  top: 0px; /* Position from the top */
-  left: 0px; /* Position from the left */
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5em;
+  margin-bottom: 1em;
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  color: #8bc34a;
+  transition: color 0.2s;
 }
-
 .back-button:hover {
-  color: #5c7c66; /* Darker shade on hover */
+  color: #5c7c66;
+}
+@media (max-width: 600px) {
+  .time-management-card {
+    padding: 1.2rem 0.5rem 1.2rem 0.5rem;
+  }
+  .title {
+    font-size: 1.3rem;
+  }
+  .section-title {
+    font-size: 1rem;
+  }
 }

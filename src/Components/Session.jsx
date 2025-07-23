@@ -75,7 +75,7 @@ const SessionMonitoring = () => {
           page: page,
           limit: itemsPerPage,
           search: debouncedSearchTerm, // Use debounced search term
-          status: filterStatus || undefined,
+          // Remove status filter from API - let client-side handle it
           date: filterDate || undefined,
           location: locationFilter,
         },
@@ -137,29 +137,44 @@ const SessionMonitoring = () => {
     setIsFilterOpen(false);
   };
 
-  // Filtered reports based on all filters (frontend, after API fetch)
+  // ---
+  // STATUS FILTERING IS HANDLED ON THE FRONTEND
+  // The backend does not reliably support status filtering, so we fetch all records for the selected date/location
+  // and filter by status on the client. Update statusMap as needed to match all possible backend status values.
+  // ---
   const statusMap = {
     present: ["present", "early", "on time", "within grace period", "late"],
-    absent: ["absent"],
+    absent: ["absent", "absentee"],
     late: ["late"],
+    // Add more status groupings here if needed
   };
   
   const filteredReports = reports.filter((report) => {
     let matchesStatus = true;
     if (filterStatus) {
-      const normalized = (report.status || "").toLowerCase();
+      const normalized = (report.status || "").toLowerCase().trim();
+      console.log(`Filtering: status="${normalized}", filterStatus="${filterStatus}"`);
+      
       if (statusMap[filterStatus]) {
         matchesStatus = statusMap[filterStatus].includes(normalized);
+        console.log(`Status match: ${matchesStatus} (${normalized} in ${JSON.stringify(statusMap[filterStatus])})`);
       } else {
-        matchesStatus = normalized === filterStatus;
+        matchesStatus = normalized === filterStatus.toLowerCase();
+        console.log(`Direct match: ${matchesStatus} (${normalized} === ${filterStatus.toLowerCase()})`);
       }
     }
+    
     const matchesSearch = debouncedSearchTerm
       ? (report.traineeId?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
          report.name?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()))
       : true;
+      
     const matchesDate = filterDate ? new Date(report.date).toLocaleDateString() === new Date(filterDate).toLocaleDateString() : true;
-    return matchesStatus && matchesSearch && matchesDate;
+    
+    const result = matchesStatus && matchesSearch && matchesDate;
+    // console.log(`Report ${report.name}: status=${matchesStatus}, search=${matchesSearch}, date=${matchesDate}, final=${result}`);
+    
+    return result;
   });
 
   const renderPaginationNumbers = () => {

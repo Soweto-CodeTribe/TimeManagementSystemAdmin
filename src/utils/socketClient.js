@@ -14,7 +14,7 @@ export const initializeSocket = (token) => {
     return null;
   }
 
-  const apiUrl = 'https://timemanagementsystemserver.onrender.com/';
+  const apiUrl = 'https://timemanagementsystemserver.onrender.com';
   
   try {
     socket = io(apiUrl, {
@@ -29,7 +29,7 @@ export const initializeSocket = (token) => {
 
     // Connection success handler
     socket.on('connect', () => {
-      console.log('Socket connected successfully');
+      // console.log('Socket connected successfully');
     });
 
     // Detailed error handling
@@ -89,9 +89,7 @@ export const subscribeToStatusChanges = (callback) => {
   return () => {
     socket.off('status-change', callback);
   };
-};
-
-/**
+};/**
  * 
  * import { io } from 'socket.io-client';
 
@@ -203,3 +201,4 @@ export const subscribeToStatusChanges = (callback) => {
   };
 };
  */
+
