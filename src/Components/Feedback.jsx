@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSelector } from 'react-redux';
 import axios from 'axios';
 import "./styling/Feedback.css";
+import DataLoader from "./dataLoader";
 
 function FeedbackPage() {
   const [feedback, setFeedback] = useState([]);
@@ -223,7 +224,7 @@ function FeedbackPage() {
       : categorizedFeedback[category]?.length || 0;
   };
 
-  if (isLoading) return <LoadingSkeleton />;
+  if (isLoading) return <DataLoader />;
   if (error) return <ErrorState error={error} />;
 
   return (
@@ -331,27 +332,6 @@ function FeedbackPage() {
     </div>
   );
 }
-
-const LoadingSkeleton = () => (
-  <div className="feedback-container">
-    <h2 className="feedback-title">Feedback</h2>
-    {Array(3)
-      .fill(0)
-      .map((_, i) => (
-        <div key={i} className="feedback-card skeleton">
-          <div className="feedback-header">
-            <div className="skeleton-info">
-              <div className="skeleton-line"></div>
-            </div>
-          </div>
-          <div className="feedback-content">
-            <div className="skeleton-line"></div>
-            <div className="skeleton-line medium"></div>
-          </div>
-        </div>
-      ))}
-  </div>
-);
 
 const ErrorState = ({ error }) => (
   <div className="feedback-card error-state">

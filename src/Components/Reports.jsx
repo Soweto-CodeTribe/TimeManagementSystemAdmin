@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import { useState, useEffect } from "react";
 import { FileText, Search, Filter, Info, ChevronLeft, ChevronRight } from "lucide-react";
@@ -6,6 +7,7 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import DataLoader from "../Components/dataLoader";
 import TraineeReportModal from "../Components/ui/TraineeReportModal";
+import CustomDropdown from './ui/CustomDropdown';
 
 const ReportsScreen = () => {
   const BASE_URL = "https://timemanagementsystemserver.onrender.com/";
@@ -65,8 +67,7 @@ const ReportsScreen = () => {
     if (allReports.length === 0) {
       fetchAllReportsForStats();
     }
-  }, [token, currentPage, itemsPerPage, debouncedSearchTerm, filterStatus, filterDate, 
-    ...(userRole === 'super_admin' ?  [filterLocation]: [])]);
+  }, [token, currentPage, itemsPerPage, debouncedSearchTerm, filterStatus, filterDate, filterLocation]);
 
   // Function to fetch all reports for accurate statistics calculation
   const fetchAllReportsForStats = async () => {
@@ -89,29 +90,11 @@ const ReportsScreen = () => {
     }
   };
 
-  // Calculate metrics dynamically based on available reports
-  const calculateMetrics = () => {
-    // Use all reports if available, otherwise use current page reports
-    const dataSource = allReports.length > 0 ? allReports : reports;
-    
-    // If we have API-provided summary, use it
-    if (summaryData && Object.keys(summaryData).length > 0) {
-      return {
-        totalReports: summaryData.totalReports || dataSource.length,
-        resolvedReports: summaryData.resolvedReports || dataSource.filter(r => r.status?.toLowerCase() === 'resolved').length,
-        pendingReports: summaryData.pendingReports || dataSource.filter(r => r.status?.toLowerCase() === 'pending').length,
-        rejectedReports: summaryData.rejectedReports || dataSource.filter(r => r.status?.toLowerCase() === 'rejected').length
-      };
-    }
-    
-    // Otherwise calculate from available data
-    return {
-      totalReports: dataSource.length,
-      resolvedReports: dataSource.filter(r => r.status?.toLowerCase() === 'resolved').length,
-      pendingReports: dataSource.filter(r => r.status?.toLowerCase() === 'pending').length,
-      rejectedReports: dataSource.filter(r => r.status?.toLowerCase() === 'rejected').length
-    };
-  };
+  const generateReportForTrainee = (trainee) =>{
+    setSelectedTrainee(trainee);
+    // Open the report modal or perform any action needed
+
+  }
 
   const fetchData = async (page = 1) => {
     setIsLoading(true);
@@ -191,6 +174,16 @@ const ReportsScreen = () => {
     }
   };
 
+  // Helper to render date
+  const renderDate = () => {
+    if (!summaryData?.date) return "";
+    try {
+      return new Date(summaryData.date).toLocaleDateString();
+    } catch {
+      return "";
+    }
+  };
+
   // Render Pagination Numbers
   const renderPaginationNumbers = () => {
     const pageNumbers = [];
@@ -214,8 +207,33 @@ const ReportsScreen = () => {
     return pageNumbers;
   };
 
-  // Get current metrics
-  const metrics = calculateMetrics();
+  // Filtered reports based on all filters
+  const statusMap = {
+    present: ["present", "early", "on time", "within grace period"],
+    absent: ["absent"],
+    late: ["late"],
+    resolved: ["resolved"],
+    pending: ["pending"],
+    rejected: ["rejected"],
+  };
+  const filteredReports = reports.filter((report) => {
+    let matchesStatus = true;
+    if (filterStatus) {
+      const normalized = (report.status || "").toLowerCase();
+      if (statusMap[filterStatus]) {
+        matchesStatus = statusMap[filterStatus].includes(normalized);
+      } else {
+        matchesStatus = normalized === filterStatus;
+      }
+    }
+    const matchesDate = filterDate ? new Date(report.date).toLocaleDateString() === new Date(filterDate).toLocaleDateString() : true;
+    const matchesLocation = filterLocation ? (report.location?.toLowerCase() === filterLocation.toLowerCase()) : true;
+    const matchesSearch = debouncedSearchTerm
+      ? (report.traineeId?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+         report.name?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()))
+      : true;
+    return matchesStatus && matchesDate && matchesLocation && matchesSearch;
+  });
 
   // Loading State
   if (isLoading) return <DataLoader />;
@@ -231,7 +249,10 @@ const ReportsScreen = () => {
       {/* Table Container */}
       <div className="table-container">
         <div className="table-header">
-          <h2 className="table-title">Issue Management Table</h2>
+          <h2 className="table-title">
+            Reports Table
+            {summaryData && <span className="table-date"> - {renderDate()}</span>}
+          </h2>
           <div className="table-actions">
             {/* Filter Dropdown */}
             <div className="filter-wrapper">
@@ -246,23 +267,23 @@ const ReportsScreen = () => {
                 <div className="filter-dropdown">
                   <div className="filter-group">
                     <label>Status:</label>
-                    <select
+                    <CustomDropdown
+                      options={[
+                        { value: '', label: 'All' },
+                        { value: 'present', label: 'Present' },
+                        { value: 'absent', label: 'Absent' },
+                        { value: 'late', label: 'Late' },
+                      ]}
                       value={filterStatus}
-                      // onChange={(e) => setFilterStatus(e.target.value)}
-                      onChange={(e) => handleStatusChange(e.target.value)}
-                    >
-                      <option value="">All</option>
-                      <option value="resolved">Resolved</option>
-                      <option value="pending">Pending</option>
-                      <option value="rejected">Rejected</option>
-                    </select>
+                      onChange={handleStatusChange}
+                      placeholder="All"
+                    />
                   </div>
                   <div className="filter-group">
                     <label>Date:</label>
                     <input
                       type="date"
                       value={filterDate}
-                      // onChange={(e) => setFilterDate(e.target.value)}
                       onChange={(e) => handleDateChange(e.target.value)}
                     />
                   </div>
@@ -270,18 +291,15 @@ const ReportsScreen = () => {
                   {userRole === 'super_admin' && (
                   <div className="filter-group">
                     <label>Location:</label>
-                    <select
+                    <CustomDropdown
+                      options={[
+                        { value: '', label: 'All Locations' },
+                        ...LOCATIONS.map(location => ({ value: location, label: location }))
+                      ]}
                       value={filterLocation}
-                      // onChange={(e) => setFilterLocation(e.target.value)}
-                      onChange={(e) => handleLocationChange(e.target.value)}
-                    >
-                      <option value="">All Locations</option>
-                      {LOCATIONS.map((location) => (
-                        <option key={location} value={location}>
-                          {location}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={handleLocationChange}
+                      placeholder="All Locations"
+                    />
                   </div>
                   )}
                 </div>
@@ -292,7 +310,7 @@ const ReportsScreen = () => {
               <Search className="search-icon" />
               <input
                 type="text"
-                placeholder="Search by ID, Name, or Status"
+                placeholder="Search by name or ID"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="search-input"
@@ -334,7 +352,7 @@ const ReportsScreen = () => {
                 </tr>
               </thead>
               <tbody>
-                {reports.map((report, index) => (
+                {filteredReports.map((report, index) => (
                   <tr key={index} onClick={() => setSelectedTrainee(report)}>
                     <td>{report.traineeId || "-"}</td>
                     <td>{report.name || "N/A"}</td>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './styling/AdminProfile.css';
 import { FaUser } from 'react-icons/fa';
@@ -11,7 +11,8 @@ const AdminProfile = () => {
     fullName: '',
     surname: '',
     role: '',
-    email: ''
+    email: '',
+    profileImageUrl: '' // Add this field
   });
   const [successMessage, setSuccessMessage] = useState('');
   const [feedbackMessage, setFeedbackMessage] = useState('');
@@ -26,10 +27,9 @@ const AdminProfile = () => {
 
   // Disable scrolling when the component mounts
   useEffect(() => {
-    document.body.classList.add('no-scroll'); // Add class to disable scrolling
-
+    document.body.classList.add('no-scroll');
     return () => {
-      document.body.classList.remove('no-scroll'); // Remove class to re-enable scrolling
+      document.body.classList.remove('no-scroll');
     };
   }, []);
 
@@ -38,10 +38,12 @@ const AdminProfile = () => {
     const userId = localStorage.getItem('userId');
     console.log("User-id:", userId);
     console.log("Authorization Token:", token);
+    
     if (!token || !userId) {
       setFeedbackMessage('Authentication information missing. Please log in again.');
       return;
     }
+    
     setIsLoading(true);
     try {
       const response = await axios.get(
@@ -52,40 +54,29 @@ const AdminProfile = () => {
           },
         }
       );
+      
       if (response.data) {
         setUserData(response.data);
         console.log("Fetched User Data:", response.data);
-        console.log("User id:", response.data.uid);
         
-        // Load profile image after we have user data
-        loadProfileImage(response.data.email);
+        // Set images from backend data
+        const profileImageUrl = response.data.profileImageUrl || '';
+        setSelectedImage(profileImageUrl);
+        setTempImage(profileImageUrl);
+        
+        // Optional: Still cache in localStorage for faster loading
+        if (profileImageUrl) {
+          localStorage.setItem(`profileImage_${userId}`, profileImageUrl);
+          if (response.data.email) {
+            localStorage.setItem(`profileImage_${response.data.email}`, profileImageUrl);
+          }
+        }
       }
     } catch (error) {
       handleError(error);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // New function to load profile image with fallbacks
-  const loadProfileImage = (email) => {
-    const userId = localStorage.getItem('userId');
-    
-    // Try to get image by userId first
-    let storedImage = localStorage.getItem(`profileImage_${userId}`);
-    
-    // If not found and we have email, try that
-    if (!storedImage && email) {
-      storedImage = localStorage.getItem(`profileImage_${email}`);
-      
-      // If found via email, also set it for the current userId for future use
-      if (storedImage && userId) {
-        localStorage.setItem(`profileImage_${userId}`, storedImage);
-      }
-    }
-    
-    setTempImage(storedImage || '');
-    setSelectedImage(storedImage || '');
   };
 
   useEffect(() => {
@@ -108,11 +99,13 @@ const AdminProfile = () => {
     if (file) {
       setIsImageLoading(true);
       setImageMessage('Uploading image to Cloudinary...');
+      
       const formData = new FormData();
       formData.append('file', file);
       formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
       const userId = localStorage.getItem('userId');
       formData.append('tags', `user_${userId}`);
+      
       axios.post(CLOUDINARY_UPLOAD_URL, formData)
         .then(response => {
           console.log('Cloudinary upload response:', response.data);
@@ -129,33 +122,67 @@ const AdminProfile = () => {
     }
   };
 
-  const saveProfileImage = () => {
-    if (tempImage) {
-      const userId = localStorage.getItem('userId');
-      if (!userId) {
-        setImageMessage('User ID not found. Please log in again.');
-        return;
-      }
-      setIsImageLoading(true);
-
-      // Store with both userId and email for cross-session persistence
-      localStorage.setItem(`profileImage_${userId}`, tempImage);
-      
-      // If we have email, store with that too for persistence after logout
-      if (userData.email) {
-        localStorage.setItem(`profileImage_${userData.email}`, tempImage);
-      }
-      
-      window.dispatchEvent(new Event('profileImageUpdated'));
-      setImageMessage('Profile image saved successfully! Refreshing...');
-      setSelectedImage(tempImage);
-      setTimeout(() => {
-        setIsImageLoading(false);
-        setImageMessage('');
-      }, 1500);
-    } else {
+  // Updated function to save image to backend
+  const saveProfileImage = async () => {
+    if (!tempImage) {
       setImageMessage('No image selected to save.');
       setTimeout(() => setImageMessage(''), 3000);
+      return;
+    }
+
+    const token = localStorage.getItem('authToken');
+    const userId = localStorage.getItem('userId');
+    
+    if (!token || !userId) {
+      setImageMessage('Authentication information missing. Please log in again.');
+      return;
+    }
+
+    setIsImageLoading(true);
+    setImageMessage('Saving profile image...');
+
+    try {
+      // Save image URL to backend
+      const response = await axios.put(
+        `https://timemanagementsystemserver.onrender.com/api/facilitators/${userId}`,
+        { profileImageUrl: tempImage },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.data) {
+        // Update local state
+        setSelectedImage(tempImage);
+        setUserData(prev => ({
+          ...prev,
+          profileImageUrl: tempImage
+        }));
+
+        // Update localStorage cache
+        localStorage.setItem(`profileImage_${userId}`, tempImage);
+        if (userData.email) {
+          localStorage.setItem(`profileImage_${userData.email}`, tempImage);
+        }
+
+        // Dispatch event for other components
+        window.dispatchEvent(new Event('profileImageUpdated'));
+        
+        setImageMessage('Profile image saved successfully!');
+        setTimeout(() => {
+          setImageMessage('');
+          setIsImageLoading(false);
+        }, 2000);
+      }
+    } catch (error) {
+      console.error('Error saving profile image:', error);
+      setImageMessage('Failed to save profile image. Please try again.');
+      setTimeout(() => {
+        setImageMessage('');
+        setIsImageLoading(false);
+      }, 3000);
     }
   };
 
@@ -171,12 +198,12 @@ const AdminProfile = () => {
     event.preventDefault();
     const token = localStorage.getItem('authToken');
     const userId = localStorage.getItem('userId');
-    console.log("User Data:", userData);
-    console.log("Authorization Token:", token);
+    
     if (!token || !userId) {
       setFeedbackMessage('Authentication information missing. Please log in again.');
       return;
     }
+    
     setIsLoading(true);
     try {
       const response = await axios.put(
@@ -188,6 +215,7 @@ const AdminProfile = () => {
           },
         }
       );
+      
       if (response.data) {
         setSuccessMessage('Profile updated successfully!');
         setTimeout(() => setSuccessMessage(''), 3000);
@@ -201,29 +229,31 @@ const AdminProfile = () => {
   };
 
   const handleLogout = () => {
-    // Only remove authentication-related items
+    // Remove authentication-related items
     localStorage.removeItem('authToken');
     localStorage.removeItem('userId');
     
-    // Note: We're NOT removing any profileImage_* items
-    // This allows profile images to persist across sessions
+    // Optional: Keep profile images in cache or remove them
+    // localStorage.removeItem(`profileImage_${localStorage.getItem('userId')}`);
     
     window.location.href = '/login';
   };
+
+  const userRole = localStorage.getItem('role');
 
   return (
     <div className="profile-container">
       <div className="profile-sidebar">
         <div className="avatar-section">
           <div className="avatar-placeholder">
-            {tempImage ? (
-              <img src={tempImage} alt="Profile" className="uploaded-image"/>
+            {selectedImage || tempImage ? (
+              <img src={tempImage || selectedImage} alt="Profile" className="uploaded-image"/>
             ) : (
               <FaUser size={50} />
             )}
           </div>
           <div className="image-controls">
-            <label htmlFor="file-input" className="upload-btn">Upload </label>
+            <label htmlFor="file-input" className="upload-btn">Upload</label>
             <input
               type="file"
               id="file-input"
@@ -235,9 +265,9 @@ const AdminProfile = () => {
               type="button"
               className="save-image-btn"
               onClick={saveProfileImage}
-              disabled={isImageLoading}
+              disabled={isImageLoading || !tempImage}
             >
-              {isImageLoading ? 'Saving...' : 'Save '}
+              {isImageLoading ? 'Saving...' : 'Save'}
             </button>
           </div>
           {isImageLoading && (
@@ -248,6 +278,7 @@ const AdminProfile = () => {
           {imageMessage && <p className="image-message">{imageMessage}</p>}
         </div>
       </div>
+      
       <div className="profile-main">
         {isLoading && !isImageLoading ? (
           <div className="loader-container">
@@ -256,86 +287,83 @@ const AdminProfile = () => {
           </div>
         ) : (
           <>
-          <form className="profile-form" onSubmit={handleUpdate}>
-            <h1>Basic Information</h1>
-            <label>Name:</label>
-            <input
-              type="text"
-              name="fullname"
-              value={userData.name || userData.fullName ||''}
-              onChange={handleInputChange}
-            />
-            <label>Surname:</label>
-            <input
-              type="text"
-              name="surname"
-              value={userData.surname || ''}
-              onChange={handleInputChange}
-            />
-             <label>ID Number:</label>
-            <input
-              type="text"
-              name="IdNumber"
-              value={userData.IdNumber || userData.idNumber||''}
-              onChange={handleInputChange}
-             
-            />
-             <label>Phone Number:</label>
-            <input
-              type="text"
-              name="phoneNumber"
-              value={userData.phoneNumber || ''}
-              onChange={handleInputChange}
-             
-            />
-            <label>Role:</label>
-            <input
-              type="text"
-              name="role"
-              value={userData.role || ''}
-              onChange={handleInputChange}
-            />
-            <label>Email:</label>
-            <input
-              type="text"
-              name="email"
-              value={userData.email || ''}
-              onChange={handleInputChange}
-            />
-          </form>
+            <form className="profile-form" onSubmit={handleUpdate}>
+              <h1>Basic Information</h1>
+              <label>Name:</label>
+              <input
+                type="text"
+                name="fullname"
+                value={userData.name || userData.fullName || ''}
+                onChange={handleInputChange}
+              />
+              <label>Surname:</label>
+              <input
+                type="text"
+                name="surname"
+                value={userData.surname || ''}
+                onChange={handleInputChange}
+              />
+              <label>ID Number:</label>
+              <input
+                type="text"
+                name="IdNumber"
+                value={userData.IdNumber || userData.idNumber || ''}
+                onChange={handleInputChange}
+              />
+              <label>Phone Number:</label>
+              <input
+                type="text"
+                name="phoneNumber"
+                value={userData.phoneNumber || ''}
+                onChange={handleInputChange}
+              />
+              <label>Role:</label>
+              <input
+                type="text"
+                value={userData.role}
+                readOnly={userRole !== 'super_admin'}
+                disabled={userRole !== 'super_admin'}
+              />
+              <label>Email:</label>
+              <input
+                type="text"
+                name="email"
+                value={userData.email || ''}
+                onChange={handleInputChange}
+              />
+            </form>
 
-          <form className="profile-form" onSubmit={handleUpdate}>
-            <h1>Physical address</h1>
-
-            <label>Street:</label>
-            <input
-              type="text"
-              name="street"
-              value={userData.street || ''}
-              onChange={handleInputChange}
-            />
-            <label>City:</label>
-            <input
-              type="text"
-              name="City"
-              value={userData.City || userData.city||''}
-              onChange={handleInputChange}
-            />
-            <label>Postal Code:</label>
-            <input
-              type="text"
-              name="postalCode"
-              value={userData.postalCode || ''}
-              onChange={handleInputChange}
-            />
-            <button
-              className="update-btn"
-              type="submit"
-              disabled={isLoading}
-            >
-              {isLoading ? 'Updating...' : 'Update Information'}
-            </button>
-          </form>
+            <form className="profile-form" onSubmit={handleUpdate}>
+              <h1>Physical address</h1>
+              <label>Street:</label>
+              <input
+                type="text"
+                name="street"
+                value={userData.street || ''}
+                onChange={handleInputChange}
+              />
+              <label>City:</label>
+              <input
+                type="text"
+                name="City"
+                value={userData.City || userData.city || ''}
+                onChange={handleInputChange}
+              />
+              <label>Postal Code:</label>
+              <input
+                type="text"
+                name="postalCode"
+                value={userData.postalCode || ''}
+                onChange={handleInputChange}
+              />
+              <button
+                className="update-btn"
+                type="submit"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Updating...' : 'Update Information'}
+              </button>
+            </form>
           </>
         )}
         {successMessage && <p className="success-message">{successMessage}</p>}

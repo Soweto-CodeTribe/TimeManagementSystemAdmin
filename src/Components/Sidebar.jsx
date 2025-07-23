@@ -1,3 +1,5 @@
+/* eslint-disable react/prop-types */
+/* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -119,13 +121,19 @@ const Sidebar = ({ activeScreen }) => {
           isOpen={isLogoutModalOpen}
           onRequestClose={closeLogoutModal}
           contentLabel="Logout Confirmation"
-          className="modal"
+          className="logout-modal sleek-modal"
           overlayClassName="modal-overlay"
         >
-          <h2>Are you sure you want to log out?</h2>
-          <div className="modal-actions">
-            <button onClick={handleLogout} className="confirm-btn">Yes</button>
-            <button onClick={closeLogoutModal} className="cancel-btn">No</button>
+          <div className="logout-modal-content">
+            <div className="logout-modal-icon">
+              <AiOutlineLogout size={48} style={{ color: '#000' }} />
+            </div>
+            <h2 className="logout-modal-title">Sign Out</h2>
+            <p className="logout-modal-message">Are you sure you want to sign out?</p>
+            <div className="modal-actions">
+              <button onClick={handleLogout} className="confirm-btn sleek-btn">Yes, Sign Out</button>
+              <button onClick={closeLogoutModal} className="cancel-btn sleek-btn">Cancel</button>
+            </div>
           </div>
         </Modal>
       </div>

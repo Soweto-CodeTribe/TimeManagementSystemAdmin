@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import {
   Search,
-  Filter,
   Download,
   Upload,
   UserPlus,
@@ -14,10 +13,46 @@ import { useLocation, useNavigate } from "react-router-dom";
 import "./styling/UserManagement.css";
 import jsPDF from "jspdf";
 import Modal from "./Modal";
+import UserActionModal from "./ui/UserActionModal";
+import EditModal from "./ui/EditModal";
 import axios from "axios";
 import DataLoader from "./dataLoader";
 import CsvConfigModal from "./ui/CsvConfigModal";
 import ImportCsvModal from "./ui/ImportCsvConfig";
+import CustomDropdown from './ui/CustomDropdown';
+
+const LOCATIONS = [
+  "TIH",
+  "Tembisa",
+  "Soweto",
+  "Ga-rankuwa",
+  "Limpopo",
+  "KZN",
+  "Kimberly"
+];
+
+// Utility function to format a user object consistently
+function formatUser(user, role = "Trainee") {
+  let surname = user.surname || "";
+  let fullName = user.fullName || `${user.name || ""} ${surname}`.trim();
+  if (!surname && user.fullName) {
+    const nameParts = user.fullName.trim().split(" ");
+    surname = nameParts.length > 1 ? nameParts.slice(-1)[0] : "";
+  }
+  return {
+    id: user._id || user.id || `${role.toLowerCase()}-${crypto.randomUUID()}`,
+    firebaseId: user._id || user.firebaseId || user.id, 
+    idNumber: user.idNumber || "", // Editable User ID
+    fullName,
+    surname,
+    email: user.email || user.emailAddress || "N/A",
+    phoneNumber: user.phoneNumber || user.phone || "N/A",
+    role,
+    status: user.status || "active",
+    lastCheckIn: user.lastCheckInDate || "N/A",
+    location: user.location || "",
+  };
+}
 
 const UserManagement = () => {
   // Location and Navigation Hooks
@@ -25,6 +60,9 @@ const UserManagement = () => {
   const navigate = useNavigate();
   // State Management
   const [users, setUsers] = useState([]);
+  const [facilitators, setFacilitators] = useState([]); // New: paginated facilitators
+  const [facilitatorsPagination, setFacilitatorsPagination] = useState({ currentPage: 1, totalPages: 1, totalItems: 0, pageSize: 10 });
+  const [facilitatorsLoading, setFacilitatorsLoading] = useState(false); // New: loading state for facilitators
   const [guests, setGuests] = useState([]);
   const [onlinePeople, setOnlinePeople] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -59,12 +97,16 @@ const UserManagement = () => {
     postalAddress: true,
     cohortYear: false,
   });
+  const [selectedLocation, setSelectedLocation] = useState("");
+  const [locations, setLocations] = useState([]);
 
   // Debounce Search Term
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearchTerm(searchTerm), 500);
     return () => clearTimeout(timer);
   }, [searchTerm]);
+
+
 
   // Authentication Check
   useEffect(() => {
@@ -90,6 +132,8 @@ const UserManagement = () => {
     }
   }, [location.state]);
 
+
+
   // Fetch Online People
   const fetchOnlinePeople = async () => {
     try {
@@ -107,6 +151,15 @@ const UserManagement = () => {
     }
   };
 
+useEffect(() => {
+  const timer = setInterval(() => {
+    setFeedbackMessage(null);
+  }, 5000);
+
+  return () => clearTimeout(timer); // Always clean up timers in useEffect
+}, []);
+
+
 
   // Fetch Guests
   const fetchGuests = async () => {
@@ -121,6 +174,7 @@ const UserManagement = () => {
           (event.guestDetails || []).map((guest) => ({
             id: guest.id || guest._id || `guest-${crypto.randomUUID()}`,
             fullName: guest.fullNames || "N/A",
+            surname: guest.surname || "", // <-- add this line
             email: guest.email || "N/A",
             location: guest.location || "N/A",
             phoneNumber: guest.cellPhone || "N/A",
@@ -146,55 +200,43 @@ const UserManagement = () => {
     let allUserResults = [];
     try {
       let traineesData = [];
+      
+      // Fetch trainees based on user role
       if (userRole === "facilitator") {
         try {
           const traineesUrl = userLocation
-            ? `https://timemanagementsystemserver.onrender.com/api/trainees/location?location=${userLocation}&page=${page}&limit=${itemsPerPage}`
-            : `https://timemanagementsystemserver.onrender.com/api/my-trainees?page=${page}&limit=${itemsPerPage}`;
+            ? `https://timemanagementsystemserver.onrender.com/api/trainees/location?location=${userLocation}&limit=1000`
+            : `https://timemanagementsystemserver.onrender.com/api/my-trainees?limit=1000`;
           const traineesResponse = await axios.get(traineesUrl, { headers });
           traineesData =
             traineesResponse.data?.allTrainees ||
             traineesResponse.data?.trainees ||
             [];
-          if (traineesResponse.data.pagination) {
-            setTotalPages(traineesResponse.data.pagination.totalPages);
-            setCurrentPage(traineesResponse.data.pagination.currentPage);
-          }
+          // Debug log
+          // console.log('Fetched trainees (facilitator):', traineesData);
         } catch (error) {
           console.error("Failed to fetch trainees for facilitator:", error);
           setFeedbackMessage("Failed to fetch trainees for facilitator.");
         }
       } else if (userRole === "super_admin" || userRole === "admin") {
         try {
+          // Fetch ALL trainees for client-side pagination
           const traineesResponse = await axios.get(
-            `https://timemanagementsystemserver.onrender.com/api/trainees?page=${page}&limit=${itemsPerPage}`,
+            "https://timemanagementsystemserver.onrender.com/api/trainees?limit=1000",
             { headers }
           );
           traineesData = traineesResponse.data?.trainees || [];
-          if (traineesResponse.data.pagination) {
-            setTotalPages(traineesResponse.data.pagination.totalPages);
-            setCurrentPage(traineesResponse.data.pagination.currentPage);
-          }
+          // Debug log
+          // console.log('Fetched trainees (admin/super_admin):', traineesData);+
         } catch (error) {
           console.error("Failed to fetch trainees for admin:", error);
           setFeedbackMessage("Failed to fetch trainees for admin.");
         }
       }
 
-      // console.log('traineesData', traineesData)
-      const formattedTrainees = traineesData.map((trainee) => ({
-        id: trainee._id || trainee.id || `trainee-${crypto.randomUUID()}`,
-        fullName:
-          trainee.fullName ||
-          `${trainee.name || ""} ${trainee.surname || ""}`.trim(),
-        email: trainee.email || trainee.emailAddress || "N/A",
-        phoneNumber: trainee.phoneNumber || trainee.phone || "N/A",
-        role: "Trainee",
-        status: trainee.status,
-        lastCheckIn: trainee.lastCheckInDate || "N/A",
-      }));
+      const formattedTrainees = traineesData.map(t => formatUser(t, "Trainee"));
+      setAllTrainees(formattedTrainees); 
       allUserResults = [...formattedTrainees];
-      // console.log('formattedTrainees', formattedTrainees)
 
       if (userRole === "super_admin" || userRole === "admin") {
         try {
@@ -204,19 +246,7 @@ const UserManagement = () => {
           );
           const facilitatorsData =
             facilitatorsResponse.data?.facilitators || [];
-          const formattedFacilitators = facilitatorsData.map((facilitator) => ({
-            id:
-              facilitator._id ||
-              facilitator.id ||
-              `facilitator-${crypto.randomUUID()}`,
-            fullName:
-              facilitator.fullName ||
-              `${facilitator.name || ""} ${facilitator.surname || ""}`.trim(),
-            email: facilitator.email || facilitator.emailAddress || "N/A",
-            phoneNumber: facilitator.phoneNumber || facilitator.phone || "N/A",
-            role: "Facilitator",
-            status: facilitator.status || "active",
-          }));
+          const formattedFacilitators = facilitatorsData.map(f => formatUser(f, "Facilitator"));
           allUserResults = [...allUserResults, ...formattedFacilitators];
         } catch (error) {
           console.error("Failed to fetch facilitators:", error);
@@ -230,19 +260,7 @@ const UserManagement = () => {
           );
           const stakeholdersData =
             stakeholdersResponse.data?.stakeholders || [];
-          const formattedStakeholders = stakeholdersData.map((stakeholder) => ({
-            id:
-              stakeholder._id ||
-              stakeholder.id ||
-              `stakeholder-${crypto.randomUUID()}`,
-            fullName:
-              stakeholder.fullName ||
-              `${stakeholder.name || ""} ${stakeholder.surname || ""}`.trim(),
-            email: stakeholder.email || stakeholder.emailAddress || "N/A",
-            phoneNumber: stakeholder.phone || stakeholder.phone || "N/A",
-            role: "Stakeholder",
-            status: stakeholder.status || "active",
-          }));
+          const formattedStakeholders = stakeholdersData.map(s => formatUser(s, "Stakeholder"));
           allUserResults = [...allUserResults, ...formattedStakeholders];
         } catch (error) {
           if (error.response?.status === 403) {
@@ -259,18 +277,41 @@ const UserManagement = () => {
     }
   };
 
+  // Fetch Facilitators with server-side pagination
+  const fetchFacilitators = async (page = 1, pageSize = 10) => {
+    setFacilitatorsLoading(true);
+    try {
+      const headers = { Authorization: `Bearer ${token}` };
+      const response = await axios.get(
+        `https://timemanagementsystemserver.onrender.com/api/facilitators?page=${page}&pageSize=${pageSize}`,
+        { headers }
+      );
+      setFacilitators(response.data.facilitators || []);
+      setFacilitatorsPagination(response.data.pagination || { currentPage: 1, totalPages: 1, totalItems: 0, pageSize });
+    } catch (error) {
+      setFacilitators([]);
+      setFacilitatorsPagination({ currentPage: 1, totalPages: 1, totalItems: 0, pageSize });
+      setFeedbackMessage("Failed to fetch facilitators.");
+    } finally {
+      setFacilitatorsLoading(false);
+    }
+  };
+
   // Fetch All Data
   const fetchAllData = async () => {
     setIsLoading(true);
     setFetchError(null);
     try {
-      await fetchUsers(currentPage);
+      await fetchUsers(currentPage); // unchanged for other tabs
       if (userRole === "super_admin" || userRole === "admin" || userRole === "facilitator") {
         await fetchGuests();
       }
       if (userRole === "super_admin") {
         await fetchOnlinePeople();
-
+      }
+      // Fetch facilitators for Facilitators tab (server-side pagination)
+      if (userRole === "super_admin" || userRole === "admin") {
+        await fetchFacilitators(currentPage, itemsPerPage);
       }
       setFeedbackMessage("Data loaded successfully");
     } catch (error) {
@@ -282,11 +323,39 @@ const UserManagement = () => {
     }
   };
 
+  // Re-fetch facilitators specifically
+  const refetchFacilitators = async () => {
+    try {
+      const headers = { Authorization: `Bearer ${token}` };
+      const facilitatorsResponse = await axios.get(
+        "https://timemanagementsystemserver.onrender.com/api/facilitators",
+        { headers }
+      );
+      const facilitatorsData = facilitatorsResponse.data?.facilitators || [];
+      const formattedFacilitators = facilitatorsData.map(f => formatUser(f, "Facilitator"));
+      
+      // Update the users state to include the refreshed facilitators
+      setUsers(prevUsers => {
+        const nonFacilitators = prevUsers.filter(user => user.role !== "Facilitator");
+        return [...nonFacilitators, ...formattedFacilitators];
+      });
+    } catch (error) {
+      console.error("Failed to re-fetch facilitators:", error);
+      setFeedbackMessage("Failed to refresh facilitators data.");
+    }
+  };
+
   // Pagination Handler
   const handlePageChange = (page) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-      fetchUsers(page);
+    if (activeTab === "Facilitators") {
+      if (page >= 1 && page <= facilitatorsPagination.totalPages) {
+        setCurrentPage(page);
+        fetchFacilitators(page, facilitatorsPagination.pageSize);
+      }
+    } else {
+      if (page >= 1 && page <= totalPages) {
+        setCurrentPage(page);
+      }
     }
   };
 
@@ -294,8 +363,10 @@ const UserManagement = () => {
   const renderPaginationNumbers = () => {
     const pageNumbers = [];
     const maxVisiblePages = 5;
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    let total = activeTab === "Facilitators" ? facilitatorsPagination.totalPages : totalPages;
+    let current = activeTab === "Facilitators" ? facilitatorsPagination.currentPage : currentPage;
+    let startPage = Math.max(1, current - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(total, startPage + maxVisiblePages - 1);
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
@@ -304,7 +375,7 @@ const UserManagement = () => {
         <button
           key={i}
           onClick={() => handlePageChange(i)}
-          className={`pagination-number ${currentPage === i ? "active" : ""}`}
+          className={`pagination-number ${current === i ? "active" : ""}`}
         >
           {i}
         </button>
@@ -328,6 +399,12 @@ const UserManagement = () => {
 
   // Take Action on User
   const handleTakeAction = (user) => {
+    // Only allow super_admin to edit non-trainee users
+    if (activeTab !== "Trainees" && activeTab !== "Online Trainees" && userRole !== "super_admin") {
+      setFeedbackMessage("Only super administrators can edit facilitators, stakeholders, and guests.");
+      return;
+    }
+    // console.log('UserManagement - user data being passed to modal:', user);
     setSelectedUser(user);
     setModalOpen(true);
   };
@@ -338,7 +415,8 @@ const UserManagement = () => {
     const selectedColumns = Object.keys(columns).filter((key) => columns[key]);
     setTimeout(() => {
       try {
-        const data = getTabData(activeTab).map((user) => {
+        // Use filteredAllTrainees for export (all, not just paginated)
+        const data = filteredAllTrainees.map((user) => {
           return selectedColumns
             .map((col) => {
               switch (col) {
@@ -348,14 +426,23 @@ const UserManagement = () => {
                   return user.fullName?.split(" ").pop() || "";
                 case "codeTribeId":
                   return user.id || "";
+                case "email":
                 case "emailAddress":
                   return user.email || "";
                 case "phoneNumber":
                   return user.phoneNumber || "";
                 case "lastCheckInDate":
                   return user.lastCheckIn || "";
+                case "location":
+                  return user.location || "";
+                case "idNumber":
+                  return user.idNumber || "";
+                case "postalAddress":
+                  return user.postalAddress || "";
+                case "cohortYear":
+                  return user.cohortYear || "";
                 default:
-                  return "";
+                  return user[col] || "";
               }
             })
             .join(",");
@@ -385,11 +472,12 @@ const UserManagement = () => {
   // PDF Export
   const exportPDF = () => {
     const doc = new jsPDF();
-    const data = getTabData(activeTab);
+    // Use filteredAllTrainees for export (all, not just paginated)
+    const data = filteredAllTrainees;
     doc.text(`${activeTab} Management`, 10, 10);
     doc.text("Full Name, Email, Role", 10, 20);
     data.forEach((user, index) => {
-      if (index < 30) {
+      if (index < 100) {
         doc.text(
           `${user.fullName?.substring(0, 30) || ""}, ${
             user.email?.substring(0, 30) || ""
@@ -424,7 +512,40 @@ const UserManagement = () => {
     }
   };
 
-  // Data Filtering
+  // Data Filtering (always filter the full list, not just paginated)
+  const [allTrainees, setAllTrainees] = useState([]); // Store all trainees for export
+
+  // Data Filtering (for export: always use allTrainees, not paginated)
+  const filteredAllTrainees = useMemo(() => {
+    // Debug: Log all unique locations
+    const uniqueLocations = Array.from(new Set(allTrainees.map(u => (u.location || '').trim().toLowerCase())));
+    // console.log('Unique trainee locations:', uniqueLocations);
+
+    let filtered = allTrainees.filter(
+      (user) =>
+        user.fullName
+          .toLowerCase()
+          .includes(debouncedSearchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        user.role.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+    );
+    if (
+      selectedLocation &&
+      activeTab === "Trainees" &&
+      userRole === "super_admin"
+    ) {
+      filtered = filtered.filter(
+        (user) => {
+          const userLoc = (user.location || '').trim().toLowerCase();
+          const selectedLoc = selectedLocation.trim().toLowerCase();
+          return userLoc && userLoc === selectedLoc;
+        }
+      );
+    }
+    return filtered;
+  }, [allTrainees, debouncedSearchTerm, selectedLocation, activeTab, userRole]);
+
+  // Data Filtering (for display)
   const filteredUsersData = useMemo(() => {
     return users.filter(
       (user) =>
@@ -435,7 +556,6 @@ const UserManagement = () => {
         user.role.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
     );
   }, [users, debouncedSearchTerm]);
-
   const filteredGuestsData = useMemo(() => {
     return guests.filter(
       (guest) =>
@@ -449,7 +569,6 @@ const UserManagement = () => {
             .includes(debouncedSearchTerm.toLowerCase()))
     );
   }, [guests, debouncedSearchTerm]);
-
   const filteredOnlinePeopleData = useMemo(() => {
     return onlinePeople.filter(
       (person) =>
@@ -464,23 +583,64 @@ const UserManagement = () => {
     );
   }, [onlinePeople, debouncedSearchTerm]);
 
-  // Get Tab Data
+
+
+  // getTabData: Use facilitators state for Facilitators tab (no client-side pagination)
   const getTabData = (tabName) => {
+    let data = [];
     switch (tabName) {
       case "Trainees":
-        return filteredUsersData.filter((u) => u.role === "Trainee");
+        data = filteredAllTrainees;
+        break;
       case "Facilitators":
-        return filteredUsersData.filter((u) => u.role === "Facilitator");
+        data = facilitators;
+        break;
       case "Stakeholders":
-        return filteredUsersData.filter((u) => u.role === "Stakeholder");
+        data = filteredUsersData.filter((u) => u.role === "Stakeholder");
+        break;
       case "Guests":
-        return filteredGuestsData;
+        data = filteredGuestsData;
+        break;
       case "Online Trainees":
-        return filteredOnlinePeopleData;
+        data = filteredOnlinePeopleData;
+        break;
       default:
-        return [];
+        data = [];
     }
+    // Only apply client-side pagination to non-facilitators
+    if (tabName !== "Facilitators") {
+      const startIdx = (currentPage - 1) * itemsPerPage;
+      const endIdx = startIdx + itemsPerPage;
+      return data.slice(startIdx, endIdx);
+    }
+    return data;
   };
+
+
+
+  // Calculate total pages for current tab (skip for Facilitators, use backend pagination)
+  useEffect(() => {
+    if (activeTab === "Facilitators") return;
+    let totalItems = 0;
+    switch (activeTab) {
+      case "Trainees":
+        totalItems = filteredAllTrainees.length;
+        break;
+      case "Stakeholders":
+        totalItems = filteredUsersData.filter((u) => u.role === "Stakeholder").length;
+        break;
+      case "Guests":
+        totalItems = filteredGuestsData.length;
+        break;
+      case "Online Trainees":
+        totalItems = filteredOnlinePeopleData.length;
+        break;
+      default:
+        totalItems = 0;
+    }
+    const newTotalPages = Math.ceil(totalItems / itemsPerPage);
+    setTotalPages(newTotalPages);
+  }, [activeTab, filteredAllTrainees, filteredUsersData, filteredGuestsData, filteredOnlinePeopleData, itemsPerPage]);
 
   // console.log(onlinePeople)
 
@@ -507,15 +667,24 @@ const UserManagement = () => {
                 <th>Email</th>
                 <th>Phone</th>
                 <th>Last Active</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {onlinePeople.map((trainee) => (
+              {data.map((trainee) => (
                 <tr key={trainee.id}>
                   <td>{trainee.fullName}</td>
                   <td>{trainee.email}</td>
                   <td>{trainee.phoneNumber}</td>
                   <td>{new Date(trainee.lastActive).toLocaleString()}</td>
+                  <td>
+                    <button
+                      className="action-btn"
+                      onClick={() => handleTakeAction(trainee)}
+                    >
+                      Take action
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -524,10 +693,14 @@ const UserManagement = () => {
       );
     }
 
+    if (tabName === "Facilitators" && facilitatorsLoading) {
+      return <div className="users-table-wrapper"><DataLoader /></div>;
+    }
+
     if (data.length === 0) {
       return <div className="no-data-message">No {tabName.toLowerCase()} found.</div>;
     }
-
+    
     return (
       <div className="users-table-wrapper">
         <table className="users-table">
@@ -539,16 +712,26 @@ const UserManagement = () => {
                   <th>Email</th>
                   <th>Phone</th>
                   <th>Last Visit</th>
+                  <th>Actions</th>
                 </>
-              ) : tabName === "Online People" ? (
+              ) : tabName === "Online Trainees" ? (
                 <>
                   <th>Name</th>
                   <th>Email</th>
                   <th>Phone</th>
                   <th>Last Active</th>
+                  <th>Actions</th>
+                </>
+              ) : tabName === "Facilitators" ? (
+                <>
+                  <th>Full Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Actions</th>
                 </>
               ) : tabName === "Trainees" ? (
                 <>
+                  <th>ID</th>
                   <th>Full Name</th>
                   <th>Email</th>
                   <th>Role</th>
@@ -560,8 +743,8 @@ const UserManagement = () => {
                   <th>Full Name</th>
                   <th>Email</th>
                   <th>Role</th>
-                  {/* <th>Location</th> */}
                   <th>Status</th>
+                  <th>Actions</th>
                 </>
               )}
             </tr>
@@ -575,38 +758,108 @@ const UserManagement = () => {
                     <td>{item.email}</td>
                     <td>{item.phoneNumber}</td>
                     <td>{item.lastVisit}</td>
-                  </>
-                ) : tabName === "Online People" ? (
-                  <>
-                    <td>{item.fullName}</td>
-                    <td>{item.email}</td>
-                    <td>{item.phoneNumber}</td>
-                    <td>{new Date(item.lastActive).toLocaleString()}</td>
-                  </>
-                ) : (
-                  <>
-                    <td>{item.fullName}</td>
-                    <td>{item.email}</td>
-                    <td>{item.role}</td>
-                    {/* <td>{item.location}</td> */}
                     <td>
-                      <span
-                        className={`status-badge ${item.status}`}
-                        // onClick={() => toggleUserStatus(item.id)}
-                      >
-                        {item.status}
-                      </span>
-                    </td>
-                    {tabName === "Trainees" && (
-                      <td>
+                      {(tabName === "Guests" && (userRole === "super_admin" || userRole === "facilitator" || userRole === "admin")) ? (
                         <button
                           className="action-btn"
                           onClick={() => handleTakeAction(item)}
                         >
                           Take action
                         </button>
-                      </td>
-                    )}
+                      ) : (
+                        userRole === "super_admin" && (
+                          <button
+                            className="action-btn"
+                            onClick={() => handleTakeAction(item)}
+                          >
+                            Take action
+                          </button>
+                        )
+                      )}
+                    </td>
+                  </>
+                ) : tabName === "Online Trainees" ? (
+                  <>
+                    <td>{item.fullName}</td>
+                    <td>{item.email}</td>
+                    <td>{item.phoneNumber}</td>
+                    <td>{new Date(item.lastActive).toLocaleString()}</td>
+                    <td>
+                      <button
+                        className="action-btn"
+                        onClick={() => handleTakeAction(item)}
+                      >
+                        Take action
+                      </button>
+                    </td>
+                  </>
+                ) : tabName === "Facilitators" ? (
+                  <>
+                    <td>{item.fullName}</td>
+                    <td>{item.email}</td>
+                    <td>{item.role}</td>
+                    <td>
+                      {userRole === "super_admin" && (
+                        <button
+                          className="action-btn"
+                          onClick={() => handleTakeAction(item)}
+                        >
+                          Take action
+                        </button>
+                      )}
+                    </td>
+                  </>
+                ) : tabName === "Trainees" ? (
+                  <>
+                    <td>{item.firebaseId}</td>
+                    <td>{item.fullName}</td>
+                    <td>{item.email}</td>
+                    <td>{item.role}</td>
+                    <td>
+                      <span
+                        className={`status-dot ${item.status === 'active' ? 'active' : 'suspended'}`}
+                        title={item.status}
+                      />
+                    </td>
+                    <td>
+                      <button
+                        className="action-btn"
+                        onClick={() => handleTakeAction(item)}
+                      >
+                        Take action
+                      </button>
+                    </td>
+                  </>
+                ) : (
+                  <>
+                    <td>{item.fullName}</td>
+                    <td>{item.email}</td>
+                    <td>{item.role}</td>
+                    <td>
+                      <span
+                        className={`status-dot ${item.status === 'active' ? 'active' : 'suspended'}`}
+                        title={item.status}
+                      />
+                    </td>
+                    <td>
+                      {(tabName === "Trainees" && (userRole === "super_admin" || userRole === "facilitator" || userRole === "admin")) ? (
+                        <button
+                          className="action-btn"
+                          onClick={() => handleTakeAction(item)}
+                        >
+                          Take action
+                        </button>
+                      ) : (
+                        userRole === "super_admin" && (
+                          <button
+                            className="action-btn"
+                            onClick={() => handleTakeAction(item)}
+                          >
+                            Take action
+                          </button>
+                        )
+                      )}
+                    </td>
                   </>
                 )}
               </tr>
@@ -663,15 +916,31 @@ const UserManagement = () => {
 
   return (
     <div className="user-management-container">
-      {/* Action Modal */}
-      <Modal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onExportCSV={handleExportCSV}
-        onExportPDF={exportPDF}
-        onDelete={handleDeleteUser}
-        user={selectedUser}
-      />
+      {/* Action Modal: Use UserActionModal for trainees, EditModal for others */}
+      {activeTab === "Trainees" || activeTab === "Online Trainees" ? (
+        <UserActionModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          trainee={selectedUser}
+          onActionComplete={fetchAllData}
+          setFeedbackMessage={setFeedbackMessage}
+          showManualCheckIn={activeTab === "Trainees"}
+        />
+      ) : (
+        <EditModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          user={selectedUser}
+          userType={activeTab.slice(0, -1)} // Remove 's' from end (Facilitators -> Facilitator)
+          onActionComplete={() => {
+            fetchAllData();
+            setTimeout(() => {
+              setCurrentPage(currentPage);
+            }, 100);
+          }}
+          setFeedbackMessage={setFeedbackMessage}
+        />
+      )}
       {/* CSV Configuration Modal */}
       {openCsvConfig && (
         <CsvConfigModal
@@ -683,27 +952,23 @@ const UserManagement = () => {
         />
       )}
       {/* Header */}
-      <div className="header">
-        <div className="UM-title-section">
-          <h1>User Management</h1>
-          <p className="UM-subtitle">
-            {`Manage trainees${
-              userRole === "facilitator" ? "" : ", facilitators, stakeholders"
-            } and guests`}
-          </p>
-          {feedbackMessage && (
-            <p className="feedback-message">{feedbackMessage}</p>
-          )}
-          {fetchError && <p className="error-message">{fetchError}</p>}
-        </div>
-        <button
-          className="add-user-btn"
-          onClick={() => navigate("/add-user")}
-        >
-          <UserPlus size={16} />
-          <span>Add user</span>
-        </button>
-      </div>
+<div className="header">
+  <div className="UM-title-section">
+    <h1>User Management</h1>
+    <p className="UM-subtitle">
+      {`Manage trainees${
+        userRole === "facilitator" ? "" : ", facilitators, stakeholders"
+      } and guests`}
+    </p>
+    {feedbackMessage && <p className="feedback-message">{feedbackMessage}</p>}
+    {fetchError && <p className="error-message">{fetchError}</p>}
+  </div>
+  <button className="add-user-btn" onClick={() => navigate("/add-user")}>
+    <UserPlus size={16} />
+    <span>Add user</span>
+  </button>
+</div>
+
       {/* Tabs and Controls */}
       <div className="UMtabs-container">
         <div className="UMtabs-navigation">
@@ -716,7 +981,13 @@ const UserManagement = () => {
                 setCurrentPage(1);
               }}
             >
-              {tab} <span className="tab-count">{getTabData(tab).length}</span>
+              {tab} <span className="tab-count">{
+                tab === "Trainees" ? filteredAllTrainees.length :
+                tab === "Facilitators" ? facilitators.length :
+                tab === "Stakeholders" ? filteredUsersData.filter((u) => u.role === "Stakeholder").length :
+                tab === "Guests" ? filteredGuestsData.length :
+                tab === "Online Trainees" ? filteredOnlinePeopleData.length : 0
+              }</span>
             </button>
           ))}
         </div>
@@ -732,6 +1003,17 @@ const UserManagement = () => {
                 className="search-input"
               />
             </div>
+            {/* Location filter for super admin on Trainees tab */}
+            {activeTab === "Trainees" && userRole === "super_admin" && (
+              <div style={{ marginLeft: '1rem', minWidth: 180 }}>
+                <CustomDropdown
+                  options={[{ label: 'All Locations', value: '' }, ...LOCATIONS.map(loc => ({ label: loc, value: loc }))]}
+                  value={selectedLocation}
+                  onChange={setSelectedLocation}
+                  placeholder="Filter by location"
+                />
+              </div>
+            )}
           </div>
           <div className="right-controls">
             <button className="export-btn" onClick={exportPDF}>
@@ -760,7 +1042,7 @@ const UserManagement = () => {
               <div className="tab-content active">
                 {renderTable(activeTab)}
               </div>
-              {totalPages > 1 && activeTab === "Trainees" && (
+              {totalPages > 1 && (
                 <div className="pagination-container">
                   <div className="pagination-controls">
                     <button
@@ -797,8 +1079,11 @@ const UserManagement = () => {
       ) : (
         <></>
       )}
+      {feedbackMessage && (
+        <div className="snackbar-message">{feedbackMessage}</div>
+      )}
     </div>
   );
 };
 
-export default UserManagement;
+export default UserManagement; 

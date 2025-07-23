@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './styling/AddUserForm.css';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import CustomDropdown from './ui/CustomDropdown';
 
 const AddUserForm = () => {
     const navigate = useNavigate();
@@ -18,6 +19,7 @@ const AddUserForm = () => {
     const [location, setLocation] = useState('');
     const [role, setRole] = useState('');
     const userRole = localStorage.getItem('role');
+    const [loading, setLoading] = useState(false); // Add loading state
 
     // State for address
     const [street, setStreet] = useState('');
@@ -98,6 +100,8 @@ const AddUserForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (loading) return; // Prevent double submit
+        setLoading(true);
         
         // Validate physical address fields
         if (!street || !city || !postalCode) {
@@ -171,10 +175,13 @@ const AddUserForm = () => {
                 
                 // Delay navigation to allow toast to be seen
                 setTimeout(() => {
+                    setLoading(false); // Re-enable after delay
                     navigate('/user-management', { state: { userData } });
-                }, 1500);
+                }, 1500); // 1.5s delay
+                return;
             }
         } catch (error) {
+            setLoading(false); // Re-enable on error
             console.error('Error saving user:', error);
             
             // Enhanced error handling
@@ -188,6 +195,7 @@ const AddUserForm = () => {
                 notifyError(`Error: ${error.message}`);
             }
         }
+        setLoading(false); // Fallback re-enable
     };
 
     // Render physical address screen
@@ -260,15 +268,16 @@ const AddUserForm = () => {
                             type="button" 
                             className="back-btn"
                             onClick={() => setCurrentScreen('basic-info')}
+                            disabled={loading}
                         >
                             Back
                         </button>
                         <button 
                             type="submit" 
                             className="submit-btn"
-                            disabled={!isConfirmed}
+                            disabled={!isConfirmed || loading}
                         >
-                            Submit
+                            {loading ? 'Saving...' : 'Submit'}
                         </button>
                     </div>
                 </form>
@@ -354,38 +363,33 @@ const AddUserForm = () => {
 
                 <div className="form-group">
                     <label htmlFor="role">Role <span className="required">*</span></label>
-                    <select 
-                        id="role" 
+                    <CustomDropdown
+                        options={[
+                            ...(userRole === 'super_admin' ? [
+                                { value: 'SuperAdmin', label: 'Super Admin' },
+                                { value: 'Stakeholder', label: 'Stakeholder' },
+                                { value: 'Facilitator', label: 'Facilitator' },
+                            ] : []),
+                            { value: 'Trainee', label: 'Trainee' },
+                        ]}
                         value={role}
-                        onChange={(e) => setRole(e.target.value)}
-                        required
-                    >
-                        <option value="" disabled>Select role</option>
-                        {userRole === 'super_admin' && (
-                           <>
-                            <option value="SuperAdmin">Super Admin</option>
-                            <option value="Stakeholder">Stakeholder</option>
-                            <option value="Facilitator">Facilitator</option>
-                           </>
-                        )}
-                        <option value="Trainee">Trainee</option>
-                    </select>
+                        onChange={setRole}
+                        placeholder="Select role"
+                    />
                 </div>
 
                 {(role === 'Trainee' || role === 'Facilitator') && (
                     <div className="form-group">
                         <label htmlFor="location">Location <span className="required">*</span></label>
-                        <select 
-                            id="location" 
+                        <CustomDropdown
+                            options={[
+                                { value: '', label: 'Select Location', disabled: true },
+                                ...locations.map(loc => ({ value: loc, label: loc }))
+                            ]}
                             value={location}
-                            onChange={(e) => setLocation(e.target.value)}
-                            required
-                        >
-                            <option value="" disabled>Select Location</option>
-                            {locations.map((loc) => (
-                                <option key={loc} value={loc}>{loc}</option>
-                            ))}
-                        </select>
+                            onChange={setLocation}
+                            placeholder="Select Location"
+                        />
                     </div>
                 )}
 

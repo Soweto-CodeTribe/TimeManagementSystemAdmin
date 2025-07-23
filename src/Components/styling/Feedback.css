@@ -7,7 +7,8 @@
   --text-light: #888;
   --success-color: #10b981;
   --error-color: #ef4444;
-  --border-radius: 12px;
+  --border-radius: 50%;
+  --border-radius2: 12px;
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.07), 0 4px 6px rgba(0, 0, 0, 0.05);
@@ -68,7 +69,7 @@
 /* Feedback Card */
 .feedback-card {
   background-color: white;
-  border-radius: var(--border-radius);
+  border-radius: var(--border-radius2) var(--border-radius2) 0 var(--border-radius2);
   padding: 1.5rem;
   transition: var(--transition);
   box-shadow: var(--shadow-md);
@@ -109,7 +110,7 @@
 }
 
 .feedback-date {
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   color: var(--text-light);
   margin: 0;
 }

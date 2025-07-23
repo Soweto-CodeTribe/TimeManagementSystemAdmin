@@ -1,51 +1,45 @@
-import React, { useEffect } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth, initializeMessaging } from '../../firebaseConfig';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchUnreadCount, fetchUnreadNotifications } from '../../Slices/notificationsSlice';
 
 const NotificationHandler = () => {
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.auth.user);
+
+  // Polling for unread notifications every 15 seconds
   useEffect(() => {
-    const setupNotifications = async () => {
-      try {
-        // Listen for authentication state changes
-        onAuthStateChanged(auth, async (user) => {
-          if (user) {
-            try {
-              // Request notification permission for authenticated users
-              await initializeMessaging.requestNotificationPermission();
-            } catch (error) {
-              console.error('Notification setup failed:', error);
-            }
-          } else {
-            console.log('No user signed in. Skipping notification setup.');
-          }
-        });
+    if (!user?.id) return;
+    // Fetch immediately on mount
+    dispatch(fetchUnreadCount(user.id));
+    dispatch(fetchUnreadNotifications(user.id));
+    const interval = setInterval(() => {
+      dispatch(fetchUnreadCount(user.id));
+      dispatch(fetchUnreadNotifications(user.id));
+    }, 15000); // 15 seconds
+    return () => clearInterval(interval);
+  }, [user, dispatch]);
 
-        // Optional: Set up foreground message listener
-        initializeMessaging.onMessageListener()
-          .then((payload) => {
-            // Handle foreground notifications
-            if (payload?.notification) {
-              // Example: show desktop notification
-              new Notification(
-                payload.notification.title, 
-                { body: payload.notification.body }
-              );
-            }
-          })
-          .catch(error => console.error('Message listener error:', error));
-
-      } catch (error) {
-        console.error('Notification initialization error:', error);
-      }
-    };
-
-    setupNotifications();
-
-    // Cleanup function
-    return () => {
-      // Any cleanup logic if needed
-    };
-  }, []);
+  // --- SOCKET/FCM LOGIC DISABLED FOR NOW ---
+  // (Commented out to prevent WebSocket error spam)
+  // useEffect(() => {
+  //   let socketUnsubscribe;
+  //   if (token && user?.id) {
+  //     try {
+  //       const socket = initializeSocket(token);
+  //       if (socket) {
+  //         socketUnsubscribe = subscribeToNotifications(() => {
+  //           dispatch(fetchUnreadCount(user.id));
+  //           dispatch(fetchUnreadNotifications(user.id));
+  //         });
+  //       }
+  //     } catch (error) {
+  //       // Suppress errors
+  //     }
+  //   }
+  //   return () => {
+  //     if (socketUnsubscribe) socketUnsubscribe();
+  //   };
+  // }, [token, user, dispatch]);
 
   return null; // No rendering
 };

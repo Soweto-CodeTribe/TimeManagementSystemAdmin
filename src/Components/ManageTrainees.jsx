@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './styling/ManageTrainees.css';
+import { ChevronLeft } from 'lucide-react';
 
 const ManageTrainees = () => {
   const navigate = useNavigate();
@@ -62,7 +63,7 @@ const ManageTrainees = () => {
         }
       });
 
-      console.log("Trainees page data:", response.data);
+      // console.log("Trainees page data:", response.data);
       
       // Update pagination information
       const { pagination } = response.data;
@@ -324,192 +325,185 @@ const ManageTrainees = () => {
   };
 
   return (
-    <div className="program-manager-container">
-      <button className="back-arrow" onClick={() => navigate('/settings')}>
-        ← {/* This can be replaced with an icon if desired */}
-      </button>
-      <h2 className="program-title">Manage Trainee Program Dates</h2>
-
-      {/* Date Inputs */}
-      <div className="date-inputs">
-        <div className="date-input-group">
-          <label className="date-label">Program Start Date</label>
-          <input
-            type="date"
-            value={programStartDate}
-            onChange={(e) => setProgramStartDate(e.target.value)}
-            className="date-input"
-            required
-          />
-        </div>
-        <div className="date-input-group">
-          <label className="date-label">Program End Date (Optional)</label>
-          <input
-            type="date"
-            value={programEndDate}
-            onChange={(e) => setProgramEndDate(e.target.value)}
-            className="date-input"
-          />
-        </div>
-      </div>
-
-      {/* Pagination Summary */}
-      <div className="pagination-summary">
-        <span>
-          Showing {trainees.length} of {totalTrainees} trainees
-        </span>
-        {!allTraineesLoaded && (
-          <button 
-            className="load-all-button" 
-            onClick={loadAllTrainees}
-            disabled={loading || loadingMore}
-          >
-            Load All Trainees
-          </button>
-        )}
-      </div>
-
-      {/* Mode indicator */}
-      <div className="update-mode-indicator">
-        {isSingleUpdate && currentTrainee ? (
-          <p className="single-update-indicator">
-            Setting dates for: {currentTrainee.name} {currentTrainee.surname}
-            {currentTrainee.traineeId ? ` (ID: ${currentTrainee.traineeId})` : ` (ID: ${currentTrainee.id})`}
-          </p>
-        ) : (
-          <p className="bulk-update-indicator">
-            Bulk update: {selectedTrainees.length} trainees selected
-          </p>
-        )}
-      </div>
-
-      {/* Trainees Selection */}
-      <div className="trainees-selection">
-        <div className="select-all-container">
-          <input
-            type="checkbox"
-            checked={selectAll}
-            onChange={handleSelectAll}
-            className="checkbox"
-            id="select-all-trainees"
-            disabled={isSingleUpdate}
-          />
-          <label htmlFor="select-all-trainees" className="select-all-label">
-            Select All Trainees ({trainees.length})
-          </label>
-        </div>
-        
-        {loading && !submitting ? (
-          <div className="loading-container">
-            <div className="loader"></div>
-            <p className="loading-text">Loading trainees...</p>
-          </div>
-        ) : (
-          <div className="trainees-list">
-            {trainees.length > 0 ? (
-              trainees.map((trainee) => (
-                <div
-                  key={trainee.id}
-                  className={`trainee-item ${
-                    selectedTrainees.includes(trainee.id) 
-                      ? isSingleUpdate && currentTrainee && currentTrainee.id === trainee.id
-                        ? 'single-selected'
-                        : 'selected'
-                      : ''
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedTrainees.includes(trainee.id)}
-                    onChange={() => handleTraineeSelect(trainee.id)}
-                    className="checkbox"
-                    id={`trainee-${trainee.id}`}
-                  />
-                  <label
-                    htmlFor={`trainee-${trainee.id}`}
-                    className="trainee-label"
-                  >
-                    {trainee.name} {trainee.surname} {trainee.traineeId ? `(ID: ${trainee.traineeId})` : `(ID: ${trainee.id})`}
-                    {trainee.programStartDate && (
-                      <span className="program-date-info">
-                        Start: {new Date(trainee.programStartDate).toLocaleDateString()}
-                        {trainee.programEndDate && ` | End: ${new Date(trainee.programEndDate).toLocaleDateString()}`}
-                      </span>
-                    )}
-                  </label>
-                </div>
-              ))
-            ) : (
-              <p className="no-results">No trainees available</p>
-            )}
-            
-            {/* Load More Button */}
-            {!loading && !allTraineesLoaded && trainees.length > 0 && (
-              <div className="load-more-container">
-                <button 
-                  className="load-more-button" 
-                  onClick={handleLoadMore}
-                  disabled={loadingMore}
-                >
-                  {loadingMore ? (
-                    <span className="button-content">
-                      <span className="button-loader"></span>
-                      <span>Loading More...</span>
-                    </span>
-                  ) : (
-                    `Load More (${trainees.length}/${totalTrainees})`
-                  )}
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Actions */}
-      <div className="actions-container">
-        <button
-          onClick={handleClearSelection}
-          className="clear-button"
-          disabled={loading || selectedTrainees.length === 0}
-        >
-          Clear
+    <div className="manage-trainees-root">
+      <div className="manage-trainees-card">
+        <button className="back desktop-back" onClick={() => navigate('/settings')}>
+          <ChevronLeft /> <span style={{ fontSize: ".95em", marginLeft: 6 }}>Back To Settings</span>
         </button>
-        <button
-          onClick={handleSetProgramDates}
-          disabled={loading || selectedTrainees.length === 0 || !programStartDate}
-          className={`set-date-button ${loading ? 'button-disabled' : ''} ${isSingleUpdate ? 'single-update-button' : 'bulk-update-button'}`}
-        >
-          {submitting ? (
-            <span className="button-content">
-              <span className="button-loader"></span>
-              <span>Updating...</span>
-            </span>
-          ) : (
-            isSingleUpdate ? 'Set Date for Selected Trainee' : 'Set Dates for Selected Trainees'
+        <h1 className="program-title">Manage Trainees</h1>
+        {/* Date Inputs */}
+        <div className="date-inputs">
+          <div className="date-input-group">
+            <label className="date-label">Program Start Date</label>
+            <input
+              type="date"
+              value={programStartDate}
+              onChange={(e) => setProgramStartDate(e.target.value)}
+              className="date-input"
+              required
+            />
+          </div>
+          <div className="date-input-group">
+            <label className="date-label">Program End Date (Optional)</label>
+            <input
+              type="date"
+              value={programEndDate}
+              onChange={(e) => setProgramEndDate(e.target.value)}
+              className="date-input"
+            />
+          </div>
+        </div>
+        {/* Pagination Summary */}
+        <div className="pagination-summary">
+          <span>
+            Showing {trainees.length} of {totalTrainees} trainees
+          </span>
+          {!allTraineesLoaded && (
+            <button 
+              className="load-all-button green-btn" 
+              onClick={loadAllTrainees}
+              disabled={loading || loadingMore}
+            >
+              Load All Trainees
+            </button>
           )}
-        </button>
-      </div>
-
-      {/* Message Display */}
-      {message && (
-        <div className={`message ${message.includes('Successfully') ? 'success-message' : 'error-message'}`}>
-          {message}
         </div>
-      )}
-
-      {/* Popup Notification */}
-      {showPopup && (
-        <div className={`popup-notification ${popupType}-popup`}>
-          <div className="popup-content">
-            <span className="popup-icon">
-              {popupType === 'success' ? '✓' : popupType === 'info' ? 'ℹ' : '⚠'}
-            </span>
-            <p>{popupMessage}</p>
-            <button className="close-popup" onClick={() => setShowPopup(false)}>×</button>
+        {/* Mode indicator */}
+        <div className="update-mode-indicator">
+          {isSingleUpdate && currentTrainee ? (
+            <p className="single-update-indicator">
+              Setting dates for: {currentTrainee.name} {currentTrainee.surname}
+              {currentTrainee.traineeId ? ` (ID: ${currentTrainee.traineeId})` : ` (ID: ${currentTrainee.id})`}
+            </p>
+          ) : (
+            <p className="bulk-update-indicator">
+              Bulk update: {selectedTrainees.length} trainees selected
+            </p>
+          )}
+        </div>
+        {/* Trainees Selection */}
+        <div className="trainees-selection">
+          <div className="select-all-container">
+            <input
+              type="checkbox"
+              checked={selectAll}
+              onChange={handleSelectAll}
+              className="checkbox"
+              id="select-all-trainees"
+              disabled={isSingleUpdate}
+            />
+            <label htmlFor="select-all-trainees" className="select-all-label">
+              Select All Trainees ({trainees.length})
+            </label>
           </div>
+          {loading && !submitting ? (
+            <div className="loading-container">
+              <div className="loader"></div>
+              <p className="loading-text">Loading trainees...</p>
+            </div>
+          ) : (
+            <div className="trainees-list">
+              {trainees.length > 0 ? (
+                trainees.map((trainee) => (
+                  <div
+                    key={trainee.id}
+                    className={`trainee-item ${
+                      selectedTrainees.includes(trainee.id) 
+                        ? isSingleUpdate && currentTrainee && currentTrainee.id === trainee.id
+                          ? 'single-selected'
+                          : 'selected'
+                        : ''
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedTrainees.includes(trainee.id)}
+                      onChange={() => handleTraineeSelect(trainee.id)}
+                      className="checkbox"
+                      id={`trainee-${trainee.id}`}
+                    />
+                    <label
+                      htmlFor={`trainee-${trainee.id}`}
+                      className="trainee-label"
+                    >
+                      {trainee.name} {trainee.surname} {trainee.traineeId ? `(ID: ${trainee.traineeId})` : `(ID: ${trainee.id})`}
+                      {trainee.programStartDate && (
+                        <span className="program-date-info">
+                          Start: {new Date(trainee.programStartDate).toLocaleDateString()}
+                          {trainee.programEndDate && ` | End: ${new Date(trainee.programEndDate).toLocaleDateString()}`}
+                        </span>
+                      )}
+                    </label>
+                  </div>
+                ))
+              ) : (
+                <p className="no-results">No trainees available</p>
+              )}
+              {/* Load More Button */}
+              {!loading && !allTraineesLoaded && trainees.length > 0 && (
+                <div className="load-more-container">
+                  <button 
+                    className="load-more-button green-btn" 
+                    onClick={handleLoadMore}
+                    disabled={loadingMore}
+                  >
+                    {loadingMore ? (
+                      <span className="button-content">
+                        <span className="button-loader"></span>
+                        <span>Loading More...</span>
+                      </span>
+                    ) : (
+                      `Load More (${trainees.length}/${totalTrainees})`
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
-      )}
+        {/* Actions */}
+        <div className="actions-container">
+          <button
+            onClick={handleClearSelection}
+            className="clear-button green-btn"
+            disabled={loading || selectedTrainees.length === 0}
+          >
+            Clear
+          </button>
+          <button
+            onClick={handleSetProgramDates}
+            disabled={loading || selectedTrainees.length === 0 || !programStartDate}
+            className={`set-date-button green-btn ${loading ? 'button-disabled' : ''} ${isSingleUpdate ? 'single-update-button' : 'bulk-update-button'}`}
+          >
+            {submitting ? (
+              <span className="button-content">
+                <span className="button-loader"></span>
+                <span>Updating...</span>
+              </span>
+            ) : (
+              isSingleUpdate ? 'Set Date for Selected Trainee' : 'Set Dates for Selected Trainees'
+            )}
+          </button>
+        </div>
+        {/* Message Display */}
+        {message && (
+          <div className={`message ${message.includes('Successfully') ? 'success-message' : 'error-message'}`}>
+            {message}
+          </div>
+        )}
+        {/* Popup Notification */}
+        {showPopup && (
+          <div className={`popup-notification ${popupType}-popup`}>
+            <div className="popup-content">
+              <span className="popup-icon">
+                {popupType === 'success' ? '✓' : popupType === 'info' ? 'ℹ' : '⚠'}
+              </span>
+              <p>{popupMessage}</p>
+              <button className="close-popup" onClick={() => setShowPopup(false)}>×</button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

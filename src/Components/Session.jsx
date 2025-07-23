@@ -6,6 +6,7 @@ import { useEffect, useState } from "react"
 import { useSelector } from 'react-redux'
 import DataLoader from "./dataLoader"
 import "./styling/Session.css"
+import CustomDropdown from './ui/CustomDropdown';
 
 const SessionMonitoring = () => {
   const BASE_URL = "https://timemanagementsystemserver.onrender.com/"
@@ -25,6 +26,8 @@ const SessionMonitoring = () => {
   const [filterLocation, setFilterLocation] = useState("") // State for location filter
   const [isFilterOpen, setIsFilterOpen] = useState(false) // State for filter visibility
 
+
+
   // Locations array
   const LOCATIONS = [
     "TIH", 
@@ -40,6 +43,8 @@ const SessionMonitoring = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [itemsPerPage] = useState(10)
+
+
 
   // Debounce logic
   useEffect(() => {
@@ -70,9 +75,8 @@ const SessionMonitoring = () => {
           page: page,
           limit: itemsPerPage,
           search: debouncedSearchTerm, // Use debounced search term
-          status: filterStatus || undefined,
+          // Remove status filter from API - let client-side handle it
           date: filterDate || undefined,
-          // location: filterLocation || undefined,
           location: locationFilter,
         },
         headers: {
@@ -133,6 +137,46 @@ const SessionMonitoring = () => {
     setIsFilterOpen(false);
   };
 
+  // ---
+  // STATUS FILTERING IS HANDLED ON THE FRONTEND
+  // The backend does not reliably support status filtering, so we fetch all records for the selected date/location
+  // and filter by status on the client. Update statusMap as needed to match all possible backend status values.
+  // ---
+  const statusMap = {
+    present: ["present", "early", "on time", "within grace period", "late"],
+    absent: ["absent", "absentee"],
+    late: ["late"],
+    // Add more status groupings here if needed
+  };
+  
+  const filteredReports = reports.filter((report) => {
+    let matchesStatus = true;
+    if (filterStatus) {
+      const normalized = (report.status || "").toLowerCase().trim();
+      console.log(`Filtering: status="${normalized}", filterStatus="${filterStatus}"`);
+      
+      if (statusMap[filterStatus]) {
+        matchesStatus = statusMap[filterStatus].includes(normalized);
+        console.log(`Status match: ${matchesStatus} (${normalized} in ${JSON.stringify(statusMap[filterStatus])})`);
+      } else {
+        matchesStatus = normalized === filterStatus.toLowerCase();
+        console.log(`Direct match: ${matchesStatus} (${normalized} === ${filterStatus.toLowerCase()})`);
+      }
+    }
+    
+    const matchesSearch = debouncedSearchTerm
+      ? (report.traineeId?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+         report.name?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()))
+      : true;
+      
+    const matchesDate = filterDate ? new Date(report.date).toLocaleDateString() === new Date(filterDate).toLocaleDateString() : true;
+    
+    const result = matchesStatus && matchesSearch && matchesDate;
+    // console.log(`Report ${report.name}: status=${matchesStatus}, search=${matchesSearch}, date=${matchesDate}, final=${result}`);
+    
+    return result;
+  });
+
   const renderPaginationNumbers = () => {
     const pageNumbers = []
     const maxVisiblePages = 5
@@ -167,6 +211,8 @@ const SessionMonitoring = () => {
     }
   }
 
+
+
   if (isLoading) return <DataLoader />
 
   return (
@@ -186,9 +232,7 @@ const SessionMonitoring = () => {
     <div className={`metric-card ${metric.color}`} key={index}>
       <div className="metric-header">
         <div className={`metric-icon ${metric.color}`}>
-          {/* <div className={`metric-dot ${metric.color}`}> */}
-            <metric.icon className="metric-session-icon" style={{ color: metric.iconColor }} />
-          {/* </div> */}
+          <metric.icon className="metric-session-icon" style={{ color: metric.iconColor }} />
         </div>
         <span className="metric-label">{metric.label}</span>
       </div>
@@ -217,23 +261,23 @@ const SessionMonitoring = () => {
                 <div className="filter-dropdown">
                   <div className="filter-group">
                     <label>Status:</label>
-                    <select
+                    <CustomDropdown
+                      options={[
+                        { value: '', label: 'All' },
+                        { value: 'present', label: 'Present' },
+                        { value: 'absent', label: 'Absent' },
+                        { value: 'late', label: 'Late' },
+                      ]}
                       value={filterStatus}
-                      // onChange={(e) => setFilterStatus(e.target.value)}
-                      onChange={(e) => handleStatusChange(e.target.value)}
-                    >
-                      <option value="">All</option>
-                      <option value="present">Present</option>
-                      <option value="absent">Absent</option>
-                      <option value="late">Late</option>
-                    </select>
+                      onChange={handleStatusChange}
+                      placeholder="All"
+                    />
                   </div>
                   <div className="filter-group">
                     <label>Date:</label>
                     <input
                       type="date"
                       value={filterDate}
-                      // onChange={(e) => setFilterDate(e.target.value)}
                       onChange={(e) => handleDateChange(e.target.value)}
                     />
                   </div>
@@ -241,18 +285,15 @@ const SessionMonitoring = () => {
                   {userRole === 'super_admin' && (
                   <div className="filter-group">
                     <label>Location:</label>
-                    <select
+                    <CustomDropdown
+                      options={[
+                        { value: '', label: 'All Locations' },
+                        ...LOCATIONS.map(location => ({ value: location, label: location }))
+                      ]}
                       value={filterLocation}
-                      // onChange={(e) => setFilterLocation(e.target.value)}
-                      onChange={(e) => handleLocationChange(e.target.value)}
-                    >
-                      <option value="">All Locations</option>
-                      {LOCATIONS.map((location) => (
-                        <option key={location} value={location}>
-                          {location}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={handleLocationChange}
+                      placeholder="All Locations"
+                    />
                   </div>
                   )}
                 </div>
@@ -285,7 +326,7 @@ const SessionMonitoring = () => {
           <div className="error-container">
             <p className="error-message">{error}</p>
           </div>
-        ) : reports.length === 0 ? (
+        ) : filteredReports.length === 0 ? (
           <div className="noDataContainer">
             <Info size={48} />
             <h3>No Attendance Records</h3>
@@ -312,7 +353,7 @@ const SessionMonitoring = () => {
                 </tr>
               </thead>
               <tbody>
-                {reports.map((report, index) => (
+                {filteredReports.map((report, index) => (
                   <tr key={index}>
                     <td>{report.traineeId || "-"}</td>
                     <td>{report.name || "N/A"}</td>

@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './styling/LocationManagement.css';
+import { ArrowLeft, ChevronLeft } from 'lucide-react';
 
 const LocationManagement = () => {
   const navigate = useNavigate();
@@ -16,11 +17,18 @@ const LocationManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
+  const formRef = useRef(null);
 
   // Fetch all locations when component mounts
   useEffect(() => {
     fetchLocations();
   }, []);
+
+  useEffect(() => {
+    if (editingId && formRef.current) {
+      formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [editingId]);
 
   const fetchLocations = async () => {
     setIsLoading(true);
@@ -181,167 +189,145 @@ const LocationManagement = () => {
   };
 
   return (
-    <div className="location-management">
-      <button className="back" onClick={() => navigate('/settings')}>
-        ← {/* This can be replaced by a back arrow icon */}
-      </button>
-
-      {message.text && (
-        <div className={`message ${message.type}`}>
-          {message.text}
-          <button
-            onClick={() => setMessage({ text: '', type: '' })}
-            className="close-btn"
-          >
-            ×
-          </button>
-        </div>
-      )}
-      <div className="location-form-container">
-        <h2>{editingId ? 'Edit Location' : 'Add New Location'}</h2>
-        <form onSubmit={handleSubmit} className="location-form">
-          <div className="form-group">
-            <label htmlFor="name">Location Name*</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              required
-              placeholder="Enter location name"
-            />
-          </div>
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="latitude">Latitude*</label>
-              <input
-                type="number"
-                id="latitude"
-                name="latitude"
-                value={formData.latitude}
-                onChange={handleInputChange}
-                required
-                step="any"
-                placeholder="Enter latitude (e.g. 51.509865)"
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="longitude">Longitude*</label>
-              <input
-                type="number"
-                id="longitude"
-                name="longitude"
-                value={formData.longitude}
-                onChange={handleInputChange}
-                required
-                step="any"
-                placeholder="Enter longitude (e.g. -0.118092)"
-              />
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={getCurrentLocation}
-            className="location-btn"
-            disabled={isGettingLocation}
-          >
-            {isGettingLocation ? 'Getting Location...' : 'Use Current Location'}
-          </button>
-          <div className="form-group">
-            <label htmlFor="radius">Radius (meters)*</label>
-            <input
-              type="number"
-              id="radius"
-              name="radius"
-              value={formData.radius}
-              onChange={handleInputChange}
-              required
-              min="1"
-              placeholder="Enter radius in meters (e.g. 500)"
-            />
-          </div>
-          <div className="form-group checkbox-group">
-            <label>
-              <input
-                type="checkbox"
-                name="active"
-                checked={formData.active}
-                onChange={handleInputChange}
-              />
-              Active
-            </label>
-          </div>
-          <div className="form-buttons">
+    <div className="location-management-root">
+      <div className="location-management-card">
+        <button className="back desktop-back" onClick={() => navigate('/settings')}>
+          <ChevronLeft /> <span style={{ fontSize: ".95em", marginLeft: 6 }}>Back To Settings</span>
+        </button>
+        {message.text && (
+          <div className={`message ${message.type}`}>
+            {message.text}
             <button
-              type="submit"
-              className="submit-btn"
-              disabled={isLoading}
+              onClick={() => setMessage({ text: '', type: '' })}
+              className="close-btn"
             >
-              {isLoading ? 'Processing...' : editingId ? 'Update Location' : 'Add Location'}
+              ×
             </button>
-            {editingId && (
-              <button
-                type="button"
-                onClick={resetForm}
-                className="cancel-btn"
-              >
+          </div>
+        )}
+        <div className="location-form-container">
+          <h2>{editingId ? 'Edit Location' : 'Add New Location'}</h2>
+          <form ref={formRef} onSubmit={handleSubmit} className="location-form">
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="name">Location Name*</label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  required
+                  placeholder="Enter location name"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="latitude">Latitude*</label>
+                <input
+                  type="number"
+                  id="latitude"
+                  name="latitude"
+                  value={formData.latitude}
+                  onChange={handleInputChange}
+                  required
+                  step="any"
+                  placeholder="Enter latitude (e.g. 51.509865)"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="longitude">Longitude*</label>
+                <input
+                  type="number"
+                  id="longitude"
+                  name="longitude"
+                  value={formData.longitude}
+                  onChange={handleInputChange}
+                  required
+                  step="any"
+                  placeholder="Enter longitude (e.g. -0.118092)"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="radius">Radius (meters)*</label>
+                <input
+                  type="number"
+                  id="radius"
+                  name="radius"
+                  value={formData.radius}
+                  onChange={handleInputChange}
+                  required
+                  step="any"
+                  placeholder="Enter radius"
+                />
+              </div>
+              <div className="form-group checkbox-group">
+                <label htmlFor="active">
+                  <input
+                    type="checkbox"
+                    id="active"
+                    name="active"
+                    checked={formData.active}
+                    onChange={handleInputChange}
+                  />
+                  Active
+                </label>
+              </div>
+            </div>
+            <div className="form-buttons">
+              <button type="submit" className="submit-btn green-btn">
+                {editingId ? 'Update' : 'Add'}
+              </button>
+              <button type="button" className="cancel-btn" onClick={resetForm}>
                 Cancel
               </button>
-            )}
-          </div>
-        </form>
-      </div>
-      <div className="locations-list">
-        <h2>Allowed Locations</h2>
-        {isLoading && <div className="loading">Loading locations...</div>}
-        {locations.length === 0 && !isLoading ? (
-          <p className="no-locations">No locations added yet.</p>
-        ) : (
-          <table className="locations-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Co-ordinates</th>
-                <th>Radius</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {locations.map((location) => (
-                <tr key={location.id} className={location.active ? '' : 'inactive'}>
-                  <td>{location.name}</td>
-                  <td>
-                    {Number(location.latitude).toFixed(6)}, {Number(location.longitude).toFixed(6)}
-                  </td>
-                  <td>{location.radius}m</td>
-                  <td>
-                    <span className={`status-badge ${location.active ? 'active' : 'inactive'}`}>
-                      {location.active ? 'Active' : 'Inactive'}
-                    </span>
-                  </td>
-                  <td>
-                    <div className="action-buttons">
-                      <button
-                        onClick={() => handleEdit(location)}
-                        className="edit-btn"
-                      >
+              <button type="button" className="location-btn green-btn" onClick={getCurrentLocation} disabled={isGettingLocation}>
+                {isGettingLocation ? 'Getting...' : 'Get Location'}
+              </button>
+            </div>
+          </form>
+        </div>
+        <div className="locations-list">
+          <h2 style={{marginBottom: '1rem'}}>Locations</h2>
+          {isLoading ? (
+            <div className="loading">Loading...</div>
+          ) : locations.length === 0 ? (
+            <div className="no-locations">No locations found.</div>
+          ) : (
+            <table className="locations-table desktop-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Latitude</th>
+                  <th>Longitude</th>
+                  <th>Radius</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {locations.map((location) => (
+                  <tr key={location.id || location._id} className={location.active === false ? 'inactive' : ''}>
+                    <td>{location.name}</td>
+                    <td>{location.latitude}</td>
+                    <td>{location.longitude}</td>
+                    <td>{location.radius}</td>
+                    <td>
+                      <span className={`status-badge ${location.active !== false ? 'active' : 'inactive'}`}>{location.active !== false ? 'Active' : 'Inactive'}</span>
+                    </td>
+                    <td className="action-buttons">
+                      <button className="edit-btn green-btn" onClick={() => handleEdit(location)}>
                         Edit
                       </button>
-                      <button
-                        onClick={() => handleDelete(location.id)}
-                        className="delete-btn"
-                      >
+                      <button className="delete-btn" onClick={() => handleDelete(location.id || location._id)}>
                         Delete
                       </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
       </div>
     </div>
   );
