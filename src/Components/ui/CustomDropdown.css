@@ -9,10 +9,11 @@
   background: #fff;
   border: 1px solid #ccc;
   border-radius: 6px;
-  padding: 10px 36px 10px 12px;
+  padding: 5px;
   cursor: pointer;
   position: relative;
   min-height: 40px;
+  font-size: 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;

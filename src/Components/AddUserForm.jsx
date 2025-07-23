@@ -19,6 +19,7 @@ const AddUserForm = () => {
     const [location, setLocation] = useState('');
     const [role, setRole] = useState('');
     const userRole = localStorage.getItem('role');
+    const [loading, setLoading] = useState(false); // Add loading state
 
     // State for address
     const [street, setStreet] = useState('');
@@ -99,6 +100,8 @@ const AddUserForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (loading) return; // Prevent double submit
+        setLoading(true);
         
         // Validate physical address fields
         if (!street || !city || !postalCode) {
@@ -172,10 +175,13 @@ const AddUserForm = () => {
                 
                 // Delay navigation to allow toast to be seen
                 setTimeout(() => {
+                    setLoading(false); // Re-enable after delay
                     navigate('/user-management', { state: { userData } });
-                }, 1500);
+                }, 1500); // 1.5s delay
+                return;
             }
         } catch (error) {
+            setLoading(false); // Re-enable on error
             console.error('Error saving user:', error);
             
             // Enhanced error handling
@@ -189,6 +195,7 @@ const AddUserForm = () => {
                 notifyError(`Error: ${error.message}`);
             }
         }
+        setLoading(false); // Fallback re-enable
     };
 
     // Render physical address screen
@@ -261,15 +268,16 @@ const AddUserForm = () => {
                             type="button" 
                             className="back-btn"
                             onClick={() => setCurrentScreen('basic-info')}
+                            disabled={loading}
                         >
                             Back
                         </button>
                         <button 
                             type="submit" 
                             className="submit-btn"
-                            disabled={!isConfirmed}
+                            disabled={!isConfirmed || loading}
                         >
-                            Submit
+                            {loading ? 'Saving...' : 'Submit'}
                         </button>
                     </div>
                 </form>

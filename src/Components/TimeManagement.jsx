@@ -148,150 +148,134 @@ const TimeManagement = () => {
   };
 
   return (
-    <div className="time-management-container">
-      <button onClick={handleBack} className="back-button" aria-label="Go back">
-        <FaArrowLeft />
-      </button>
-
-      <h1 className="title">Time Management</h1>
-      <p>Configure your business hours and session timeout settings.</p>
-
-      <div className="divider"></div>
-
-      <h2 className="subtitle">Business Hours</h2>
-
-      <div className="time-input-group">
-        <label htmlFor="business-start-time">Business Start Time:</label>
-        <div
-          className="time-input"
-          ref={timePickerRefs.businessStart}
-          onClick={() => handleTimeChange("businessStart")}
-        >
-          <input type="text" id="business-start-time" value={formatTimeValue(businessStartTime)} readOnly />
-          <span className="clock-icon"><FaRegClock /></span>
-        </div>
-      </div>
-
-      <div className="time-input-group">
-        <label htmlFor="lunch-start-time">Lunch Start Time:</label>
-        <div className="time-input" ref={timePickerRefs.lunchStart} onClick={() => handleTimeChange("lunchStart")}>
-          <input type="text" id="lunch-start-time" value={formatTimeValue(lunchStartTime)} readOnly />
-          <span className="clock-icon"><FaRegClock /></span>
-        </div>
-      </div>
-
-      <div className="time-input-group">
-        <label htmlFor="lunch-end-time">Lunch End Time:</label>
-        <div className="time-input" ref={timePickerRefs.lunchEnd} onClick={() => handleTimeChange("lunchEnd")}>
-          <input type="text" id="lunch-end-time" value={formatTimeValue(lunchEndTime)} readOnly />
-          <span className="clock-icon"><FaRegClock /></span>
-        </div>
-      </div>
-
-      <div className="time-input-group">
-        <label htmlFor="business-end-time">Business End Time:</label>
-        <div className="time-input" ref={timePickerRefs.businessEnd} onClick={() => handleTimeChange("businessEnd")}>
-          <input type="text" id="business-end-time" value={formatTimeValue(businessEndTime)} readOnly />
-          <span className="clock-icon"><FaRegClock /></span>
-        </div>
-      </div>
-
-      <div className="divider"></div>
-
-      <div className="timeout-section">
-        <h2 className="subtitle">Session Timeout</h2>
-        <p className="timeout-label">Select the session timeout duration:</p>
-        <div className="radio-group">
-          <label className="radio-label">
-            <input
-              type="radio"
-              value="15"
-              checked={sessionTimeout === "15"}
-              onChange={(e) => setSessionTimeout(e.target.value)}
-            />
-            <span className="radio-custom"></span>
-            <span className="radio-text">15 minutes</span>
-          </label>
-
-          <label className="radio-label">
-            <input
-              type="radio"
-              value="30"
-              checked={sessionTimeout === "30"}
-              onChange={(e) => setSessionTimeout(e.target.value)}
-            />
-            <span className="radio-custom"></span>
-            <span className="radio-text">30 minutes</span>
-          </label>
-
-          <label className="radio-label">
-            <input
-              type="radio"
-              value="60"
-              checked={sessionTimeout === "60"}
-              onChange={(e) => setSessionTimeout(e.target.value)}
-            />
-            <span className="radio-custom"></span>
-            <span className="radio-text">60 minutes</span>
-          </label>
-        </div>
-      </div>
-
-      <button className="save-button" onClick={handleSave}>
-        Save Settings
-      </button>
-
-      {activeTimePicker && (
-        <div className="time-picker" ref={timePickerRef}>
-          <div className="time-picker-section">
-            <h3 className="time-picker-label">Select Hour</h3>
-            <div className="time-picker-options">
-              {hours.map((hour) => (
-                <div
-                  key={hour}
-                  className={`time-picker-option ${getCurrentTimeValue().hours === hour ? "selected" : ""}`}
-                  onClick={() => handleHourChange(hour)}
-                >
-                  {hour}
-                </div>
-              ))}
-            </div>
+    <div className="time-management-root">
+      <div className="time-management-card">
+        <button onClick={handleBack} className="back-button" aria-label="Go back">
+          <FaArrowLeft />
+        </button>
+        <h1 className="title">Time Management</h1>
+        <p className="subtitle">Configure your business hours and session timeout settings.</p>
+        <div className="divider"></div>
+        <h2 className="subtitle section-title">Business Hours</h2>
+        <div className="time-input-group">
+          <label htmlFor="business-start-time">Business Start Time:</label>
+          <div
+            className="time-input"
+            ref={timePickerRefs.businessStart}
+            onClick={() => handleTimeChange("businessStart")}
+          >
+            <input type="text" id="business-start-time" value={formatTimeValue(businessStartTime)} readOnly />
+            <span className="clock-icon"><FaRegClock /></span>
           </div>
-
-          <div className="time-picker-section">
-            <h3 className="time-picker-label">Select Minute</h3>
-            <div className="time-picker-options">
-              {minutes.map((minute) => (
-                <div
-                  key={minute}
-                  className={`time-picker-option ${getCurrentTimeValue().minutes === minute ? "selected" : ""}`}
-                  onClick={() => handleMinuteChange(minute)}
-                >
-                  {minute.toString().padStart(2, "0")}
-                </div>
-              ))}
-            </div>
+        </div>
+        <div className="time-input-group">
+          <label htmlFor="lunch-start-time">Lunch Start Time:</label>
+          <div className="time-input" ref={timePickerRefs.lunchStart} onClick={() => handleTimeChange("lunchStart")}> 
+            <input type="text" id="lunch-start-time" value={formatTimeValue(lunchStartTime)} readOnly />
+            <span className="clock-icon"><FaRegClock /></span>
           </div>
-
-          <div className="time-picker-section">
-            <h3 className="time-picker-label">Select Period</h3>
-            <div className="time-picker-options period">
-              <div
-                className={`time-picker-option ${getCurrentTimeValue().period === "AM" ? "selected" : ""}`}
-                onClick={() => handlePeriodChange("AM")}
-              >
-                AM
+        </div>
+        <div className="time-input-group">
+          <label htmlFor="lunch-end-time">Lunch End Time:</label>
+          <div className="time-input" ref={timePickerRefs.lunchEnd} onClick={() => handleTimeChange("lunchEnd")}> 
+            <input type="text" id="lunch-end-time" value={formatTimeValue(lunchEndTime)} readOnly />
+            <span className="clock-icon"><FaRegClock /></span>
+          </div>
+        </div>
+        <div className="time-input-group">
+          <label htmlFor="business-end-time">Business End Time:</label>
+          <div className="time-input" ref={timePickerRefs.businessEnd} onClick={() => handleTimeChange("businessEnd")}> 
+            <input type="text" id="business-end-time" value={formatTimeValue(businessEndTime)} readOnly />
+            <span className="clock-icon"><FaRegClock /></span>
+          </div>
+        </div>
+        <div className="divider"></div>
+        <div className="timeout-section">
+          <h2 className="subtitle section-title">Session Timeout</h2>
+          <p className="timeout-label">Select the session timeout duration:</p>
+          <div className="radio-group">
+            <label className="radio-label green-radio">
+              <input
+                type="radio"
+                value="15"
+                checked={sessionTimeout === "15"}
+                onChange={(e) => setSessionTimeout(e.target.value)}
+              />
+              <span className="radio-custom"></span>
+              <span className="radio-text">15 minutes</span>
+            </label>
+            <label className="radio-label green-radio">
+              <input
+                type="radio"
+                value="30"
+                checked={sessionTimeout === "30"}
+                onChange={(e) => setSessionTimeout(e.target.value)}
+              />
+              <span className="radio-custom"></span>
+              <span className="radio-text">30 minutes</span>
+            </label>
+            <label className="radio-label green-radio">
+              <input
+                type="radio"
+                value="60"
+                checked={sessionTimeout === "60"}
+                onChange={(e) => setSessionTimeout(e.target.value)}
+              />
+              <span className="radio-custom"></span>
+              <span className="radio-text">60 minutes</span>
+            </label>
+          </div>
+        </div>
+        <button className="save-button green-save" onClick={handleSave}>
+          Save Settings
+        </button>
+        {activeTimePicker && (
+          <div className="time-picker" ref={timePickerRef}>
+            <div className="time-picker-section">
+              <h3 className="time-picker-label">Select Hour</h3>
+              <div className="time-picker-options">
+                {hours.map((hour) => (
+                  <div
+                    key={hour}
+                    className={`time-picker-option ${getCurrentTimeValue().hours === hour ? "selected green-selected" : ""}`}
+                    onClick={() => handleHourChange(hour)}
+                  >
+                    {hour}
+                  </div>
+                ))}
               </div>
-              <div
-                className={`time-picker-option ${getCurrentTimeValue().period === "PM" ? "selected" : ""}`}
-                onClick={() => handlePeriodChange("PM")}
-              >
-                PM
+            </div>
+            <div className="time-picker-section">
+              <h3 className="time-picker-label">Select Minute</h3>
+              <div className="time-picker-options">
+                {minutes.map((minute) => (
+                  <div
+                    key={minute}
+                    className={`time-picker-option ${getCurrentTimeValue().minutes === minute ? "selected green-selected" : ""}`}
+                    onClick={() => handleMinuteChange(minute)}
+                  >
+                    {minute.toString().padStart(2, "0")}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="time-picker-section">
+              <h3 className="time-picker-label">Select AM/PM</h3>
+              <div className="time-picker-options period">
+                {["AM", "PM"].map((period) => (
+                  <div
+                    key={period}
+                    className={`time-picker-option ${getCurrentTimeValue().period === period ? "selected green-selected" : ""}`}
+                    onClick={() => handlePeriodChange(period)}
+                  >
+                    {period}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
